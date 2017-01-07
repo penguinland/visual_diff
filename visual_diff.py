@@ -7,7 +7,15 @@ import sys
 import token
 import tokenize
 
-import gui
+try:
+    # To get the GUI to work, you'll need to be able to install the TK bindings
+    # for PIL (in Ubuntu, it's the python3-pil.imagetk package). We put this in
+    # a try block so that the non-GUI functionality will still work even if you
+    # can't install this.
+    import gui
+    can_use_gui = True
+except ImportError:
+    can_use_gui = False
 
 
 parser = argparse.ArgumentParser()
@@ -49,7 +57,12 @@ for i, value in enumerate(tokens_a):
     matrix[i, :] = (tokens_b == value)
 
 if args.gui:
-    gui.launch(matrix, data_a, data_b)
+    if can_use_gui:
+        gui.launch(matrix, data_a, data_b)
+    else:
+        print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
+              "python3-pil.imagetk`. If that doesn't help, open a python3 "
+              "shell, `import gui`, and see what's going wrong.")
 else:
     # WARNING: You probably don't want to display the image straight to the
     # screen.  On a 1000-line file with 10 tokens per line, we're generating a
