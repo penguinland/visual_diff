@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import functools
+from math import ceil
 import tkinter as tk
 
 from zoom_map import ZoomMap
@@ -33,9 +34,10 @@ class _Context(tk.Text):
         # The zoom level is equivalent to the number of tokens described by the
         # current pixel in the map.
         zoom_level = self._zoom_map.zoom_level
-        begin_token_index = getattr(event, self._axis) * zoom_level
-        end_token_index = min(begin_token_index + zoom_level,
-                              len(self._boundaries)) - 1
+        begin_token_index = int(getattr(event, self._axis) * zoom_level)
+        end_token_index = min(begin_token_index + ceil(zoom_level),
+                              len(self._boundaries))- 1
+
         if not (0 <= begin_token_index < len(self._boundaries)):
             # TODO: Should this ever happen? It does happen on the rightmost
             # and bottommost edges of the image.

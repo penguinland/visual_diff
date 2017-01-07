@@ -6,12 +6,32 @@ import PIL.ImageTk
 
 
 class ZoomMap:
+    _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in from 100%
+    _MIN_MAP_SIZE = 300  # Pixel length at which to stop zooming out
+
     def __init__(self, matrix):
         self._matrix = matrix
-        self._zoom_level = 0
+        self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
         self._pyramid = []
-        for _ in range(5):  # TODO: replace this with a real loop
-            self._pyramid.append(self._to_image(matrix))
+
+        def add_level(level):
+            self._pyramid.append(self._to_image(level))
+
+        # Start by zooming into the matrix so that each pixel of the original
+        # takes up multiple pixels on the screen.
+        zoomed_in_matrix = matrix
+        for _ in range(self._ZOOMED_IN_LEVELS):
+            next_level = numpy.zeros([2 * x for x in zoomed_in_matrix.shape])
+            for r in [0, 1]:
+                for c in [0, 1]:
+                    next_level[r::2, c::2] = zoomed_in_matrix
+            add_level(next_level)
+            zoomed_in_matrix = next_level
+        self._pyramid.reverse()  # The most zoomed-in part comes at the base
+        add_level(matrix)
+
+        # Now, zoom out and make the matrix smaller and smaller
+        while max(matrix.shape) > 2 * self._MIN_MAP_SIZE:
             # Combine 2x2 squares of pixels to make the next level.
             nr, nc = [(value // 2) * 2 for value in matrix.shape]
             quads = [matrix[row:nr:2, col:nc:2]
@@ -44,6 +64,7 @@ class ZoomMap:
             # set.
             matrix = ((quads[0] & quads[3]) |
                       (quads[1] & numpy.logical_not(quads[2])))
+            add_level(matrix)
 
     @staticmethod
     def _to_image(matrix):
@@ -56,7 +77,7 @@ class ZoomMap:
 
     @property
     def zoom_level(self):
-        return 2 ** self._zoom_level
+        return 2 ** (self._zoom_level - self._ZOOMED_IN_LEVELS)
 
     def zoom(self, amount):
         # Note that tkinter doesn't spawn extra threads, so this doesn't have
