@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import functools
+from math import ceil
 import tkinter as tk
 
 from zoom_map import ZoomMap
@@ -33,15 +34,16 @@ class _Context(tk.Text):
         # The zoom level is equivalent to the number of tokens described by the
         # current pixel in the map.
         zoom_level = self._zoom_map.zoom_level
-        begin_token_index = getattr(event, self._axis) * zoom_level
-        end_token_index = min(begin_token_index + zoom_level,
-                              len(self._boundaries)) - 1
-        if not (0 <= begin_token_index < len(self._boundaries)):
+        first_token_index = int(getattr(event, self._axis) * zoom_level)
+        last_token_index = min(first_token_index + ceil(zoom_level),
+                               len(self._boundaries))- 1
+
+        if not (0 <= first_token_index < len(self._boundaries)):
             # TODO: Should this ever happen? It does happen on the rightmost
             # and bottommost edges of the image.
             print("Out of range; skipping!")
             return
-        line_number = self._boundaries[begin_token_index][0][0]
+        line_number = self._boundaries[first_token_index][0][0]
 
         # Recall that line_number comes from the token module, which starts
         # counting at 1 instead of 0.
@@ -59,8 +61,8 @@ class _Context(tk.Text):
         self.insert(tk.INSERT, text)
 
         # Highlight the tokens of interest.
-        (ar, ac) = self._boundaries[begin_token_index][0]
-        (br, bc) = self._boundaries[end_token_index][1]
+        (ar, ac) = self._boundaries[first_token_index][0]
+        (br, bc) = self._boundaries[last_token_index][1]
         self.tag_add("token",
                      "{}.{}".format(self.CONTEXT_COUNT + 1,
                                     ac + self.PRELUDE_WIDTH),
