@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import functools
+from functools import partial
 from math import ceil
 import tkinter as tk
 
@@ -18,7 +18,7 @@ class _Context(tk.Text):
     # location of the token within the line?
     TEXT_WIDTH = 80
 
-    def __init__(self, tk_parent, data, axis, zoom_map):
+    def __init__(self, tk_parent, data, zoom_map):
         height = 2 * self.CONTEXT_COUNT + 1
         width = self.PRELUDE_WIDTH + self.TEXT_WIDTH
         super().__init__(tk_parent, width=width, height=height,
@@ -26,23 +26,19 @@ class _Context(tk.Text):
         self.pack()
         # TODO: Use a NamedTuple?
         self._tokens, self._lines, self._boundaries = data
-        self._axis = axis
         self._zoom_map = zoom_map
 
-    def display(self, event):
-        # TODO: Check this whole thing for off-by-one errors.
+    def display(self, pixel):
         # The zoom level is equivalent to the number of tokens described by the
         # current pixel in the map.
         zoom_level = self._zoom_map.zoom_level
-        first_token_index = int(getattr(event, self._axis) * zoom_level)
+        first_token_index = int(pixel * zoom_level)
         last_token_index = min(first_token_index + ceil(zoom_level),
-                               len(self._boundaries))- 1
+                               len(self._boundaries)) - 1
 
         if not (0 <= first_token_index < len(self._boundaries)):
-            # TODO: Should this ever happen? It does happen on the rightmost
-            # and bottommost edges of the image.
-            print("Out of range; skipping!")
-            return
+            # TODO: Restrict panning so that we can't go outside the image.
+            return  # We're out of range of the image. Skip it.
         line_number = self._boundaries[first_token_index][0][0]
 
         # Recall that line_number comes from the token module, which starts
@@ -60,7 +56,7 @@ class _Context(tk.Text):
         self.delete("1.0", tk.END)
         self.insert(tk.INSERT, text)
 
-        # Highlight the tokens of interest.
+        # Highlight the tokens of interest...
         (ar, ac) = self._boundaries[first_token_index][0]
         (br, bc) = self._boundaries[last_token_index][1]
         self.tag_add("token",
@@ -87,37 +83,63 @@ class _Gui(tk.Frame):
         super().__init__(root)
         self.pack(fill=tk.BOTH, expand="true")
         self._zoom_map = ZoomMap(matrix)
-        self._map = tk.Label(self, image=self._zoom_map.image)
-        self._map.pack()
+        self._map = _Map(self, self._zoom_map)
 
-        # We're using (row, col) format, so the first one changes with Y.
-        self._contexts = [_Context(self, data, axis, self._zoom_map)
-                          for data, axis in ((data_a, "y"), (data_b, "x"))]
-        [self._map.bind(*args) for args in
-                [("<Button-4>",  functools.partial(self._zoom, -1)),
-                 ("<Button-5>",  functools.partial(self._zoom,  1)),
-                 ("<Button-1>",  self._on_click),
-                 ("<B1-Motion>", self._on_drag),
-                 ("<Motion>",    self._on_motion),
-                 ("<Enter>",     self._on_motion)]]
+        self._contexts = [_Context(self, data, self._zoom_map)
+                          for data in (data_a, data_b)]
+        [self._map.bind(event, self._on_motion)
+                for event in ["<Motion>", "<Enter>"]]
 
     def _on_motion(self, event):
-        [context.display(event) for context in self._contexts]
+        # We're using (row, col) format, so the first one changes with Y.
+        self._contexts[0].display(self._map.canvasy(event.y))
+        self._contexts[1].display(self._map.canvasx(event.x))
+
+
+class _Map(tk.Canvas):
+    def __init__(self, tk_parent, zoom_map):
+        # TODO: figure out a way to prevent panning off the map, so we never
+        # see the green background.
+        # TODO: Modify this so we only have part of the map stored in an image
+        # at a time, so we can display really big programs without running out
+        # of memory.
+        super().__init__(tk_parent, height=500, width=500, bg="green",
+                         xscrollincrement=1, yscrollincrement=1)
+        self._zoom_map = zoom_map
+        self._set_image()
+        self.pack()
+        [self.bind(*args) for args in
+                [("<Button-4>",  partial(self._zoom, -1)),
+                 ("<Button-5>",  partial(self._zoom,  1)),
+                 ("<Button-1>",  self._on_click),
+                 ("<B1-Motion>", self._on_drag)]]
+
+    def _set_image(self):
+        self._image = self.create_image(0, 0, anchor=tk.NW,
+                                        image=self._zoom_map.image)
 
     def _zoom(self, amount, event):
-        # TODO: when click-and-drag is implemented and the whole map is not
-        # onscreen, make the zooming centered around the curser.
-        self._zoom_map.zoom(amount)
-        self._map.configure(image=self._zoom_map.image)
+        if not self._zoom_map.zoom(amount):
+            return
+
+        # Otherwise, we changed zoom levels, so adjust everything accordingly.
+        self.delete(self._image)
+        self._set_image()
+
+        # We need to move the map so the pixels that started under the mouse are
+        # still under it afterwards.
+        location_shift = (2 ** -amount) - 1
+        self.xview_scroll(int(self.canvasx(event.x) * location_shift), "units")
+        self.yview_scroll(int(self.canvasy(event.y) * location_shift), "units")
 
     def _on_click(self, event):
         self._click_coords = [event.x, event.y]
 
     def _on_drag(self, event):
-        # TODO: fill this in.
         dx = self._click_coords[0] - event.x
         dy = self._click_coords[1] - event.y
-        print("Dragging ({}, {})".format(dx, dy))
+        self.xview_scroll(dx, "units")
+        self.yview_scroll(dy, "units")
         self._on_click(event)
 
 

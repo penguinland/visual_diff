@@ -6,12 +6,11 @@ import PIL.ImageTk
 
 
 class ZoomMap:
-    _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in from 100%
-    _MIN_MAP_SIZE = 300  # Pixel length at which to stop zooming out
+    _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
+    _MIN_MAP_SIZE = 250  # Pixel length at which to stop zooming out
 
     def __init__(self, matrix):
         self._matrix = matrix
-        self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
         self._pyramid = []
 
         def add_level(level):
@@ -66,6 +65,10 @@ class ZoomMap:
                       (quads[1] & numpy.logical_not(quads[2])))
             add_level(matrix)
 
+        # self._zoom_level is the index into self._pyramid to get the current
+        # image.
+        self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
+
     @staticmethod
     def _to_image(matrix):
         image = PIL.Image.fromarray(matrix * 255)
@@ -80,8 +83,13 @@ class ZoomMap:
         return 2 ** (self._zoom_level - self._ZOOMED_IN_LEVELS)
 
     def zoom(self, amount):
+        """
+        Returns whether we successfully changed zoom levels.
+        """
+        orig_zoom_level = self._zoom_level
         # Note that tkinter doesn't spawn extra threads, so this doesn't have
         # race conditions.
         self._zoom_level += amount
         self._zoom_level = min(self._zoom_level, len(self._pyramid) - 1)
         self._zoom_level = max(self._zoom_level, 0)
+        return (self._zoom_level != orig_zoom_level)

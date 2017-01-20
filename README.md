@@ -38,10 +38,10 @@ equal, too.
 
 If you specify the `--gui` option (and have the TK bindings for PIL installed),
 a graphical user interface will open up in which you can explore the image. Use
-the scroll wheel to zoom in and out, and mouse around the image to explore the
-code. Quit with control-Q or control-W. When the GUI is finished, the intention
-is to have it be very similar to Google Maps, OpenStreetMap, or other map
-exploration interfaces.
+the scroll wheel to zoom in and out, click-and-drag to pan around, and mouse
+around the image to explore the code. Quit with control-Q or control-W. When
+the GUI is finished, the intention is to have it be very similar to Google
+Maps, OpenStreetMap, or other map exploration interfaces.
 
 If you don't specify `--gui`, the image will be saved to file. By default it
 goes in `output.png`, but you can specify a different place to put it with the
