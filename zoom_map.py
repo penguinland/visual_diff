@@ -1,15 +1,19 @@
 #!/usr/bin/python3
 
+from functools import partial
 import numpy
 import PIL.Image
 import PIL.ImageTk
+import tkinter as tk
 
 
-class ZoomMap:
+class ZoomMap(tk.Canvas):
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
     _MIN_MAP_SIZE = 250  # Pixel length at which to stop zooming out
 
-    def __init__(self, matrix):
+    def __init__(self, tk_parent, matrix):
+        super().__init__(tk_parent, height=500, width=500, bg="green",
+                         xscrollincrement=1, yscrollincrement=1)
         self._matrix = matrix
         self._pyramid = []
 
@@ -68,6 +72,42 @@ class ZoomMap:
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
         self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
+
+        self._set_image()
+        self.pack()
+        [self.bind(*args) for args in
+                [("<Button-4>", partial(self._map_zoom, -1)),
+                 ("<Button-5>", partial(self._map_zoom,  1)),
+                 ("<Button-1>", self._on_click),
+                 ("<B1-Motion>", self._on_drag)]]
+
+    def _set_image(self):
+        self._tk_image = self.create_image(0, 0, anchor=tk.NW,
+                                           image=self.image)
+
+    def _map_zoom(self, amount, event):
+        if not self.zoom(amount):
+            return
+
+        # Otherwise, we changed zoom levels, so adjust everything accordingly.
+        self.delete(self._tk_image)
+        self._set_image()
+
+        # We need to move the map so the pixels that started under the mouse are
+        # still under it afterwards.
+        location_shift = (2 ** -amount) - 1
+        self.xview_scroll(int(self.canvasx(event.x) * location_shift), "units")
+        self.yview_scroll(int(self.canvasy(event.y) * location_shift), "units")
+
+    def _on_click(self, event):
+        self._click_coords = [event.x, event.y]
+
+    def _on_drag(self, event):
+        dx = self._click_coords[0] - event.x
+        dy = self._click_coords[1] - event.y
+        self.xview_scroll(dx, "units")
+        self.yview_scroll(dy, "units")
+        self._on_click(event)
 
     @staticmethod
     def _to_image(matrix):

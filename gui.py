@@ -82,10 +82,9 @@ class _Gui(tk.Frame):
     def __init__(self, matrix, data_a, data_b, root):
         super().__init__(root)
         self.pack(fill=tk.BOTH, expand="true")
-        self._zoom_map = ZoomMap(matrix)
-        self._map = _Map(self, self._zoom_map)
+        self._map = ZoomMap(self, matrix)
 
-        self._contexts = [_Context(self, data, self._zoom_map)
+        self._contexts = [_Context(self, data, self._map)
                           for data in (data_a, data_b)]
         [self._map.bind(event, self._on_motion)
                 for event in ["<Motion>", "<Enter>"]]
@@ -94,53 +93,6 @@ class _Gui(tk.Frame):
         # We're using (row, col) format, so the first one changes with Y.
         self._contexts[0].display(self._map.canvasy(event.y))
         self._contexts[1].display(self._map.canvasx(event.x))
-
-
-class _Map(tk.Canvas):
-    def __init__(self, tk_parent, zoom_map):
-        # TODO: figure out a way to prevent panning off the map, so we never
-        # see the green background.
-        # TODO: Modify this so we only have part of the map stored in an image
-        # at a time, so we can display really big programs without running out
-        # of memory.
-        super().__init__(tk_parent, height=500, width=500, bg="green",
-                         xscrollincrement=1, yscrollincrement=1)
-        self._zoom_map = zoom_map
-        self._set_image()
-        self.pack()
-        [self.bind(*args) for args in
-                [("<Button-4>",  partial(self._zoom, -1)),
-                 ("<Button-5>",  partial(self._zoom,  1)),
-                 ("<Button-1>",  self._on_click),
-                 ("<B1-Motion>", self._on_drag)]]
-
-    def _set_image(self):
-        self._image = self.create_image(0, 0, anchor=tk.NW,
-                                        image=self._zoom_map.image)
-
-    def _zoom(self, amount, event):
-        if not self._zoom_map.zoom(amount):
-            return
-
-        # Otherwise, we changed zoom levels, so adjust everything accordingly.
-        self.delete(self._image)
-        self._set_image()
-
-        # We need to move the map so the pixels that started under the mouse are
-        # still under it afterwards.
-        location_shift = (2 ** -amount) - 1
-        self.xview_scroll(int(self.canvasx(event.x) * location_shift), "units")
-        self.yview_scroll(int(self.canvasy(event.y) * location_shift), "units")
-
-    def _on_click(self, event):
-        self._click_coords = [event.x, event.y]
-
-    def _on_drag(self, event):
-        dx = self._click_coords[0] - event.x
-        dy = self._click_coords[1] - event.y
-        self.xview_scroll(dx, "units")
-        self.yview_scroll(dy, "units")
-        self._on_click(event)
 
 
 def launch(matrix, data_a, data_b):
