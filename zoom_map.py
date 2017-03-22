@@ -10,15 +10,24 @@ import tkinter as tk
 class ZoomMap(tk.Canvas):
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
     _MIN_MAP_SIZE = 250  # Pixel length at which to stop zooming out
+    _HEIGHT=500
+    _WIDTH=500
 
     def __init__(self, tk_parent, matrix):
-        super().__init__(tk_parent, height=500, width=500, bg="green",
-                         xscrollincrement=1, yscrollincrement=1)
+        super().__init__(tk_parent, height=self._HEIGHT, width=self._WIDTH,
+                         bg="green", xscrollincrement=1, yscrollincrement=1)
         self._matrix = matrix
         self._pyramid = []
+        # We keep a handle to the actual image being displayed, because TK
+        # doesn't do that itself and then it gets garbage collected while it's
+        # still supposed to be on the screen. We also keep track of the TK
+        # image object, so we can delete it later when we create a new, updated
+        # one to take its place.
+        self._cached_image = None
+        self._tk_image = None
 
         def add_level(level):
-            self._pyramid.append(self._to_image(level))
+            self._pyramid.append(level)
 
         # Start by zooming into the matrix so that each pixel of the original
         # takes up multiple pixels on the screen.
@@ -79,25 +88,58 @@ class ZoomMap(tk.Canvas):
                 [("<Button-4>", partial(self._map_zoom, -1)),
                  ("<Button-5>", partial(self._map_zoom,  1)),
                  ("<Button-1>", self._on_click),
-                 ("<B1-Motion>", self._on_drag)]]
+                 ("<B1-Motion>", self._on_drag),
+                 ("<ButtonRelease-1>", self._on_unclick)]]
 
     def _set_image(self):
-        self._tk_image = self.create_image(0, 0, anchor=tk.NW,
-                                           image=self.image)
+        if self._tk_image is not None:
+            # Clean up the old image.
+            self.delete(self._tk_image)
+            self._cached_image = None
+            self._tk_image = None
+
+        # We'll make an image that covers as much of the 3-screen-by-3-screen
+        # area centered on the actual screen center as we have data to cover.
+        # Start by figuring out where the top-left corner of the screen is in
+        # canvas coordinates.
+        top_left_x = int(self.canvasx(0))
+        top_left_y = int(self.canvasy(0))
+
+        current_data = self._pyramid[self._zoom_level]
+        nr, nc = current_data.shape
+
+        min_x = max(0,  top_left_x -     self._WIDTH)
+        min_y = max(0,  top_left_y -     self._HEIGHT)
+        max_x = min(nc, top_left_x + 2 * self._WIDTH)
+        max_y = min(nr, top_left_y + 2 * self._HEIGHT)
+
+        submatrix = current_data[min_y:max_y, min_x:max_x]
+        if len(submatrix) == 0:
+            # We're so far away from the actual data that none of it will fit
+            # on or even near the screen. Rather than attempting and failing to
+            # display this data, just don't show it in the first place.
+            # TODO: Should we snap to the nearest edge or something? It would
+            # be nice if we couldn't explore outside the data.
+            return
+
+        # Hold on to the image because tkinter doesn't, and we don't want it to
+        # get garbage collected at the end of this function!
+        self._cached_image = self._to_image(submatrix)
+        self._tk_image = self.create_image(min_x, min_y, anchor=tk.NW,
+                                           image=self._cached_image)
 
     def _map_zoom(self, amount, event):
         if not self.zoom(amount):
             return
 
         # Otherwise, we changed zoom levels, so adjust everything accordingly.
-        self.delete(self._tk_image)
-        self._set_image()
-
         # We need to move the map so the pixels that started under the mouse are
         # still under it afterwards.
         location_shift = (2 ** -amount) - 1
         self.xview_scroll(int(self.canvasx(event.x) * location_shift), "units")
         self.yview_scroll(int(self.canvasy(event.y) * location_shift), "units")
+
+        self._set_image()
 
     def _on_click(self, event):
         self._click_coords = [event.x, event.y]
@@ -109,14 +151,13 @@ class ZoomMap(tk.Canvas):
         self.yview_scroll(dy, "units")
         self._on_click(event)
 
+    def _on_unclick(self, event):
+        self._set_image()
+
     @staticmethod
     def _to_image(matrix):
         image = PIL.Image.fromarray(matrix * 255)
         return PIL.ImageTk.PhotoImage(image)
-
-    @property
-    def image(self):
-        return self._pyramid[self._zoom_level]
 
     @property
     def zoom_level(self):
