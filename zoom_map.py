@@ -81,6 +81,7 @@ class ZoomMap(tk.Canvas):
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
         self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
+        self._pixels_per_bit = 1  # Might increase if we zoom more than 100%
 
         self._set_image()
         self.pack()
@@ -161,16 +162,25 @@ class ZoomMap(tk.Canvas):
 
     @property
     def zoom_level(self):
-        return 2 ** (self._zoom_level - self._ZOOMED_IN_LEVELS)
+        return (2 ** (self._zoom_level - self._ZOOMED_IN_LEVELS) *
+                self._pixels_per_bit)
 
     def zoom(self, amount):
         """
         Returns whether we successfully changed zoom levels.
         """
-        orig_zoom_level = self._zoom_level
+        orig_zoom_level = [self._zoom_level, self._pixels_per_bit]
         # Note that tkinter doesn't spawn extra threads, so this doesn't have
         # race conditions.
         self._zoom_level += amount
+        while self._zoom_level > 0 and self._pixels_per_bit != 1:
+            self._zoom_level -= 1
+            self._pixels_per_bit //= 2
+        while self._zoom_level < 0:
+            self._zoom_level += 1
+            self._pixels_per_bit *= 2
+
         self._zoom_level = min(self._zoom_level, len(self._pyramid) - 1)
-        self._zoom_level = max(self._zoom_level, 0)
-        return (self._zoom_level != orig_zoom_level)
+        self._pixels_per_bit = min(self._pixels_per_bit,
+                                   2 ** self._ZOOMED_IN_LEVELS)
+        return ([self._zoom_level, self._pixels_per_bit] != orig_zoom_level)
