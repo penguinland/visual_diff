@@ -1,7 +1,6 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import argparse
-from matplotlib import pyplot
 import numpy
 import sys
 import token
@@ -63,10 +62,18 @@ if args.gui:
         print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
               "python3-pil.imagetk`. If that doesn't help, open a python3 "
               "shell, `import gui`, and see what's going wrong.")
+        sys.exit(1)
 else:
-    # WARNING: You probably don't want to display the image straight to the
-    # screen.  On a 1000-line file with 10 tokens per line, we're generating a
-    # 100 megapixel image, and pyplot has trouble with images that large. Just
-    # write it to file and open it with the GIMP or something else designed for
-    # large files.
+    # Only import matplotlib if we're going to use it. There's some weird
+    # behavior on Macs in which matplotlib works fine on its own, and PIL works
+    # fine on its own, but if you import matplotlib and then try *using* PIL for
+    # the GUI, we have an uncaught NSException. Consequently, we don't import
+    # matplotlib at the top of the file, and instead only import it if we're
+    # actually going to use it.
+    from matplotlib import pyplot
+
+    # WARNING: Converting large arrays to images can take up so many resources
+    # that your computer freezes. For example, on a 1000-line file with 10
+    # tokens per line, we're generating a 100 megapixel image, and pyplot has
+    # trouble with images that large. Do not try this with very large programs!
     pyplot.imsave(args.output_location, matrix)

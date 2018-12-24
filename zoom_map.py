@@ -85,11 +85,16 @@ class ZoomMap(tk.Canvas):
         self._set_image()
         self.pack()
         [self.bind(*args) for args in
-                [("<Button-4>", partial(self._map_zoom, -1)),
-                 ("<Button-5>", partial(self._map_zoom,  1)),
+                [
                  ("<Button-1>", self._on_click),
                  ("<B1-Motion>", self._on_drag),
-                 ("<ButtonRelease-1>", self._on_unclick)]]
+                 ("<ButtonRelease-1>", self._on_unclick),
+                 # Linux scrolling
+                 ("<Button-4>", partial(self._map_zoom, -1)),
+                 ("<Button-5>", partial(self._map_zoom,  1)),
+                 # Mac scrolling
+                 ("<MouseWheel>", self._map_zoom_mac),
+                 ]]
 
     def _set_image(self):
         if self._tk_image is not None:
@@ -127,6 +132,9 @@ class ZoomMap(tk.Canvas):
         self._cached_image = self._to_image(submatrix)
         self._tk_image = self.create_image(min_x, min_y, anchor=tk.NW,
                                            image=self._cached_image)
+
+    def _map_zoom_mac(self, event):
+        return self._map_zoom(-event.delta, event)
 
     def _map_zoom(self, amount, event):
         if not self.zoom(amount):

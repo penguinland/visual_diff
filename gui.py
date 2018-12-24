@@ -103,4 +103,13 @@ def launch(matrix, data_a, data_b):
     [root.bind("<Control-{}>".format(char), _quit) for char in "wWqQ"]
 
     gui = _Gui(matrix, data_a, data_b, root)
-    root.mainloop()
+    while True:
+        try:
+            root.mainloop()
+            break
+        except UnicodeDecodeError:
+            # Macs running Python 3.6 and older have a bug in TK where they
+            # interpret scroll wheel events as though they should be UTF-8 even
+            # though they're not.
+            print("Macs with old versions of TK installed don't scroll "
+                  "properly. Try upgrading Python to version 3.7 or later.")
