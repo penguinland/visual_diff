@@ -16,6 +16,9 @@ class ZoomMap(tk.Canvas):
     def __init__(self, tk_parent, matrix):
         super().__init__(tk_parent, height=self._HEIGHT, width=self._WIDTH,
                          bg="green", xscrollincrement=1, yscrollincrement=1)
+        # We save a reference to our parent object for help with coordinate
+        # shifts when zooming. See the explanation in _map_zoom for more.
+        self._parent = tk_parent
         self._matrix = matrix
         self._pyramid = []
         # We keep a handle to the actual image being displayed, because TK
@@ -144,7 +147,16 @@ class ZoomMap(tk.Canvas):
         # We need to move the map so the pixels that started under the mouse are
         # still under it afterwards.
         location_shift = (2 ** -amount) - 1
-        self.xview_scroll(int(self.canvasx(event.x) * location_shift), "units")
+
+        # This is an ugly workaround. The coordinates for scroll wheel events
+        # are not local to the Canvas object, but instead are from the edge of
+        # the window, which includes some padding to the left of the map.
+        # Consequently, we remove half the difference in widths from the X
+        # coordinate. FMI, see
+        # https://stackoverflow.com/q/53990183/927908
+        x_coord = self.canvasx(event.x)
+        x_coord -= (self._parent.winfo_width() - self.winfo_width()) / 2
+        self.xview_scroll(int(              x_coord * location_shift), "units")
         self.yview_scroll(int(self.canvasy(event.y) * location_shift), "units")
 
         self._set_image()
