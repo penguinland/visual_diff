@@ -17,7 +17,7 @@ except ImportError:
     can_use_gui = False
 
 
-def parse_arguments():
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("filename_a", help="File to analyze")
     parser.add_argument("filename_b", nargs="?", help="Second file to analyze")
