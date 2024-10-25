@@ -75,8 +75,8 @@ else:
     from matplotlib import pyplot
 
     pixel_count = len(tokens_a) * len(tokens_b)
-    if pixel_count > 50 * 1000 * 1000 and not args.big_file:
-        print("WARNING: the image is over 50 megapixels. Saving very large "
+    if pixel_count > 10 * 1000 * 1000 and not args.big_file:
+        print("WARNING: the image is over 10 megapixels. Saving very large "
               "images can use so many resources that your computer "
               "will freeze. To perform this action anyway, use the "
               "--big_file flag.")
