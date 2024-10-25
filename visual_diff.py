@@ -27,6 +27,8 @@ def parse_args():
                         help="Location of output image (default: output.png)")
     parser.add_argument("--big_file", "-b", action="store_true",
                         help="Save the image even if the file is big")
+    parser.add_argument("--language", "-l", default="python",
+                        help="Language of code in files")
     return parser.parse_args(sys.argv[1:])
 
 
