@@ -33,6 +33,12 @@ def parse_args():
 
 
 def get_tokens(filename):
+    """
+    We return a tuple of (tokens, lines, boundaries) where
+    - tokens is a list of tokens from the file
+    - lines is a list of strings containing the file text
+    - boundaries is a list of ((start_row, start_col), (end_row, end_col)) tuples for each token
+    """
     with open(filename) as f:
         tokens = tokenize.generate_tokens(f.readline)
         # Ignore non-significant whitespace
@@ -48,6 +54,7 @@ def get_tokens(filename):
             [tok.type if tok.type in constant_types else tok.string
              for tok in tokens])
     boundaries = [(tok.start, tok.end) for tok in tokens]
+
     return token_array, lines, boundaries
 
 
