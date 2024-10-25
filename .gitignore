@@ -1,0 +1,7 @@
+# A directory to put virtual environment stuff in
+venv/
+
+__pycache__/
+
+# Vim swap files
+*.swp
