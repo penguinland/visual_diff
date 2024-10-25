@@ -24,6 +24,8 @@ parser.add_argument("--gui", "-g", action="store_true",
                     help="Explore the results in a GUI")
 parser.add_argument("--output_location", "-o", default="output.png",
                     help="Location of output image (default: output.png)")
+parser.add_argument("--big_file", "-b", action="store_true",
+                    help="Save the image even if the file is big")
 args = parser.parse_args(sys.argv[1:])
 
 
@@ -72,8 +74,13 @@ else:
     # actually going to use it.
     from matplotlib import pyplot
 
-    # WARNING: Converting large arrays to images can take up so many resources
-    # that your computer freezes. For example, on a 1000-line file with 10
-    # tokens per line, we're generating a 100 megapixel image, and pyplot has
-    # trouble with images that large. Do not try this with very large programs!
+    pixel_count = len(tokens_a) * len(tokens_b)
+    if pixel_count > 10 * 1000 * 1000 and not args.big_file:
+        print("WARNING: the image is over 10 megapixels. Saving very large "
+              "images can use so many resources that your computer "
+              "will freeze. To perform this action anyway, use the "
+              "--big_file flag.")
+        sys.exit(2)
+
+    # Otherwise, all is well.
     pyplot.imsave(args.output_location, matrix)
