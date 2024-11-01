@@ -36,7 +36,8 @@ def get_tokens(filename, language):
     We return a tuple of (tokens, lines, boundaries) where
     - tokens is a list of tokens from the file
     - lines is a list of strings containing the file text
-    - boundaries is a list of ((start_row, start_col), (end_row, end_col)) tuples for each token
+    - boundaries is a list of ((start_row, start_col), (end_row, end_col))
+      tuples for each token
     """
     with open(filename) as f:
         contents = f.read()
@@ -59,17 +60,19 @@ def get_tokens(filename, language):
                 assert(t.new_line_before)
                 next_t = toks[i+1]
                 line = next_t.ast_node.start_point[0] + 1
-                boundaries.append(((line, 0), (line, next_t.ast_node.start_point[1]-1)))
+                boundaries.append(
+                    ((line, 0), (line, next_t.ast_node.start_point[1]-1)))
             elif t.type == "dedent":
-                # We might be the very last token. Look backwards to the last non-dedent token to
-                # figure out what line we're on.
+                # We might be the very last token. Look backwards to the last
+                # non-dedent token to figure out what line we're on.
                 di = 0
                 prev_t = t
                 while prev_t.type == "dedent":
                     di -= 1
                     prev_t = toks[i + di]
                 line = prev_t.ast_node.end_point[0] + 2
-                boundaries.append(((line, 0), (line, 0)))  # Eh... good enough, though not correct
+                # Eh... this is good enough, though not correct
+                boundaries.append(((line, 0), (line, 0)))
             else:
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
@@ -99,11 +102,11 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         # Only import matplotlib if we're going to use it. There's some weird
-        # behavior on Macs in which matplotlib works fine on its own, and PIL works
-        # fine on its own, but if you import matplotlib and then try *using* PIL for
-        # the GUI, we have an uncaught NSException. Consequently, we don't import
-        # matplotlib at the top of the file, and instead only import it if we're
-        # actually going to use it.
+        # behavior on Macs in which matplotlib works fine on its own, and PIL
+        # works fine on its own, but if you import matplotlib and then try
+        # *using* PIL for the GUI, we have an uncaught NSException.
+        # Consequently, we don't import matplotlib at the top of the file, and
+        # instead only import it if we're actually going to use it.
         from matplotlib import pyplot
 
         pixel_count = len(tokens_a) * len(tokens_b)
