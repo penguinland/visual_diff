@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import code_tokenize
 import numpy
 import sys
 import token
@@ -31,6 +32,8 @@ def parse_args():
                         help="Language of code in files")
     return parser.parse_args(sys.argv[1:])
 
+def print10(data, name):
+    print(f"first 50 {name}s: {data[:50]} ({type(data[0])}) ({type(data)})")
 
 def get_tokens(filename):
     """
@@ -55,13 +58,55 @@ def get_tokens(filename):
              for tok in tokens])
     boundaries = [(tok.start, tok.end) for tok in tokens]
 
+    print("")
+    print10(token_array, "token")
+    print10(lines, "line")
+    print10(boundaries, "boundary")
     return token_array, lines, boundaries
+
+
+def get_tokens2(filename):
+    with open(filename) as f:
+        contents = f.read()
+    toks = code_tokenize.tokenize(contents, lang="python")
+    toks = [t for t in toks if t.type not in ("newline", "comment")]
+    lines = [line.rstrip() for line in contents.split("\n")]
+    print("")
+    print10(toks, "token")
+    print(toks[0].type)
+    print10(lines, "line")
+
+    #boundaries = [(t.ast_node.start_point, t.ast_node.end_point) for t in toks]
+    boundaries = []
+    for i, t in enumerate(toks):
+        try:
+            boundaries.append((t.ast_node.start_point, t.ast_node.end_point))
+        except AttributeError:
+            if t.type == "indent":
+                assert(t.new_line_before)
+                next_t = toks[i+1]
+                line = next_t.ast_node.start_point[0]
+                boundaries.append(((line, 0), (line, next_t.ast_node.start_point[1]-1)))
+            elif t.type == "dedent":
+                di = 0
+                prev_t = t
+                while prev_t.type == "dedent":
+                    di -= 1
+                    prev_t = toks[i + di]
+                line = prev_t.ast_node.end_point[0] + 1
+                boundaries.append(((line, 0), (line, 0)))
+            else:
+                print(i, t, type(t), dir(t))
+                raise
+
+    return toks, lines, boundaries
+
 
 
 if __name__ == "__main__":
     args = parse_args()
-    data_a = get_tokens(args.filename_a)
-    data_b = get_tokens(args.filename_b or args.filename_a)
+    data_a = get_tokens2(args.filename_a)
+    data_b = get_tokens2(args.filename_b or args.filename_a)
     tokens_a = data_a[0]
     tokens_b = data_b[0]
 
