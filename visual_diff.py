@@ -4,8 +4,6 @@ import argparse
 import code_tokenize
 import numpy
 import sys
-import token
-import tokenize
 
 try:
     # To get the GUI to work, you'll need to be able to install the TK bindings
@@ -33,33 +31,13 @@ def parse_args():
     return parser.parse_args(sys.argv[1:])
 
 
-def get_tokens(filename):
+def get_tokens(filename, language):
     """
     We return a tuple of (tokens, lines, boundaries) where
     - tokens is a list of tokens from the file
     - lines is a list of strings containing the file text
     - boundaries is a list of ((start_row, start_col), (end_row, end_col)) tuples for each token
     """
-    with open(filename) as f:
-        tokens = tokenize.generate_tokens(f.readline)
-        # Ignore non-significant whitespace
-        ignore_types = [token.NEWLINE, token.ENDMARKER, tokenize.NL,
-                        tokenize.COMMENT]
-        tokens = [tok for tok in tokens if tok.type not in ignore_types]
-        f.seek(0)
-        lines = [line.rstrip() for line in f.readlines()]
-
-    # We treat all constants as identical to other constants of the same type.
-    constant_types = (token.STRING, token.NUMBER)
-    token_array = numpy.array(
-            [tok.type if tok.type in constant_types else tok.string
-             for tok in tokens])
-    boundaries = [(tok.start, tok.end) for tok in tokens]
-
-    return token_array, lines, boundaries
-
-
-def get_tokens2(filename, language):
     with open(filename) as f:
         contents = f.read()
     toks = code_tokenize.tokenize(contents, lang=language)
@@ -102,8 +80,8 @@ def get_tokens2(filename, language):
 
 if __name__ == "__main__":
     args = parse_args()
-    data_a = get_tokens2(args.filename_a, args.language)
-    data_b = get_tokens2(args.filename_b or args.filename_a, args.language)
+    data_a = get_tokens(args.filename_a, args.language)
+    data_b = get_tokens(args.filename_b or args.filename_a, args.language)
     tokens_a = data_a[0]
     tokens_b = data_b[0]
 
