@@ -65,16 +65,22 @@ def get_tokens2(filename):
     toks = code_tokenize.tokenize(contents, lang="python")
     toks = [t for t in toks if t.type not in ("newline", "comment")]
     lines = [line.rstrip() for line in contents.split("\n")]
+    constant_types = ("string", "integer", "float", "indent", "dedent")
+    token_array = numpy.array(
+            [tok.type if tok.type in constant_types else tok.text
+             for tok in toks])
 
     boundaries = []
     for i, t in enumerate(toks):
         try:
-            boundaries.append((t.ast_node.start_point, t.ast_node.end_point))
+            start = t.ast_node.start_point
+            end = t.ast_node.end_point
+            boundaries.append(((start[0] + 1, start[1]), (end[0] + 1, end[1])))
         except AttributeError:
             if t.type == "indent":
                 assert(t.new_line_before)
                 next_t = toks[i+1]
-                line = next_t.ast_node.start_point[0]
+                line = next_t.ast_node.start_point[0] + 1
                 boundaries.append(((line, 0), (line, next_t.ast_node.start_point[1]-1)))
             elif t.type == "dedent":
                 # We might be the very last token. Look backwards to the last non-dedent token to
@@ -84,13 +90,13 @@ def get_tokens2(filename):
                 while prev_t.type == "dedent":
                     di -= 1
                     prev_t = toks[i + di]
-                line = prev_t.ast_node.end_point[0] + 1
+                line = prev_t.ast_node.end_point[0] + 2
                 boundaries.append(((line, 0), (line, 0)))  # Eh... good enough, though not correct
             else:
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
 
-    return toks, lines, boundaries
+    return token_array, lines, boundaries
 
 
 
