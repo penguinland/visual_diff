@@ -59,10 +59,10 @@ def get_tokens(filename):
     return token_array, lines, boundaries
 
 
-def get_tokens2(filename):
+def get_tokens2(filename, language):
     with open(filename) as f:
         contents = f.read()
-    toks = code_tokenize.tokenize(contents, lang="python")
+    toks = code_tokenize.tokenize(contents, lang=language)
     toks = [t for t in toks if t.type not in ("newline", "comment")]
     lines = [line.rstrip() for line in contents.split("\n")]
     constant_types = ("string", "integer", "float", "indent", "dedent")
@@ -102,8 +102,8 @@ def get_tokens2(filename):
 
 if __name__ == "__main__":
     args = parse_args()
-    data_a = get_tokens2(args.filename_a)
-    data_b = get_tokens2(args.filename_b or args.filename_a)
+    data_a = get_tokens2(args.filename_a, args.language)
+    data_b = get_tokens2(args.filename_b or args.filename_a, args.language)
     tokens_a = data_a[0]
     tokens_b = data_b[0]
 
