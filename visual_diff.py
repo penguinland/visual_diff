@@ -5,6 +5,8 @@ import code_tokenize
 import numpy
 import sys
 
+import file_info
+
 try:
     # To get the GUI to work, you'll need to be able to install the TK bindings
     # for PIL (in Ubuntu, it's the python3-pil.imagetk package). We put this in
@@ -27,6 +29,8 @@ def parse_args():
     parser.add_argument("--big_file", "-b", action="store_true",
                         help="Save the image even if the file is big")
     parser.add_argument("--language", "-l", default="python",
+                        help="Language of code in files")
+    parser.add_argument("--gui_width", "-w", default=80,
                         help="Language of code in files")
     return parser.parse_args(sys.argv[1:])
 
@@ -77,16 +81,15 @@ def get_tokens(filename, language):
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
 
-    return token_array, lines, boundaries
-
+    return file_info.FileInfo(token_array, lines, boundaries)
 
 
 if __name__ == "__main__":
     args = parse_args()
     data_a = get_tokens(args.filename_a, args.language)
     data_b = get_tokens(args.filename_b or args.filename_a, args.language)
-    tokens_a = data_a[0]
-    tokens_b = data_b[0]
+    tokens_a = data_a.tokens
+    tokens_b = data_b.tokens
 
     matrix = numpy.zeros([len(tokens_a), len(tokens_b)], numpy.uint8)
     for i, value in enumerate(tokens_a):

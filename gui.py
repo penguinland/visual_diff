@@ -29,7 +29,9 @@ class _Context(tk.Text):
                          relief="ridge")
         self.pack()
         # TODO: Use a NamedTuple?
-        self._tokens, self._lines, self._boundaries = data
+        self._tokens = data.tokens
+        self._lines = data.lines
+        self._boundaries = data.boundaries
         self._zoom_map = zoom_map
 
     def display(self, pixel):
