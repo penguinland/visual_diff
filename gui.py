@@ -17,13 +17,12 @@ class _Context(tk.Text):
     # TODO: What about files with over 99,999 lines?
     LINE_NUMBER_WIDTH = 5  # Number of characters to allocate for line numbers
     PRELUDE_WIDTH = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
-    # NOTE: Lines longer than TEXT_WIDTH get truncated, and any tokens off the
-    # end don't get shown/highlighted.
-    TEXT_WIDTH = 80
 
-    def __init__(self, tk_parent, data, zoom_map):
+    def __init__(self, tk_parent, data, text_width, zoom_map):
         height = 2 * self.CONTEXT_COUNT + 1
-        width = self.PRELUDE_WIDTH + self.TEXT_WIDTH
+        # NOTE: Lines longer than text_width get truncated, and any tokens off
+        # the end don't get shown/highlighted.
+        width = self.PRELUDE_WIDTH + text_width
         super().__init__(tk_parent, width=width, height=height,
                          state=tk.DISABLED, font="TkFixedFont", borderwidth=2,
                          relief="ridge")
@@ -85,12 +84,12 @@ class _Context(tk.Text):
 
 
 class _Gui(tk.Frame):
-    def __init__(self, matrix, data_a, data_b, root):
+    def __init__(self, matrix, data_a, data_b, text_width, root):
         super().__init__(root)
         self.pack(fill=tk.BOTH, expand="true")
         self._map = ZoomMap(self, matrix)
 
-        self._contexts = [_Context(self, data, self._map)
+        self._contexts = [_Context(self, data, text_width, self._map)
                           for data in (data_a, data_b)]
         [self._map.bind(event, self._on_motion)
                 for event in ["<Motion>", "<Enter>"]]
@@ -101,7 +100,7 @@ class _Gui(tk.Frame):
         self._contexts[1].display(self._map.canvasx(event.x))
 
 
-def launch(matrix, data_a, data_b):
+def launch(matrix, data_a, data_b, text_width):
     """
     Creates a new window for the GUI and runs the main program.
     """
@@ -112,7 +111,7 @@ def launch(matrix, data_a, data_b):
     for char in "wWqQ":
         root.bind("<Control-{}>".format(char), _quit)
 
-    gui = _Gui(matrix, data_a, data_b, root)
+    gui = _Gui(matrix, data_a, data_b, text_width, root)
     while True:
         try:
             root.mainloop()
