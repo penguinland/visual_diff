@@ -32,8 +32,6 @@ def parse_args():
                         help="Language of code in files")
     return parser.parse_args(sys.argv[1:])
 
-def print10(data, name):
-    print(f"first 50 {name}s: {data[:50]} ({type(data[0])}) ({type(data)})")
 
 def get_tokens(filename):
     """
@@ -58,10 +56,6 @@ def get_tokens(filename):
              for tok in tokens])
     boundaries = [(tok.start, tok.end) for tok in tokens]
 
-    print("")
-    print10(token_array, "token")
-    print10(lines, "line")
-    print10(boundaries, "boundary")
     return token_array, lines, boundaries
 
 
@@ -71,12 +65,7 @@ def get_tokens2(filename):
     toks = code_tokenize.tokenize(contents, lang="python")
     toks = [t for t in toks if t.type not in ("newline", "comment")]
     lines = [line.rstrip() for line in contents.split("\n")]
-    print("")
-    print10(toks, "token")
-    print(toks[0].type)
-    print10(lines, "line")
 
-    #boundaries = [(t.ast_node.start_point, t.ast_node.end_point) for t in toks]
     boundaries = []
     for i, t in enumerate(toks):
         try:
@@ -88,15 +77,17 @@ def get_tokens2(filename):
                 line = next_t.ast_node.start_point[0]
                 boundaries.append(((line, 0), (line, next_t.ast_node.start_point[1]-1)))
             elif t.type == "dedent":
+                # We might be the very last token. Look backwards to the last non-dedent token to
+                # figure out what line we're on.
                 di = 0
                 prev_t = t
                 while prev_t.type == "dedent":
                     di -= 1
                     prev_t = toks[i + di]
                 line = prev_t.ast_node.end_point[0] + 1
-                boundaries.append(((line, 0), (line, 0)))
+                boundaries.append(((line, 0), (line, 0)))  # Eh... good enough, though not correct
             else:
-                print(i, t, type(t), dir(t))
+                print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
 
     return toks, lines, boundaries
