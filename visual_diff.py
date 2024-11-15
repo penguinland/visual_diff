@@ -43,20 +43,25 @@ def get_tokens(filename, language):
         contents = f.read()
     toks = code_tokenize.tokenize(contents, lang=language)
     toks = [t for t in toks if t.type not in ("newline", "comment")]
-    lines = [line.rstrip() for line in contents.split("\n")]
+    lines = list(contents.split("\n"))
     constant_types = ("string", "integer", "float", "indent", "dedent")
     token_array = numpy.array(
-            [tok.type if tok.type in constant_types else tok.text
-             for tok in toks])
+        [tok.type if tok.type in constant_types else tok.text for tok in toks])
 
     boundaries = []
     for i, t in enumerate(toks):
         try:
+            # Most tokens contain their start and end values. However, the
+            # tokenizer we use starts counting lines at 0, and we need to
+            # start counting at 1. So, add 1 to all line indices.
             start = t.ast_node.start_point
             end = t.ast_node.end_point
             boundaries.append(((start[0] + 1, start[1]), (end[0] + 1, end[1])))
         except AttributeError:
             if t.type == "indent":
+                # When we add indentation, it's on the same line as the next
+                # token. Pretend it starts at the beginning of the line and
+                # ends just before the start of the next token.
                 assert(t.new_line_before)
                 next_t = toks[i+1]
                 line = next_t.ast_node.start_point[0] + 1
@@ -64,14 +69,18 @@ def get_tokens(filename, language):
                     ((line, 0), (line, next_t.ast_node.start_point[1]-1)))
             elif t.type == "dedent":
                 # We might be the very last token. Look backwards to the last
-                # non-dedent token to figure out what line we're on.
+                # non-dedent token: we're on the line after that. It's unclear
+                # what the width of an unindent should be: we make it 0 wide,
+                # which is not technically correct but good enough anyway.
                 di = 0
                 prev_t = t
                 while prev_t.type == "dedent":
                     di -= 1
                     prev_t = toks[i + di]
+                # Grab the line of the last non-dedent token, then add 1 to get
+                # our line. The parser starts counting at line 0, but we start
+                # at line 1, so add another 1 to match.
                 line = prev_t.ast_node.end_point[0] + 2
-                # Eh... this is good enough, though not correct
                 boundaries.append(((line, 0), (line, 0)))
             else:
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
