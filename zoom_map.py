@@ -8,8 +8,7 @@ import tkinter as tk
 class ZoomMap(tk.Canvas):
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
     _MIN_MAP_SIZE = 250  # Pixel length at which to stop zooming out
-    _HEIGHT=500
-    _WIDTH=500
+    _HEIGHT, _WIDTH = 500, 500  # Size of canvas, in pixels
 
     def __init__(self, tk_parent, matrix):
         super().__init__(tk_parent, height=self._HEIGHT, width=self._WIDTH,
