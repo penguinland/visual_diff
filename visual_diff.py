@@ -37,11 +37,7 @@ def parse_args():
 
 def get_tokens(filename, language):
     """
-    We return a tuple of (tokens, lines, boundaries) where
-    - tokens is a list of tokens from the file
-    - lines is a list of strings containing the file text
-    - boundaries is a list of ((start_row, start_col), (end_row, end_col))
-      tuples for each token
+    We return a file_info.FileInfo object containing details of this file.
     """
     with open(filename) as f:
         contents = f.read()
@@ -95,6 +91,7 @@ def get_text_width(args):
 if __name__ == "__main__":
     args = parse_args()
     data_a = get_tokens(args.filename_a, args.language)
+    # TODO: it might be cool to allow comparisons across languages.
     data_b = get_tokens(args.filename_b or args.filename_a, args.language)
     tokens_a = data_a.tokens
     tokens_b = data_b.tokens
