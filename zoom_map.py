@@ -13,8 +13,6 @@ class ZoomMap(tk.Canvas):
     def __init__(self, tk_parent, matrix):
         super().__init__(tk_parent, height=self._HEIGHT, width=self._WIDTH,
                          bg="green", xscrollincrement=1, yscrollincrement=1)
-        self._matrix = matrix
-        self._pyramid = []
         # We keep a handle to the actual image being displayed, because TK
         # doesn't do that itself and then it gets garbage collected while it's
         # still supposed to be on the screen. We also keep track of the TK
@@ -22,6 +20,9 @@ class ZoomMap(tk.Canvas):
         # one to take its place.
         self._cached_image = None
         self._tk_image = None
+
+        self._matrix = matrix  # A 2D numpy array of booleans
+        self._pyramid = []  # A list of self._matrix at different zoom levels
 
         def add_level(level):
             self._pyramid.append(level)
