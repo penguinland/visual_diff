@@ -92,20 +92,21 @@ def get_tokens(filename, language):
 def guess_language(filename):
     file_type = filename.split(".")[-1]
     known_types = {
-        "py": "python",
-        "go": "go",
-        "c": "c",
-        "h": "c",
-        "cc": "c",
-        "hh": "c",
+        "py":  "python",
+        "go":  "go",
+        "c":   "c",
+        "h":   "cpp",  # Might be C or C++, err on the side of caution
+        "cc":  "cpp",
+        "hh":  "cpp",
         "cpp": "cpp",
         "hpp": "cpp",
+        "js":  "javascript",
         }
     expected_language = known_types.get(file_type)
     if expected_language is not None:
         return expected_language
     raise ValueError(f"Cannot infer language for unknown file extension "
-                      "{file_type}. Set language explicitly")
+                     f"'.{file_type}'. Set language explicitly")
 
 
 def get_text_width(args):
