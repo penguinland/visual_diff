@@ -28,7 +28,7 @@ def parse_args():
                         help="Location of output image (default: output.png)")
     parser.add_argument("--big_file", "-b", action="store_true",
                         help="Save the image even if the file is big")
-    parser.add_argument("--language", "-l", default="python",
+    parser.add_argument("--language", "-l", default=None,
                         help="Language of code in files")
     parser.add_argument("--gui_width", "-w", type=int,
                         help="Expected maximum line width, in characters")
@@ -89,6 +89,26 @@ def get_tokens(filename, language):
     return file_info.FileInfo(token_array, lines, boundaries)
 
 
+def guess_language(filename):
+    file_type = filename.split(".")[-1]
+    known_types = {
+        "py":  "python",
+        "go":  "go",
+        "c":   "c",
+        "h":   "cpp",  # Might be C or C++, err on the side of caution
+        "cc":  "cpp",
+        "hh":  "cpp",
+        "cpp": "cpp",
+        "hpp": "cpp",
+        "js":  "javascript",
+        }
+    expected_language = known_types.get(file_type)
+    if expected_language is not None:
+        return expected_language
+    raise ValueError(f"Cannot infer language for unknown file extension "
+                     f"'.{file_type}'. Set language explicitly")
+
+
 def get_text_width(args):
     if args.gui_width is not None:
         return args.gui_width
@@ -99,9 +119,12 @@ def get_text_width(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    data_a = get_tokens(args.filename_a, args.language)
+    language = args.language
+    if language is None:
+        language = guess_language(args.filename_a)
+    data_a = get_tokens(args.filename_a, language)
     # TODO: it might be cool to allow comparisons across languages.
-    data_b = get_tokens(args.filename_b or args.filename_a, args.language)
+    data_b = get_tokens(args.filename_b or args.filename_a, language)
     tokens_a = data_a.tokens
     tokens_b = data_b.tokens
 
