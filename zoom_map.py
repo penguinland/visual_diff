@@ -94,6 +94,12 @@ class ZoomMap(tk.Canvas):
             self.bind(*args)
 
     def _set_image(self):
+        """
+        Delete the old image, if it exists, then display the new one.
+
+        The image to use is at the current zoom level, 3 times taller and wider
+        than the displayed window.
+        """
         if self._tk_image is not None:
             # Clean up the old image.
             self.delete(self._tk_image)
