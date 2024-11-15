@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+import code_tokenize
 import numpy
 import sys
-import token
-import tokenize
+
+import file_info
 
 try:
     # To get the GUI to work, you'll need to be able to install the TK bindings
@@ -27,34 +28,82 @@ def parse_args():
                         help="Location of output image (default: output.png)")
     parser.add_argument("--big_file", "-b", action="store_true",
                         help="Save the image even if the file is big")
+    parser.add_argument("--language", "-l", default="python",
+                        help="Language of code in files")
+    parser.add_argument("--gui_width", "-w", type=int,
+                        help="Expected maximum line width, in characters")
     return parser.parse_args(sys.argv[1:])
 
 
-def get_tokens(filename):
+def get_tokens(filename, language):
+    """
+    We return a file_info.FileInfo object containing details of this file.
+    """
     with open(filename) as f:
-        tokens = tokenize.generate_tokens(f.readline)
-        # Ignore non-significant whitespace
-        ignore_types = [token.NEWLINE, token.ENDMARKER, tokenize.NL,
-                        tokenize.COMMENT]
-        tokens = [tok for tok in tokens if tok.type not in ignore_types]
-        f.seek(0)
-        lines = [line.rstrip() for line in f.readlines()]
-
-    # We treat all constants as identical to other constants of the same type.
-    constant_types = (token.STRING, token.NUMBER)
+        contents = f.read()
+    toks = code_tokenize.tokenize(contents, lang=language)
+    toks = [t for t in toks if t.type not in ("newline", "comment")]
+    lines = list(contents.split("\n"))
+    constant_types = ("string", "integer", "float", "indent", "dedent")
     token_array = numpy.array(
-            [tok.type if tok.type in constant_types else tok.string
-             for tok in tokens])
-    boundaries = [(tok.start, tok.end) for tok in tokens]
-    return token_array, lines, boundaries
+        [tok.type if tok.type in constant_types else tok.text for tok in toks])
+
+    boundaries = []
+    for i, t in enumerate(toks):
+        try:
+            # Most tokens contain their start and end values. However, the
+            # tokenizer we use starts counting lines at 0, and we need to
+            # start counting at 1. So, add 1 to all line indices.
+            start = t.ast_node.start_point
+            end = t.ast_node.end_point
+            boundaries.append(((start[0] + 1, start[1]), (end[0] + 1, end[1])))
+        except AttributeError:
+            if t.type == "indent":
+                # When we add indentation, it's on the same line as the next
+                # token. Pretend it starts at the beginning of the line and
+                # ends just before the start of the next token.
+                assert(t.new_line_before)
+                next_t = toks[i+1]
+                line = next_t.ast_node.start_point[0] + 1
+                boundaries.append(
+                    ((line, 0), (line, next_t.ast_node.start_point[1]-1)))
+            elif t.type == "dedent":
+                # We might be the very last token. Look backwards to the last
+                # non-dedent token: we're on the line after that. It's unclear
+                # what the width of an unindent should be: we make it 0 wide,
+                # which is not technically correct but good enough anyway.
+                di = 0
+                prev_t = t
+                while prev_t.type == "dedent":
+                    di -= 1
+                    prev_t = toks[i + di]
+                # Grab the line of the last non-dedent token, then add 1 to get
+                # our line. The parser starts counting at line 0, but we start
+                # at line 1, so add another 1 to match.
+                line = prev_t.ast_node.end_point[0] + 2
+                boundaries.append(((line, 0), (line, 0)))
+            else:
+                print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
+                raise
+
+    return file_info.FileInfo(token_array, lines, boundaries)
+
+
+def get_text_width(args):
+    if args.gui_width is not None:
+        return args.gui_width
+    if args.language == "go":
+        return 100
+    return 80
 
 
 if __name__ == "__main__":
     args = parse_args()
-    data_a = get_tokens(args.filename_a)
-    data_b = get_tokens(args.filename_b or args.filename_a)
-    tokens_a = data_a[0]
-    tokens_b = data_b[0]
+    data_a = get_tokens(args.filename_a, args.language)
+    # TODO: it might be cool to allow comparisons across languages.
+    data_b = get_tokens(args.filename_b or args.filename_a, args.language)
+    tokens_a = data_a.tokens
+    tokens_b = data_b.tokens
 
     matrix = numpy.zeros([len(tokens_a), len(tokens_b)], numpy.uint8)
     for i, value in enumerate(tokens_a):
@@ -62,7 +111,8 @@ if __name__ == "__main__":
 
     if args.gui:
         if can_use_gui:
-            gui.launch(matrix, data_a, data_b)
+            text_width = get_text_width(args)
+            gui.launch(matrix, data_a, data_b, text_width)
         else:
             print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
                   "python3-pil.imagetk`. If that doesn't help, open a python3 "
@@ -70,11 +120,11 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         # Only import matplotlib if we're going to use it. There's some weird
-        # behavior on Macs in which matplotlib works fine on its own, and PIL works
-        # fine on its own, but if you import matplotlib and then try *using* PIL for
-        # the GUI, we have an uncaught NSException. Consequently, we don't import
-        # matplotlib at the top of the file, and instead only import it if we're
-        # actually going to use it.
+        # behavior on Macs in which matplotlib works fine on its own, and PIL
+        # works fine on its own, but if you import matplotlib and then try
+        # *using* PIL for the GUI, we have an uncaught NSException.
+        # Consequently, we don't import matplotlib at the top of the file, and
+        # instead only import it if we're actually going to use it.
         from matplotlib import pyplot
 
         pixel_count = len(tokens_a) * len(tokens_b)
