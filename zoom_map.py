@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 from functools import partial
 import numpy
 import PIL.Image
