@@ -79,6 +79,7 @@ class ZoomMap(tk.Canvas):
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
         self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
+        self._max_zoom_level = len(self._pyramid) - 1
 
         self._set_image()
         self.pack()
@@ -182,6 +183,6 @@ class ZoomMap(tk.Canvas):
         # Note that tkinter doesn't spawn extra threads, so this doesn't have
         # race conditions.
         self._zoom_level += amount
-        self._zoom_level = min(self._zoom_level, len(self._pyramid) - 1)
+        self._zoom_level = min(self._zoom_level, self._max_zoom_level)
         self._zoom_level = max(self._zoom_level, 0)
         return (self._zoom_level != orig_zoom_level)
