@@ -1,7 +1,4 @@
 from functools import partial
-import numpy
-import PIL.Image
-import PIL.ImageTk
 import tkinter as tk
 
 from image_pyramid import ImagePyramid
@@ -20,7 +17,6 @@ class ZoomMap(tk.Canvas):
         self._cached_image = None
         self._tk_image = None
 
-        self._matrix = matrix  # A 2D numpy array of booleans
         self._pyramid = ImagePyramid(matrix)
 
         self._set_image()

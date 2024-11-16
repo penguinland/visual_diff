@@ -1,8 +1,6 @@
-from functools import partial
 import numpy
 import PIL.Image
 import PIL.ImageTk
-import tkinter as tk
 
 
 class ImagePyramid:
