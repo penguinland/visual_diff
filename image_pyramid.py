@@ -8,7 +8,6 @@ import tkinter as tk
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
     _MIN_MAP_SIZE = 250  # Pixel length at which to stop zooming out
-    _HEIGHT, _WIDTH = 500, 500  # Size of canvas, in pixels
 
     def __init__(self, matrix):
         self._pyramid = []  # A list of self._matrix at different zoom levels
@@ -67,7 +66,7 @@ class ImagePyramid:
         self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
         self._max_zoom_level = len(self._pyramid) - 1
 
-    def get_image(self, top_left_x, top_left_y):
+    def get_image(self, top_left_x, top_left_y, height, width):
         """
         We return a sub-image, and the indices of the top-left corner.
 
@@ -77,10 +76,10 @@ class ImagePyramid:
         current_data = self._pyramid[self._zoom_level]
         nr, nc = current_data.shape
 
-        min_x = max(0,  top_left_x -     self._WIDTH)
-        min_y = max(0,  top_left_y -     self._HEIGHT)
-        max_x = min(nc, top_left_x + 2 * self._WIDTH)
-        max_y = min(nr, top_left_y + 2 * self._HEIGHT)
+        min_x = max(0,  top_left_x -     width)
+        min_y = max(0,  top_left_y -     height)
+        max_x = min(nc, top_left_x + 2 * width)
+        max_y = min(nr, top_left_y + 2 * height)
 
         submatrix = current_data[min_y:max_y, min_x:max_x]
         if len(submatrix) == 0:

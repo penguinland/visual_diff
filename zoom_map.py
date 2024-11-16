@@ -7,8 +7,6 @@ import tkinter as tk
 from image_pyramid import ImagePyramid
 
 class ZoomMap(tk.Canvas):
-    _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
-    _MIN_MAP_SIZE = 250  # Pixel length at which to stop zooming out
     _HEIGHT, _WIDTH = 500, 500  # Size of canvas, in pixels
 
     def __init__(self, tk_parent, matrix):
@@ -24,10 +22,6 @@ class ZoomMap(tk.Canvas):
 
         self._matrix = matrix  # A 2D numpy array of booleans
         self._pyramid = ImagePyramid(matrix)
-
-        # self._zoom_level is the index into self._pyramid to get the current
-        # image.
-        self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
 
         self._set_image()
         self.pack()
@@ -64,8 +58,8 @@ class ZoomMap(tk.Canvas):
 
         # Hold on to the image because tkinter doesn't, and we don't want it to
         # get garbage collected at the end of this function!
-        self._cached_image, min_x, min_y = self._pyramid.get_image(top_left_x,
-                                                                   top_left_y)
+        self._cached_image, min_x, min_y = self._pyramid.get_image(
+                top_left_x, top_left_y, self._HEIGHT, self._WIDTH)
         if self._cached_image is None:
             # We're so far away from the actual data that none of it will fit
             # on or even near the screen. Rather than attempting and failing to
