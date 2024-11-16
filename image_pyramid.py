@@ -69,6 +69,8 @@ class ImagePyramid:
 
     def get_image(self, top_left_x, top_left_y):
         """
+        We return a sub-image, and the indices of the top-left corner.
+
         The image returned is at the current zoom level, 3 times taller and wider
         than the displayed window. If no data would be included, we return None.
         """
@@ -85,10 +87,10 @@ class ImagePyramid:
             # We're so far away from the actual data that none of it will fit
             # on or even near the screen. Rather than attempting and failing to
             # display this data, just don't show it in the first place.
-            return None
+            return None, min_x, min_y
 
         image = PIL.Image.fromarray(submatrix * 255)
-        return PIL.ImageTk.PhotoImage(image)
+        return PIL.ImageTk.PhotoImage(image), min_x, min_y
 
     def zoom(self, amount):
         """

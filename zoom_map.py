@@ -28,7 +28,6 @@ class ZoomMap(tk.Canvas):
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
         self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
-        self._max_zoom_level = len(self._pyramid) - 1
 
         self._set_image()
         self.pack()
@@ -65,7 +64,8 @@ class ZoomMap(tk.Canvas):
 
         # Hold on to the image because tkinter doesn't, and we don't want it to
         # get garbage collected at the end of this function!
-        self._cached_image = self._pyramid.get_image(top_left_x, top_left_y)
+        self._cached_image, min_x, min_y = self._pyramid.get_image(top_left_x,
+                                                                   top_left_y)
         if self._cached_image is None:
             # We're so far away from the actual data that none of it will fit
             # on or even near the screen. Rather than attempting and failing to
@@ -81,7 +81,7 @@ class ZoomMap(tk.Canvas):
         return self._map_zoom(-event.delta, event)
 
     def _map_zoom(self, amount, event):
-        if not self.pyramid.zoom(amount):
+        if not self._pyramid.zoom(amount):
             return
 
         # Otherwise, we changed zoom levels, so adjust everything accordingly.
@@ -108,4 +108,4 @@ class ZoomMap(tk.Canvas):
 
     @property
     def zoom_level(self):  # Used in gui.py
-        return 2 ** self._pyramed.get_zoom_level()
+        return 2 ** self._pyramid.get_zoom_level()
