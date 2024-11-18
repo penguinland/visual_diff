@@ -34,11 +34,6 @@ class ZoomMap(tk.Canvas):
                      ):
             self.bind(*args)
 
-    @staticmethod
-    def _to_image(matrix):
-        image = PIL.Image.fromarray(matrix * 255)
-        return PIL.ImageTk.PhotoImage(image)
-
     def _set_image(self):
         """
         Delete the old image, if it exists, then display the new one.
@@ -103,6 +98,11 @@ class ZoomMap(tk.Canvas):
 
     def _on_unclick(self, event):
         self._set_image()
+
+    @staticmethod
+    def _to_image(matrix):
+        image = PIL.Image.fromarray(matrix * 255)
+        return PIL.ImageTk.PhotoImage(image)
 
     @property
     def zoom_level(self):  # Used in gui.py
