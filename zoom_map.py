@@ -54,11 +54,9 @@ class ZoomMap(tk.Canvas):
         top_left_x = int(self.canvasx(0))
         top_left_y = int(self.canvasy(0))
 
-        # Hold on to the image because tkinter doesn't, and we don't want it to
-        # get garbage collected at the end of this function!
         submatrix, min_x, min_y = self._pyramid.get_submatrix(
             top_left_x, top_left_y, self._HEIGHT, self._WIDTH)
-        if len(submatrix) is None:
+        if len(submatrix) == 0:
             # We're so far away from the actual data that none of it will fit
             # on or even near the screen. Rather than attempting and failing to
             # display this data, just don't show it in the first place.
@@ -66,9 +64,11 @@ class ZoomMap(tk.Canvas):
             # be nice if we couldn't explore outside the data.
             return
 
+        # Hold on to the image because tkinter doesn't, and we don't want it to
+        # get garbage collected at the end of this function!
         self._cached_image = self._to_image(submatrix)
-        self._tk_image = self.create_image(
-            min_x, min_y, anchor=tk.NW, image=self._cached_image)
+        self._tk_image = self.create_image(min_x, min_y, anchor=tk.NW,
+                                           image=self._cached_image)
 
     def _map_zoom_mac(self, event):
         return self._map_zoom(-event.delta, event)
