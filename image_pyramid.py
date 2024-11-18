@@ -1,6 +1,4 @@
 import numpy
-import PIL.Image
-import PIL.ImageTk
 
 
 class ImagePyramid:
@@ -8,7 +6,7 @@ class ImagePyramid:
     _MIN_MAP_SIZE = 250  # Pixel length at which to stop zooming out
 
     def __init__(self, matrix):
-        self._pyramid = []  # A list of self._matrix at different zoom levels
+        self._pyramid = []  # A list of `matrix` at different zoom levels
 
         # Start by zooming into the matrix so that each pixel of the original
         # takes up multiple pixels on the screen.
@@ -64,12 +62,14 @@ class ImagePyramid:
         self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
         self._max_zoom_level = len(self._pyramid) - 1
 
-    def get_image(self, top_left_x, top_left_y, height, width):
+    def get_submatrix(self, top_left_x, top_left_y, height, width):
         """
-        We return a sub-image, and the indices of the top-left corner.
+        We return a matrix containing the relevant sub-image, and the indices of
+        the top-left corner.
 
-        The image returned is at the current zoom level, 3 times taller and wider
-        than the displayed window. If no data would be included, we return None.
+        The image returned is at the current zoom level, 3 times taller and
+        wider than the displayed window. If no data would be included, we return
+        None.
         """
         current_data = self._pyramid[self._zoom_level]
         nr, nc = current_data.shape
@@ -80,14 +80,7 @@ class ImagePyramid:
         max_y = min(nr, top_left_y + 2 * height)
 
         submatrix = current_data[min_y:max_y, min_x:max_x]
-        if len(submatrix) == 0:
-            # We're so far away from the actual data that none of it will fit
-            # on or even near the screen. Rather than attempting and failing to
-            # display this data, just don't show it in the first place.
-            return None, min_x, min_y
-
-        image = PIL.Image.fromarray(submatrix * 255)
-        return PIL.ImageTk.PhotoImage(image), min_x, min_y
+        return submatrix, min_x, min_y
 
     def zoom(self, amount):
         """
