@@ -61,7 +61,7 @@ class ImagePyramid:
 
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
-        self._zoom_level = self._ZOOMED_IN_LEVELS  # Start at 100%
+        self._zoom_level = 0  # Start at 100%
         self._max_zoom_level = len(self._pyramid) - 1
 
     def get_submatrix(self, top_left_x, top_left_y, height, width):
@@ -74,37 +74,8 @@ class ImagePyramid:
         wider than the displayed window, so that the center of the window is
         the center of the image.
         """
-        zoom_level = self._zoom_level - self._ZOOMED_IN_LEVELS
-        if zoom_level < 0:
-            # We're zoomed in more than 100%. Grab the data we want, then
-            # duplicate it a bunch.
-            zoom_level *= -1
-            scale = 2 ** zoom_level
-
-            current_data = self._pyramid[0]
-            nr, nc = current_data.shape
-
-            # Avoid roundoff errors: make the top part 1 wider, and if it's a few pixels more
-            # detailed than expected, no one will notice.
-            min_x = max(0,  top_left_x -     width)  // scale
-            min_y = max(0,  top_left_y -     height) // scale
-            max_x = min(nc, top_left_x + 2 * width)  // scale + 1
-            max_y = min(nr, top_left_y + 2 * height) // scale + 1
-
-            submatrix = current_data[min_y:max_y, min_x:max_x]
-
-            for _ in range(zoom_level):
-                new_submatrix = numpy.zeros([2 * x for x in submatrix.shape])
-                for r in [0, 1]:
-                    for c in [0, 1]:
-                        new_submatrix[r::2, c::2] = submatrix
-                submatrix = new_submatrix
-
-            return submatrix, min_x * scale, min_y * scale
-
-        # Otherwise, we're zoomed in at most 100%. Grab the data from the
-        # relevant part of the pyramid.
-        current_data = self._pyramid[zoom_level]
+        zoom_level = self._zoom_level
+        current_data = self._pyramid[max(0, zoom_level)]
         nr, nc = current_data.shape
 
         min_x = max(0,  top_left_x -     width)
@@ -112,8 +83,36 @@ class ImagePyramid:
         max_x = min(nc, top_left_x + 2 * width)
         max_y = min(nr, top_left_y + 2 * height)
 
+        if zoom_level >= 0:
+            # No need to do anything special: just return the relevant data
+            submatrix = current_data[min_y:max_y, min_x:max_x]
+            return submatrix, min_x, min_y
+
+        # Otherwise, we're zoomed in more than 100%. Grab the data we want,
+        # then duplicate it a bunch.
+        zoom_level *= -1
+        scale = 2 ** zoom_level
+
+        min_x //= scale
+        min_y //= scale
+        max_x //= scale
+        max_y //= scale
+        # Avoid roundoff errors: make the top part 1 wider, and if it's a few
+        # pixels larger than expected, no one will notice.
+        max_x += 1
+        max_y += 1
+
         submatrix = current_data[min_y:max_y, min_x:max_x]
-        return submatrix, min_x, min_y
+
+        # Now, duplicate the data until it's grown to the right size.
+        for _ in range(zoom_level):
+            new_submatrix = numpy.zeros([2 * x for x in submatrix.shape])
+            for r in [0, 1]:
+                for c in [0, 1]:
+                    new_submatrix[r::2, c::2] = submatrix
+            submatrix = new_submatrix
+
+        return submatrix, min_x * scale, min_y * scale
 
     def zoom(self, amount):
         """
@@ -124,8 +123,8 @@ class ImagePyramid:
         # race conditions.
         self._zoom_level += amount
         self._zoom_level = min(self._zoom_level, self._max_zoom_level)
-        self._zoom_level = max(self._zoom_level, 0)
+        self._zoom_level = max(self._zoom_level, -self._ZOOMED_IN_LEVELS)
         return (self._zoom_level != orig_zoom_level)
 
     def get_zoom_level(self):
-        return self._zoom_level - self._ZOOMED_IN_LEVELS
+        return self._zoom_level
