@@ -74,15 +74,20 @@ class ImagePyramid:
         wider than the displayed window, so that the center of the window is
         the center of the image.
         """
-        print("top of function:")
+        print("\ntop of function:")
         print("top_left_x", top_left_x)
         print("top_left_y", top_left_y)
         print("height", height)
         print("width", width)
         zoom_level = self._zoom_level
         print("zoom_level", zoom_level)
+        scale = 1 if zoom_level >= 0 else 2 ** (-zoom_level)
+        print("scale", scale)
         current_data = self._pyramid[max(0, zoom_level)]
         nr, nc = current_data.shape
+        nr *= scale
+        nc *= scale
+
         print("nr", nr)
         print("nc", nc)
 
@@ -104,10 +109,6 @@ class ImagePyramid:
         print("unusual case!")
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
         # then duplicate it a bunch.
-        zoom_level *= -1
-        print("zoom_level", zoom_level)
-        scale = 2 ** zoom_level
-        print("scale", scale)
 
         min_x //= scale
         min_y //= scale
@@ -127,14 +128,17 @@ class ImagePyramid:
         submatrix = current_data[min_y:max_y, min_x:max_x]
 
         # Now, duplicate the data until it's grown to the right size.
-        for _ in range(zoom_level):
+        for _ in range(-zoom_level):
             new_submatrix = numpy.zeros([2 * x for x in submatrix.shape])
             for r in [0, 1]:
                 for c in [0, 1]:
                     new_submatrix[r::2, c::2] = submatrix
             submatrix = new_submatrix
 
-        return submatrix, min_x * scale, min_y * scale
+        ret_val = submatrix, min_x * scale, min_y * scale
+
+        print("ret_val", ret_val[0].shape, ret_val[1], ret_val[2])
+        return ret_val
 
     def zoom(self, amount):
         """
