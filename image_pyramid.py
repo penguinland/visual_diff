@@ -74,33 +74,55 @@ class ImagePyramid:
         wider than the displayed window, so that the center of the window is
         the center of the image.
         """
+        print("top of function:")
+        print("top_left_x", top_left_x)
+        print("top_left_y", top_left_y)
+        print("height", height)
+        print("width", width)
         zoom_level = self._zoom_level
+        print("zoom_level", zoom_level)
         current_data = self._pyramid[max(0, zoom_level)]
         nr, nc = current_data.shape
+        print("nr", nr)
+        print("nc", nc)
 
         min_x = max(0,  top_left_x -     width)
         min_y = max(0,  top_left_y -     height)
         max_x = min(nc, top_left_x + 2 * width)
         max_y = min(nr, top_left_y + 2 * height)
+        print("min_x", min_x)
+        print("min_y", min_y)
+        print("max_x", max_x)
+        print("max_y", max_y)
 
         if zoom_level >= 0:
+            print("normal case")
             # No need to do anything special: just return the relevant data
             submatrix = current_data[min_y:max_y, min_x:max_x]
             return submatrix, min_x, min_y
 
+        print("unusual case!")
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
         # then duplicate it a bunch.
         zoom_level *= -1
+        print("zoom_level", zoom_level)
         scale = 2 ** zoom_level
+        print("scale", scale)
 
         min_x //= scale
         min_y //= scale
         max_x //= scale
         max_y //= scale
+        print("min_x", min_x)
+        print("min_y", min_y)
+        print("max_x", max_x)
+        print("max_y", max_y)
         # Avoid roundoff errors: make the top part 1 wider, and if it's a few
         # pixels larger than expected, no one will notice.
         max_x += 1
         max_y += 1
+        print("max_x", max_x)
+        print("max_y", max_y)
 
         submatrix = current_data[min_y:max_y, min_x:max_x]
 
