@@ -7,23 +7,9 @@ class ImagePyramid:
 
     def __init__(self, matrix):
         self._pyramid = []  # A list of `matrix` at different zoom levels
-
-        """
-        # Start by zooming into the matrix so that each pixel of the original
-        # takes up multiple pixels on the screen.
-        zoomed_in_matrix = matrix
-        for _ in range(self._ZOOMED_IN_LEVELS):
-            next_level = numpy.zeros([2 * x for x in zoomed_in_matrix.shape])
-            for r in [0, 1]:
-                for c in [0, 1]:
-                    next_level[r::2, c::2] = zoomed_in_matrix
-            self._pyramid.append(next_level)
-            zoomed_in_matrix = next_level
-        self._pyramid.reverse()  # The most zoomed-in part comes at the base
-        """
         self._pyramid.append(matrix)
 
-        # Now, zoom out and make the matrix smaller and smaller
+        # Zoom out and make the matrix smaller and smaller
         while max(matrix.shape) >= 2 * self._MIN_MAP_SIZE:
             # Combine 2x2 squares of pixels to make the next level.
             nr, nc = [(value // 2) * 2 for value in matrix.shape]
