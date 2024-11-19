@@ -75,11 +75,11 @@ class ImagePyramid:
         the center of the image.
         """
         zoom_level = self._zoom_level
-        scale = 1 if zoom_level >= 0 else 2 ** (-zoom_level)
+        scale = max(0, -zoom_level)
         current_data = self._pyramid[max(0, zoom_level)]
         nr, nc = current_data.shape
-        nr *= scale
-        nc *= scale
+        nr <<= scale
+        nc <<= scale
 
         min_x = max(0,  top_left_x -     width)
         min_y = max(0,  top_left_y -     height)
@@ -94,12 +94,13 @@ class ImagePyramid:
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
         # then duplicate it a bunch.
 
-        min_x //= scale
-        min_y //= scale
-        max_x //= scale
-        max_y //= scale
-        # Avoid roundoff errors: make the top part 1 wider, and if it's a few
-        # pixels larger than expected, no one will notice.
+        min_x >>= scale
+        min_y >>= scale
+        max_x >>= scale
+        max_y >>= scale
+        # Avoid roundoff errors: make the truncated edges 1 pixel wider before
+        # expanding, and if it's a few pixels larger than expected, no one
+        # will notice.
         max_x += 1
         max_y += 1
 
@@ -113,7 +114,7 @@ class ImagePyramid:
                     new_submatrix[r::2, c::2] = submatrix
             submatrix = new_submatrix
 
-        return submatrix, min_x * scale, min_y * scale
+        return submatrix, min_x << scale, min_y << scale
 
     def zoom(self, amount):
         """
