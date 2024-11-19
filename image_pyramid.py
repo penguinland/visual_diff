@@ -22,7 +22,7 @@ class ImagePyramid:
         self._pyramid.append(matrix)
 
         # Now, zoom out and make the matrix smaller and smaller
-        while max(matrix.shape) > 2 * self._MIN_MAP_SIZE:
+        while max(matrix.shape) >= 2 * self._MIN_MAP_SIZE:
             # Combine 2x2 squares of pixels to make the next level.
             nr, nc = [(value // 2) * 2 for value in matrix.shape]
             quads = [matrix[row:nr:2, col:nc:2]
