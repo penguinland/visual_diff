@@ -94,6 +94,7 @@ class ImagePyramid:
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
         # then duplicate it a bunch.
 
+        # First, scale all the coordinates to the actual data size.
         min_x >>= scale
         min_y >>= scale
         max_x >>= scale
