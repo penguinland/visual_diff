@@ -64,12 +64,13 @@ class ImagePyramid:
 
     def get_submatrix(self, top_left_x, top_left_y, height, width):
         """
-        We return a matrix containing the relevant sub-image, and the indices of
+        Given the top left corner of a window and its height and width, we
+        return a matrix containing the relevant sub-image, and the indices of
         the top-left corner.
 
         The image returned is at the current zoom level, 3 times taller and
-        wider than the displayed window. If no data would be included, we return
-        None.
+        wider than the displayed window, so that the center of the window is
+        the center of the image.
         """
         current_data = self._pyramid[self._zoom_level]
         nr, nc = current_data.shape
