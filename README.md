@@ -17,7 +17,8 @@ worked, but that was one of the things I tried.
 
 If you're running a different OS, good luck (and if you get it to work, please
 either file an issue telling us to update the documentation with what you did,
-or update it yourself and send us a pull request!).
+or update it yourself and send us a pull request!). Once upon a time, this
+also worked on Mac, but I no longer have one and can't easily try that out.
 
 ## Options
 The short version: run `visual_diff.py --help` for info.
