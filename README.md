@@ -36,22 +36,32 @@ the first file and the jth token from the second file are equal. All strings
 are considered equal regardless of their contents; all numbers are considered
 equal, too.
 
-If you specify the `--gui` option (and have the TK bindings for PIL installed),
-a graphical user interface will open up in which you can explore the image. Use
-the scroll wheel to zoom in and out, click-and-drag to pan around, and mouse
-around the image to explore the code. Quit with control-Q or control-W. When
-the GUI is finished, the intention is to have it be very similar to Google
-Maps, OpenStreetMap, or other map exploration interfaces.
+When you run the program, a graphical user interface will open up in which you
+can explore the image. Use the scroll wheel to zoom in and out, click-and-drag
+to pan around, and mouse around the image to explore the code. Quit with
+control-Q or control-W. When the GUI is finished, the intention is to have it
+be very similar to Google Maps, OpenStreetMap, or other map exploration
+interfaces.
 
-If you don't specify `--gui`, the image will be saved to file. By default it
-goes in `output.png`, but you can specify a different place to put it with the
-`-o` option.
+The program can recognize a handful of languages from the file extension (e.g.,
+`.py` or `.go`). If you want to use a language that is not automatically
+recognized, you can do so with the `--language` flag. We use
+[`tree_sitter`](https://tree-sitter.github.io/tree-sitter/) for tokenizing,
+and it supports [many dozens of
+languages](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers).
+If manually setting the language is a common annoyance for you, please send us
+a PR with your file extension and language! The place to change is in
+`visual_diff.py`, in the `guess_language` function.
 
-## Warnings
+If you specify an `--output_location`, then instead of opening the GUI, the
+image will be saved to file and then the program will exit. Most popular image
+formats should work, including `.png`, `.gif`, and `.jpg`.
+
 Saving images to a file takes much more memory than displaying them to the
-screen, and doing this with large images can freeze your whole system. So, by
-default we refuse to save any image that is over 10 megapixels. This can be
-overridden with the `--big_file` flag, but use that at your own peril.
+screen (because they involve compression algorithms), so doing this with large
+images can freeze your whole system. So, by default we refuse to save any
+image that is over 10 megapixels. This can be overridden with the `--big_file`
+flag, but **use that at your own peril.**
 
 ## Uses
 Finding code that has been copied and pasted or is otherwise similar enough to
