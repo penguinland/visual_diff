@@ -22,10 +22,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("filename_a", help="File to analyze")
     parser.add_argument("filename_b", nargs="?", help="Second file to analyze")
-    parser.add_argument("--gui", "-g", action="store_true",
-                        help="Explore the results in a GUI")
-    parser.add_argument("--output_location", "-o", default="output.png",
-                        help="Location of output image (default: output.png)")
+    parser.add_argument("--output_location", "-o",
+                        help="Save an image to this location and exit")
     parser.add_argument("--big_file", "-b", action="store_true",
                         help="Save the image even if the file is big")
     parser.add_argument("--language", "-l", default=None,
@@ -132,7 +130,7 @@ if __name__ == "__main__":
     for i, value in enumerate(tokens_a):
         matrix[i, :] = (tokens_b == value)
 
-    if args.gui:
+    if args.output_location is None:
         if can_use_gui:
             text_width = get_text_width(args)
             gui.launch(matrix, data_a, data_b, text_width)
