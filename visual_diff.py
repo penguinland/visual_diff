@@ -28,7 +28,9 @@ def parse_args():
                         help="Save the image even if the file is big")
     parser.add_argument("--language", "-l", default=None,
                         help="Language of code in files")
-    parser.add_argument("--gui_width", "-w", type=int,
+    parser.add_argument("--gui_width", "-w", type=int, default=500,
+                        help="GUI width, in pixels")
+    parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
     return parser.parse_args(sys.argv[1:])
 
@@ -108,11 +110,11 @@ def guess_language(filename):
 
 
 def get_text_width(args):
-    if args.gui_width is not None:
-        return args.gui_width
-    if args.language == "go":
-        return 100
-    return 80
+    if args.text_width is not None:
+        return args.text_width
+    if args.language == "python" or args.filename_a.split(".")[-1] == "py":
+        return 80
+    return 100
 
 
 if __name__ == "__main__":
