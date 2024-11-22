@@ -55,7 +55,7 @@ a PR with your file extension and language! The place to change is in
 
 If you specify an `--output_location`, then instead of opening the GUI, the
 image will be saved to file and then the program will exit. Most popular image
-formats should work, including `.png`, `.gif`, and `.jpg`.
+formats should work, including `.png`, `.gif`, `.jpg`, and `.bmp`.
 
 Saving images to a file takes much more memory than displaying them to the
 screen (because they involve compression algorithms), so doing this with large
