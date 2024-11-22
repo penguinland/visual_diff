@@ -28,7 +28,7 @@ def parse_args():
                         help="Save the image even if the file is big")
     parser.add_argument("--language", "-l", default=None,
                         help="Language of code in files")
-    parser.add_argument("--map_width", "-w", type=int, default=500,
+    parser.add_argument("--map_width", "-mw", type=int, default=600,
                         help="map width/height, in pixels")
     parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
