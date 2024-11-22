@@ -40,9 +40,8 @@ equal, too.
 When you run the program, a graphical user interface will open up in which you
 can explore the image. Use the scroll wheel to zoom in and out, click-and-drag
 to pan around, and mouse around the image to explore the code. Quit with
-control-Q or control-W. When the GUI is finished, the intention is to have it
-be very similar to Google Maps, OpenStreetMap, or other map exploration
-interfaces.
+control-Q or control-W. The intention is for the GUI to be very similar to
+Google Maps, OpenStreetMap, or other map exploration interfaces.
 
 The program can recognize a handful of languages from the file extension (e.g.,
 `.py` or `.go`). If you want to use a language that is not automatically
