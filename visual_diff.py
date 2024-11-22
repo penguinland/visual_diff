@@ -91,18 +91,18 @@ def get_tokens(filename, language):
 
 def guess_language(filename):
     file_type = filename.split(".")[-1]
-    known_types = {
-        "py":     "python",
-        "go":     "go",
+    known_types = {  # Sorted by language (sorted by value, not key!)
         "c":      "c",
         "h":      "cpp",  # Might be C or C++, err on the side of caution
         "cc":     "cpp",
         "hh":     "cpp",
         "cpp":    "cpp",
         "hpp":    "cpp",
+        "go":     "go",
         "js":     "javascript",
-        "ts":     "typescript",
+        "py":     "python",
         "svelte": "svelte",
+        "ts":     "typescript",
         }
     expected_language = known_types.get(file_type)
     if expected_language is not None:
