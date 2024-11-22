@@ -6,8 +6,8 @@ import tkinter as tk
 from image_pyramid import ImagePyramid
 
 class ZoomMap(tk.Canvas):
-    def __init__(self, tk_parent, matrix, width):
-        super().__init__(tk_parent, height=width, width=width,
+    def __init__(self, tk_parent, matrix, sidelength):
+        super().__init__(tk_parent, height=sidelength, width=sidelength,
                          bg="green", xscrollincrement=1, yscrollincrement=1)
         # We keep a handle to the actual image being displayed, because TK
         # doesn't do that itself and then it gets garbage collected while it's
@@ -17,7 +17,7 @@ class ZoomMap(tk.Canvas):
         self._cached_image = None
         self._tk_image = None
 
-        self._pyramid = ImagePyramid(matrix, width)
+        self._pyramid = ImagePyramid(matrix, sidelength)
 
         self._set_image()
         self.pack()
