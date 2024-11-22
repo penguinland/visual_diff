@@ -6,8 +6,8 @@ TODO: put some images here!
 ## Prerequisites
 You'll need [Tcl/Tk bindings](https://docs.python.org/3/library/tkinter.html)
 for Python. This might require installing something outside of your virtual
-environment: you'll know it's right if you can run `python3 -m tkinter` and
-get a little interactive window to pop up.
+environment: you'll know it's set up right if you can run `python3 -m tkinter`
+and get a little interactive window to pop up.
 
 After that, just `pip install -r requirements.txt`, and you should be good!
 
