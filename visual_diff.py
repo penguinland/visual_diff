@@ -28,8 +28,8 @@ def parse_args():
                         help="Save the image even if the file is big")
     parser.add_argument("--language", "-l", default=None,
                         help="Language of code in files")
-    parser.add_argument("--gui_width", "-w", type=int, default=500,
-                        help="GUI width, in pixels")
+    parser.add_argument("--map_width", "-w", type=int, default=500,
+                        help="map width/height, in pixels")
     parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
     return parser.parse_args(sys.argv[1:])
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     if args.output_location is None:
         if can_use_gui:
             text_width = get_text_width(args)
-            gui.launch(matrix, data_a, data_b, text_width)
+            gui.launch(matrix, data_a, data_b, args.map_width, text_width)
         else:
             print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
                   "python3-pil.imagetk`. If that doesn't help, open a python3 "
