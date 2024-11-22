@@ -3,14 +3,14 @@ import numpy
 
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
-    _MIN_MAP_SIZE = 250  # Pixel length at which to stop zooming out
 
-    def __init__(self, matrix):
+    def __init__(self, matrix, sidelength):
         self._pyramid = []  # A list of `matrix` at different zoom levels
         self._pyramid.append(matrix)
+        self._sidelength = sidelength
 
         # Zoom out and make the matrix smaller and smaller
-        while max(matrix.shape) >= 2 * self._MIN_MAP_SIZE:
+        while max(matrix.shape) >= sidelength:
             # Combine 2x2 squares of pixels to make the next level.
             nr, nc = [(value // 2) * 2 for value in matrix.shape]
             quads = [matrix[row:nr:2, col:nc:2]
@@ -50,11 +50,10 @@ class ImagePyramid:
         self._zoom_level = 0  # Start at 100%
         self._max_zoom_level = len(self._pyramid) - 1
 
-    def get_submatrix(self, top_left_x, top_left_y, height, width):
+    def get_submatrix(self, top_left_x, top_left_y):
         """
-        Given the top left corner of a window and its height and width, we
-        return a matrix containing the relevant sub-image, and the indices of
-        the top-left corner.
+        Given the top left corner of a window, we return a matrix containing
+        the relevant sub-image, and the indices of the top-left corner.
 
         The image returned is at the current zoom level, 3 times taller and
         wider than the displayed window, so that the center of the window is
@@ -67,10 +66,10 @@ class ImagePyramid:
         nr <<= scale
         nc <<= scale
 
-        min_x = max(0,  top_left_x -     width)
-        min_y = max(0,  top_left_y -     height)
-        max_x = min(nc, top_left_x + 2 * width)
-        max_y = min(nr, top_left_y + 2 * height)
+        min_x = max(0,  top_left_x -     self._sidelength)
+        min_y = max(0,  top_left_y -     self._sidelength)
+        max_x = min(nc, top_left_x + 2 * self._sidelength)
+        max_y = min(nr, top_left_y + 2 * self._sidelength)
 
         if zoom_level >= 0:
             # No need to do anything special: just return the relevant data

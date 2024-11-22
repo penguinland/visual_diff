@@ -6,10 +6,8 @@ import tkinter as tk
 from image_pyramid import ImagePyramid
 
 class ZoomMap(tk.Canvas):
-    _HEIGHT, _WIDTH = 500, 500  # Size of canvas, in pixels
-
-    def __init__(self, tk_parent, matrix):
-        super().__init__(tk_parent, height=self._HEIGHT, width=self._WIDTH,
+    def __init__(self, tk_parent, matrix, sidelength):
+        super().__init__(tk_parent, height=sidelength, width=sidelength,
                          bg="green", xscrollincrement=1, yscrollincrement=1)
         # We keep a handle to the actual image being displayed, because TK
         # doesn't do that itself and then it gets garbage collected while it's
@@ -19,7 +17,7 @@ class ZoomMap(tk.Canvas):
         self._cached_image = None
         self._tk_image = None
 
-        self._pyramid = ImagePyramid(matrix)
+        self._pyramid = ImagePyramid(matrix, sidelength)
 
         self._set_image()
         self.pack()
@@ -54,8 +52,8 @@ class ZoomMap(tk.Canvas):
         top_left_x = int(self.canvasx(0))
         top_left_y = int(self.canvasy(0))
 
-        submatrix, min_x, min_y = self._pyramid.get_submatrix(
-            top_left_x, top_left_y, self._HEIGHT, self._WIDTH)
+        submatrix, min_x, min_y = self._pyramid.get_submatrix(top_left_x,
+                                                              top_left_y)
         if len(submatrix) == 0:
             # We're so far away from the actual data that none of it will fit
             # on or even near the screen. Rather than attempting and failing to

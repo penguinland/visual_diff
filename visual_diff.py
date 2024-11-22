@@ -28,7 +28,9 @@ def parse_args():
                         help="Save the image even if the file is big")
     parser.add_argument("--language", "-l", default=None,
                         help="Language of code in files")
-    parser.add_argument("--gui_width", "-w", type=int,
+    parser.add_argument("--map_width", "-mw", type=int, default=600,
+                        help="map width/height, in pixels")
+    parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
     return parser.parse_args(sys.argv[1:])
 
@@ -89,16 +91,18 @@ def get_tokens(filename, language):
 
 def guess_language(filename):
     file_type = filename.split(".")[-1]
-    known_types = {
-        "py":  "python",
-        "go":  "go",
-        "c":   "c",
-        "h":   "cpp",  # Might be C or C++, err on the side of caution
-        "cc":  "cpp",
-        "hh":  "cpp",
-        "cpp": "cpp",
-        "hpp": "cpp",
-        "js":  "javascript",
+    known_types = {  # Sorted by language (sorted by value, not key!)
+        "c":      "c",
+        "h":      "cpp",  # Might be C or C++, err on the side of caution
+        "cc":     "cpp",
+        "hh":     "cpp",
+        "cpp":    "cpp",
+        "hpp":    "cpp",
+        "go":     "go",
+        "js":     "javascript",
+        "py":     "python",
+        "svelte": "svelte",
+        "ts":     "typescript",
         }
     expected_language = known_types.get(file_type)
     if expected_language is not None:
@@ -108,11 +112,11 @@ def guess_language(filename):
 
 
 def get_text_width(args):
-    if args.gui_width is not None:
-        return args.gui_width
-    if args.language == "go":
-        return 100
-    return 80
+    if args.text_width is not None:
+        return args.text_width
+    if args.language == "python" or args.filename_a.split(".")[-1] == "py":
+        return 80
+    return 100
 
 
 if __name__ == "__main__":
@@ -133,7 +137,7 @@ if __name__ == "__main__":
     if args.output_location is None:
         if can_use_gui:
             text_width = get_text_width(args)
-            gui.launch(matrix, data_a, data_b, text_width)
+            gui.launch(matrix, data_a, data_b, args.map_width, text_width)
         else:
             print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
                   "python3-pil.imagetk`. If that doesn't help, open a python3 "

@@ -63,6 +63,12 @@ images can freeze your whole system. So, by default we refuse to save any
 image that is over 10 megapixels. This can be overridden with the `--big_file`
 flag, but **use that at your own peril.**
 
+When using the GUI, you can set the maximum line length for the code displayed
+using the `--text_width` or `-tw` option (default is 100 characters, except
+Python files are 80 characters), and you can set the sidelength, in
+pixels, of the GUI's (square) map view using the `--map_width` or `-mw` option
+(default is 600 pixels).
+
 ## Uses
 Finding code that has been copied and pasted or is otherwise similar enough to
 consider refactoring. This is the main use case of this code. These show up
