@@ -9,16 +9,20 @@ for Python. This might require installing something outside of your virtual
 environment: you'll know it's set up right if you can run `python3 -m tkinter`
 and get a little interactive window to pop up.
 
-After that, just `pip install -r requirements.txt`, and you should be good!
-
-On Ubuntu, you might try `sudo apt-get install python3-pil.imagetk` to get
+- On Mac, try `sudo brew install python-tk` to install that.
+- On Ubuntu, you might try `sudo apt-get install python3-pil.imagetk` to get
 Tcl/Tk set up correctly. I don't remember exactly what I did that finally
 worked, but that was one of the things I tried.
 
+After that, just `pip install -r requirements.txt`, and you should be good!
+
+If you get errors about not doing this in a virtual environment, try
+`python -m venv venv`, then `source venv/bin/activate`, and then try installing
+the requirements again.
+
 If you're running a different OS, good luck (and if you get it to work, please
 either file an issue telling us to update the documentation with what you did,
-or update it yourself and send us a pull request!). Once upon a time, this
-also worked on Mac, but I no longer have one and can't easily try that out.
+or update it yourself and send us a pull request!).
 
 ## Options
 The short version: run `visual_diff.py --help` for info.
