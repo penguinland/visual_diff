@@ -16,7 +16,7 @@ worked, but that was one of the things I tried.
 
 After that, just `pip install -r requirements.txt`, and you should be good!
 
-If you get complaints about not doing this in a virtual environment, try
+If you get errors about not doing this in a virtual environment, try
 `python -m venv venv`, then `source venv/bin/activate`, and then try installing
 the requirements again.
 
