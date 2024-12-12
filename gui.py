@@ -6,15 +6,13 @@ import tkinter.font as tkfont
 from zoom_map import ZoomMap
 
 
-TAB_WIDTH = 4  # Width of a tab, in characters
-
-
 class _Context(tk.Text):
     """
     A display of surrounding code, with the relevant tokens highlighted. We will
     have one of these for the token(s) represented by the column of the mouse
     cursor, and another for its row.
     """
+    TAB_WIDTH = 4  # Width of a tab, in characters
     CONTEXT_COUNT = 3  # Lines to display before/after the current one
     # We hope we don't encounter files with more than 99,999 lines, but if we
     # do, alignment will be off.
@@ -42,7 +40,7 @@ class _Context(tk.Text):
         # everything else.
         font = tkfont.Font(font=self["font"])
         prelude_width = font.measure(" " * self.PRELUDE_WIDTH)
-        tab_width     = font.measure(" " * TAB_WIDTH)
+        tab_width     = font.measure(" " * self.TAB_WIDTH)
         self.config(tabs=f"{prelude_width +     tab_width} "
                          f"{prelude_width + 2 * tab_width}")
 
@@ -60,7 +58,8 @@ class _Context(tk.Text):
         # If we have tabs in the line, they will register as a single character
         # but take up multiple characters of width.
         tab_count = line_start.count("\t")
-        line_start = line_start[:self._text_width - tab_count * (TAB_WIDTH - 1)]
+        characters_on_line = self._text_width - tab_count * (self.TAB_WIDTH - 1)
+        line_start = line_start[:characters_on_line]
         updated_tab_count = line_start.count("\t")
         if tab_count != updated_tab_count:
             # We removed a tab while shortening the line to fit all the tabs.
