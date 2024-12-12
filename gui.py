@@ -1,8 +1,13 @@
 from functools import partial
 from math import ceil
 import tkinter as tk
+import tkinter.font as tkfont
 
 from zoom_map import ZoomMap
+
+
+# TODO: it would be nice to have tabs be 4 characters wide. Is this changeable?
+TAB_WIDTH = 8  # Width of a tab, in characters
 
 
 class _Context(tk.Text):
@@ -12,8 +17,9 @@ class _Context(tk.Text):
     cursor, and another for its row.
     """
     CONTEXT_COUNT = 3  # Lines to display before/after the current one
-    # TODO: What about files with over 99,999 lines?
-    LINE_NUMBER_WIDTH = 5  # Number of characters to allocate for line numbers
+    # Make the prelude width 8, so that tabs at the beginning of a line have
+    # the correct alignment.
+    LINE_NUMBER_WIDTH = 6  # Number of characters to allocate for line numbers
     PRELUDE_WIDTH = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
 
     def __init__(self, tk_parent, data, text_width, zoom_map):
@@ -26,11 +32,32 @@ class _Context(tk.Text):
                          state=tk.DISABLED, font="TkFixedFont", borderwidth=2,
                          relief="ridge")
         self.pack()
+        # Set the tab width to 4 characters, not 8
+        tab_width = tkfont.Font(font=self["font"]).measure("    ")
+        self.config(tabs=tab_width)
         # TODO: Use a NamedTuple?
         self._tokens = data.tokens
         self._lines = data.lines
         self._boundaries = data.boundaries
         self._zoom_map = zoom_map
+
+    def _snip_line(self, i):
+        """
+        Give back the part of line i that will fit in the display.
+        """
+        line = self._lines[i]
+        line_start = line[:self._text_width]
+        # If we have tabs in the line, they will register as a single character
+        # but take up multiple characters of width.
+        tab_count = line_start.count("\t")
+        line_start = line_start[:self._text_width - tab_count * (TAB_WIDTH - 1)]
+        updated_tab_count = line_start.count("\t")
+        if tab_count != updated_tab_count:
+            # We removed a tab while shortening the line to fit all the tabs.
+            # Hopefully this is rare enough that it's not worth figuring out a
+            # solution that always works.
+            print("PROBLEM: tabs at the end of the line!")
+        return line_start
 
     def display(self, pixel):
         # The zoom level is equivalent to the number of tokens described by the
@@ -50,7 +77,7 @@ class _Context(tk.Text):
         start = line_number - self.CONTEXT_COUNT - 1
         end   = line_number + self.CONTEXT_COUNT
         lines = ["{:>{}}: {}".format(i + 1, self.LINE_NUMBER_WIDTH,
-                                     self._lines[i][:self._text_width])
+                                     self._snip_line(i))
                  if 0 <= i < len(self._lines) else ""
                  for i in range(start, end)]
         text = "\n".join(lines)
