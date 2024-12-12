@@ -17,6 +17,7 @@ class _Context(tk.Text):
     PRELUDE_WIDTH = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
 
     def __init__(self, tk_parent, data, text_width, zoom_map):
+        self._text_width = text_width
         height = 2 * self.CONTEXT_COUNT + 1
         # NOTE: Lines longer than text_width get truncated, and any tokens off
         # the end don't get shown/highlighted.
@@ -49,7 +50,7 @@ class _Context(tk.Text):
         start = line_number - self.CONTEXT_COUNT - 1
         end   = line_number + self.CONTEXT_COUNT
         lines = ["{:>{}}: {}".format(i + 1, self.LINE_NUMBER_WIDTH,
-                                     self._lines[i][:80])
+                                     self._lines[i][:self._text_width])
                  if 0 <= i < len(self._lines) else ""
                  for i in range(start, end)]
         text = "\n".join(lines)
