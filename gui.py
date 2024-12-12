@@ -53,13 +53,14 @@ class _Context(tk.Text):
         """
         Give back the part of line i that will fit in the display.
         """
-        line = self._lines[i]
-        line_start = line[:self._text_width]
+        line_start = self._lines[i][:self._text_width]
+
         # If we have tabs in the line, they will register as a single character
         # but take up multiple characters of width.
         tab_count = line_start.count("\t")
         characters_on_line = self._text_width - tab_count * (self.TAB_WIDTH - 1)
         line_start = line_start[:characters_on_line]
+
         updated_tab_count = line_start.count("\t")
         if tab_count != updated_tab_count:
             # We removed a tab while shortening the line to fit all the tabs.
