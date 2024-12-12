@@ -36,7 +36,6 @@ class _Context(tk.Text):
         tab_width = tkfont.Font(font=self["font"]).measure("    ")
         self.config(tabs=tab_width)
         # TODO: Use a NamedTuple?
-        self._tokens = data.tokens
         self._lines = data.lines
         self._boundaries = data.boundaries
         self._zoom_map = zoom_map
