@@ -6,8 +6,7 @@ import tkinter.font as tkfont
 from zoom_map import ZoomMap
 
 
-# TODO: it would be nice to have tabs be 4 characters wide. Is this changeable?
-TAB_WIDTH = 8  # Width of a tab, in characters
+TAB_WIDTH = 4  # Width of a tab, in characters
 
 
 class _Context(tk.Text):
@@ -32,17 +31,18 @@ class _Context(tk.Text):
                          relief="ridge")
         self.pack()
 
-        # Set the tab width to 4 characters, not 8. Tcl/tk uses a list of tab
-        # stop distances, where each '\t' character will advance the text to
-        # the next tab stop. The units on these widths are not characters, but
-        # something more fine-grained (pixels? points?). The first tab should
-        # go 4 characters past the end of the prelude (the line number), and
-        # the next one should go 4 additional characters past that. Subsequent
-        # tab stops are inferred to be the same distance apart as the last two
-        # tab stops specified, so these two are sufficient for everything else.
+        # Set the tab width. Tcl/tk uses a list of tab stop distances, where
+        # each '\t' character will advance the text to the next tab stop. The
+        # units on these widths are not characters, but something more
+        # fine-grained (pixels? points?). The first tab should go TAB_WIDTH
+        # characters past the end of the prelude (the line number), and the
+        # next one should go TAB_WIDTH additional characters past that.
+        # Subsequent tab stops are inferred to be the same distance apart as
+        # the last two tab stops specified, so these two are sufficient for
+        # everything else.
         font = tkfont.Font(font=self["font"])
         prelude_width = font.measure(" " * self.PRELUDE_WIDTH)
-        tab_width     = font.measure(" " * 4)
+        tab_width     = font.measure(" " * TAB_WIDTH)
         self.config(tabs=f"{prelude_width +     tab_width} "
                          f"{prelude_width + 2 * tab_width}")
 
