@@ -90,8 +90,8 @@ class _Gui(tk.Frame):
 
         self._contexts = [_Context(self, data, text_width, self._map)
                           for data in (data_a, data_b)]
-        [self._map.bind(event, self._on_motion)
-                for event in ["<Motion>", "<Enter>"]]
+        for event in ("<Motion>", "<Enter>"):
+            self._map.bind(event, self._on_motion)
 
     def _on_motion(self, event):
         # We're using (row, col) format, so the first one changes with Y.
