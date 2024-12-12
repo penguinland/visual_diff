@@ -17,13 +17,12 @@ class _Context(tk.Text):
     cursor, and another for its row.
     """
     CONTEXT_COUNT = 3  # Lines to display before/after the current one
-    # Make the prelude width 8, so that tabs at the beginning of a line have
-    # the correct alignment.
-    LINE_NUMBER_WIDTH = 6  # Number of characters to allocate for line numbers
+    # We hope we don't encounter files with more than 99,999 lines, but if we
+    # do, alignment will be off.
+    LINE_NUMBER_WIDTH = 5  # Number of characters to allocate for line numbers
     PRELUDE_WIDTH = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
 
     def __init__(self, tk_parent, data, text_width, zoom_map):
-        self._text_width = text_width
         height = 2 * self.CONTEXT_COUNT + 1
         # NOTE: Lines longer than text_width get truncated, and any tokens off
         # the end don't get shown/highlighted.
@@ -32,10 +31,22 @@ class _Context(tk.Text):
                          state=tk.DISABLED, font="TkFixedFont", borderwidth=2,
                          relief="ridge")
         self.pack()
-        # Set the tab width to 4 characters, not 8
-        tab_width = tkfont.Font(font=self["font"]).measure("    ")
-        self.config(tabs=tab_width)
-        # TODO: Use a NamedTuple?
+
+        # Set the tab width to 4 characters, not 8. Tcl/tk uses a list of tab
+        # stop distances, where each '\t' character will advance the text to
+        # the next tab stop. The units on these widths are not characters, but
+        # something more fine-grained (pixels? points?). The first tab should
+        # go 4 characters past the end of the prelude (the line number), and
+        # the next one should go 4 additional characters past that. Subsequent
+        # tab stops are inferred to be the same distance apart as the last two
+        # tab stops specified, so these two are sufficient for everything else.
+        font = tkfont.Font(font=self["font"])
+        prelude_width = font.measure(" " * self.PRELUDE_WIDTH)
+        tab_width     = font.measure(" " * 4)
+        self.config(tabs=f"{prelude_width +     tab_width} "
+                         f"{prelude_width + 2 * tab_width}")
+
+        self._text_width = text_width
         self._lines = data.lines
         self._boundaries = data.boundaries
         self._zoom_map = zoom_map
