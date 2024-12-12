@@ -51,7 +51,7 @@ class _Context(tk.Text):
 
     def _snip_line(self, i):
         """
-        Give back the part of line i that will fit in the display.
+        Returns the part of line i that will fit in the display.
         """
         line_start = self._lines[i][:self._text_width]
 
