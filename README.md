@@ -1,7 +1,7 @@
 # visual_diff
 A tool for generating a visual comparison of two files of source code.
 
-TODO: put some images here!
+![screenshot of the tool in use](./screenshots/boilerplate.png)
 
 ## Prerequisites
 You'll need [Tcl/Tk bindings](https://docs.python.org/3/library/tkinter.html)
@@ -78,8 +78,6 @@ Finding code that has been copied and pasted or is otherwise similar enough to
 consider refactoring. This is the main use case of this code. These show up
 as diagonal lines in the image.
 
-TODO: give example images and discuss in more detail
-
 #### Other Uses
 - Finding students who are cheating on their homework by copying and pasting
   code from each other. There are better tools for this task, but `visual_diff`
@@ -87,6 +85,37 @@ TODO: give example images and discuss in more detail
 - Cheating on homework by making sure that the code you have copied and pasted
   has been modified enough that it no longer looks copied and pasted.
   :upside_down_face:
+
+## Examples
+
+The mouse cursor has been artificially colored purple in order to better
+distinguish it from the background. The context at the bottom highlights the
+token(s) represented by the pixel the mouse is pointing to.
+
+Boilerplate code that repeats itself a lot clearly looks like it repeats:
+
+![example of boilerplate code](./screenshots/grpc-boilerplate.png)
+
+Here's a short file compared to a longer file which was created by copying the
+short file and modifying it:
+
+![example of a short file compared to a long file made from modifying the short one](./screenshots/gps.png)
+
+This is a single file compared to itself, where the second half of the file
+was created by modifying a copy of the first half:
+
+![a file whose second half is a modified copy of the first half](./screenshots/screenshot1.png)
+
+Data structures with very regular structure, such as lists and dictionaries,
+show up as very regular structures:
+
+![a string-to-string map shows as a checkerboard pattern](./screenshots/str-dict.png)
+
+If you zoom out in a very large file, each pixel of the map will contain
+multiple tokens within it. Duplicated code will still show up as a diagonal
+line even if the individual pixels only match partially.
+
+![a zoomed-out view shows each pixel represents multiple tokens in the file](./screenshots/multitoken-matching.png)
 
 ## Motivation
 This code was predominantly written by Alan Davidson. He got the
