@@ -1,6 +1,7 @@
 from functools import partial
 from math import ceil
 import tkinter as tk
+import tkinter.font as tkfont
 
 from zoom_map import ZoomMap
 
@@ -11,8 +12,10 @@ class _Context(tk.Text):
     have one of these for the token(s) represented by the column of the mouse
     cursor, and another for its row.
     """
+    TAB_WIDTH = 4  # Width of a tab, in characters
     CONTEXT_COUNT = 3  # Lines to display before/after the current one
-    # TODO: What about files with over 99,999 lines?
+    # We hope we don't encounter files with more than 99,999 lines, but if we
+    # do, alignment will be off.
     LINE_NUMBER_WIDTH = 5  # Number of characters to allocate for line numbers
     PRELUDE_WIDTH = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
 
@@ -25,11 +28,46 @@ class _Context(tk.Text):
                          state=tk.DISABLED, font="TkFixedFont", borderwidth=2,
                          relief="ridge")
         self.pack()
-        # TODO: Use a NamedTuple?
-        self._tokens = data.tokens
+
+        # Set the tab width. Tcl/tk uses a list of tab stop distances, where
+        # each '\t' character will advance the text to the next tab stop. The
+        # units on these widths are not characters, but something more
+        # fine-grained (pixels? points?). The first tab should go TAB_WIDTH
+        # characters past the end of the prelude (the line number), and the
+        # next one should go TAB_WIDTH additional characters past that.
+        # Subsequent tab stops are inferred to be the same distance apart as
+        # the last two tab stops specified, so these two are sufficient for
+        # everything else.
+        font = tkfont.Font(font=self["font"])
+        prelude_width = font.measure(" " * self.PRELUDE_WIDTH)
+        tab_width     = font.measure(" " * self.TAB_WIDTH)
+        self.config(tabs=f"{prelude_width +     tab_width} "
+                         f"{prelude_width + 2 * tab_width}")
+
+        self._text_width = text_width
         self._lines = data.lines
         self._boundaries = data.boundaries
         self._zoom_map = zoom_map
+
+    def _snip_line(self, i):
+        """
+        Returns the part of line i that will fit in the display.
+        """
+        line_start = self._lines[i][:self._text_width]
+
+        # If we have tabs in the line, they will register as a single character
+        # but take up multiple characters of width.
+        tab_count = line_start.count("\t")
+        characters_on_line = self._text_width - tab_count * (self.TAB_WIDTH - 1)
+        line_start = line_start[:characters_on_line]
+
+        updated_tab_count = line_start.count("\t")
+        if tab_count != updated_tab_count:
+            # We removed a tab while shortening the line to fit all the tabs.
+            # Hopefully this is rare enough that it's not worth figuring out a
+            # solution that always works.
+            print("PROBLEM: tabs at the end of the line!")
+        return line_start
 
     def display(self, pixel):
         # The zoom level is equivalent to the number of tokens described by the
@@ -49,7 +87,7 @@ class _Context(tk.Text):
         start = line_number - self.CONTEXT_COUNT - 1
         end   = line_number + self.CONTEXT_COUNT
         lines = ["{:>{}}: {}".format(i + 1, self.LINE_NUMBER_WIDTH,
-                                     self._lines[i][:80])
+                                     self._snip_line(i))
                  if 0 <= i < len(self._lines) else ""
                  for i in range(start, end)]
         text = "\n".join(lines)
@@ -89,8 +127,8 @@ class _Gui(tk.Frame):
 
         self._contexts = [_Context(self, data, text_width, self._map)
                           for data in (data_a, data_b)]
-        [self._map.bind(event, self._on_motion)
-                for event in ["<Motion>", "<Enter>"]]
+        for event in ("<Motion>", "<Enter>"):
+            self._map.bind(event, self._on_motion)
 
     def _on_motion(self, event):
         # We're using (row, col) format, so the first one changes with Y.
