@@ -9,18 +9,16 @@ def get_lengths(matrix, is_single_file):
 
     This number is calculated as follows:
     - The number of a False pixel is 0.
-    - A pixel not joined to anything else has a score of 1.
-    - Pixels can only be joined in a down-and-to-the-right fashion.
     - The "cost" of joining two pixels into a segment is the Manhattan distance
       between the location just below-right of the first pixel and the second
       pixel. For example, two pixels immediately diagonal from each other cost
       nothing to join together, while joining two pixels a knights move apart
       has a cost of 1.
-    - The number of a True pixel is the maximum value of the number of pixels
-      it can join with minus the cost of performing all the joins. For example,
-      a diagonal run of 10 pixels should each have value 10, whereas two
-      diagonals of 5 pixels each whose endpoints are separated by a knight's
-      move should have a value of 9.
+    - The final score of a True pixel is the maximum value of (the number of
+      pixels in the group minus the cost of performing all the joins). For
+      example, a diagonal run of 10 pixels should each have score 10, whereas
+      two diagonals of 5 pixels whose endpoints are separated by a knight's
+      move should have a score of 9. A single pixel by itself scores 1.
     """
     nr, nc = matrix.shape
     distance_template = numpy.arange(nr)[:, None] + numpy.arange(nc)
