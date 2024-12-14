@@ -6,6 +6,7 @@ import numpy
 import sys
 
 import file_info
+import find_duplicates
 
 try:
     # To get the GUI to work, you'll need to be able to install the TK bindings
@@ -138,10 +139,14 @@ if __name__ == "__main__":
         data_b = get_tokens(f_b.read(), language)
     matrix = make_matrix(data_a.tokens, data_b.tokens)
 
+    scores = find_duplicates.get_lengths(matrix, args.filename_b is None)
+    #scores = None
+
     if args.output_location is None:
         if can_use_gui:
             text_width = get_text_width(args)
-            gui.launch(matrix, data_a, data_b, args.map_width, text_width)
+            gui.launch(matrix, data_a, data_b, args.map_width, text_width,
+                       scores)
         else:
             print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
                   "python3-pil.imagetk`. If that doesn't help, open a python3 "

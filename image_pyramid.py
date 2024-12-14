@@ -3,11 +3,21 @@ import numpy
 
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
+    _MAX_TOKEN_CHAIN = 100
 
-    def __init__(self, matrix, sidelength):
+    def __init__(self, matrix, sidelength, scores=None):
         self._pyramid = []  # A list of `matrix` at different zoom levels
         self._pyramid.append(matrix)
         self._sidelength = sidelength
+
+        if scores is None:
+            self._score_pyramid = None
+        else:
+            normalized_scores = (
+                numpy.astype(scores, numpy.float32) / self._MAX_TOKEN_CHAIN)
+            normalized_scores = numpy.maximum(1, normalized_scores)
+            self._score_pyramid = []
+            self._score_pyramid.append(normalized_scores)
 
         # Zoom out and make the matrix smaller and smaller
         while max(matrix.shape) >= sidelength:
@@ -45,6 +55,15 @@ class ImagePyramid:
                       (quads[1] & numpy.logical_not(quads[2])))
             self._pyramid.append(matrix)
 
+            if scores is not None:
+                # Do the same thing with the scores, except use the max value.
+                score_quads = [normalized_scores[row:nr:2, col:nc:2]
+                               for row in [0, 1] for col in [0, 1]]
+                normalized_scores = numpy.maximum(
+                    numpy.maximum(score_quads[0], score_quads[1]),
+                    numpy.maximum(score_quads[2], score_quads[3]))
+                self._score_pyramid.append(normalized_scores)
+
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
         self._zoom_level = 0  # Start at 100%
@@ -74,7 +93,7 @@ class ImagePyramid:
         if zoom_level >= 0:
             # No need to do anything special: just return the relevant data
             submatrix = current_data[min_y:max_y, min_x:max_x]
-            return submatrix, min_x, min_y
+            return submatrix * 255, min_x, min_y
 
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
         # then duplicate it a bunch.
@@ -100,7 +119,7 @@ class ImagePyramid:
                     new_submatrix[r::2, c::2] = submatrix
             submatrix = new_submatrix
 
-        return submatrix, min_x << scale, min_y << scale
+        return submatrix * 255, min_x << scale, min_y << scale
 
     def zoom(self, amount):
         """
