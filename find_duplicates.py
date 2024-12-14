@@ -62,13 +62,12 @@ def get_lengths(matrix, is_single_file):
 
     # Now, do the opposite: moving top-left to bottom-right, set the scores of
     # all pixels to be as large as we could find.
-    # TODO: can this be numpy-icized? At least column-by-column, maybe?
     for i in range(nr):
-        for j in range(nc):
-            r = next_r[i, j]
-            c = next_c[i, j]
-            if r < 0 or c < 0:
-                continue
-            scores[r, c] = max(scores[i, j], scores[r, c])
+        has_update = numpy.logical_and(numpy.greater_equal(next_r[i, :], 0),
+                                       numpy.greater_equal(next_c[i, :], 0))
+        rs = next_r[i,:][has_update]
+        cs = next_c[i,:][has_update]
+        ss = scores[i,:][has_update]
+        scores[rs, cs] = numpy.maximum(scores[rs, cs], ss)
 
     return scores
