@@ -1,5 +1,6 @@
 import numpy
 
+
 def get_lengths(matrix, is_single_file):
     """
     Matrix is a 2D numpy array of bools. We return a 2D numpy array of ints,
