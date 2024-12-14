@@ -119,6 +119,13 @@ def get_text_width(args):
     return 100
 
 
+def make_matrix(tokens_a, tokens_b):
+    matrix = numpy.zeros([len(tokens_a), len(tokens_b)], dtype=numpy.uint8)
+    for i, value in enumerate(tokens_a):
+        matrix[i, :] = (tokens_b == value)
+    return matrix
+
+
 if __name__ == "__main__":
     args = parse_args()
     language = args.language
@@ -130,9 +137,7 @@ if __name__ == "__main__":
     tokens_a = data_a.tokens
     tokens_b = data_b.tokens
 
-    matrix = numpy.zeros([len(tokens_a), len(tokens_b)], dtype=numpy.uint8)
-    for i, value in enumerate(tokens_a):
-        matrix[i, :] = (tokens_b == value)
+    matrix = make_matrix(tokens_a, tokens_b)
 
     if args.output_location is None:
         if can_use_gui:
