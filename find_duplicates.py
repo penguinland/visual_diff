@@ -8,7 +8,7 @@ def get_lengths(matrix, is_single_file):
     how long a chain of bools is.
 
     This number is calculated as follows:
-    - The number of a False pixel is -1.
+    - The number of a False pixel is 0.
     - A pixel not joined to anything else has a score of 1.
     - Pixels can only be joined in a down-and-to-the-right fashion.
     - The "cost" of joining two pixels into a segment is the Manhattan distance
@@ -27,21 +27,21 @@ def get_lengths(matrix, is_single_file):
     # For each pixel, we need to keep track of the score it can achieve by
     # joining things further down and right from it, and the row and column of
     # the best such pixel to join it with.
-    scores = numpy.zeros((nr, nc), dtype=numpy.int32) - 1
+    scores = numpy.zeros((nr, nc), dtype=numpy.int32)
     next_r = numpy.zeros((nr, nc), dtype=numpy.int32) - 1
     next_c = numpy.zeros((nr, nc), dtype=numpy.int32) - 1
 
     # Initialize the bottommost and rightmost edges to be the initial scores:
     # they cannot grow further down or right.
-    scores[-1, :] = 2 * numpy.astype(matrix[-1, :], numpy.int32) - 1
-    scores[:, -1] = 2 * numpy.astype(matrix[:, -1], numpy.int32) - 1
+    scores[-1, :] = 2 * numpy.astype(matrix[-1, :], numpy.int32)
+    scores[:, -1] = 2 * numpy.astype(matrix[:, -1], numpy.int32)
 
     # Then, walk the rest of matrix from bottom-right to top-left, with each
     # pixel growing as large as it can solely by joining things further right
     # and down from itself.
     for r in range(nr - 2, -1, -1):
         for c in range(nc - 2, -1, -1):
-            if matrix[r, c] == 0:  # Pixel is unset, so it should score -1.
+            if matrix[r, c] == 0:  # Pixel is unset, so it should score 0.
                 continue
             # Otherwise, it should be at least 1.
             scores[r, c] = 1
