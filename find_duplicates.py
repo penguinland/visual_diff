@@ -52,8 +52,8 @@ def get_lengths(matrix, is_single_file):
             candidates = scores[r+1:, c+1:]
             distances = distance_template[:(nr - r - 1), :(nc - c - 1)]
             possible_scores = candidates - distances
-            best_r, best_c = numpy.unravel_index(
-                    numpy.argmax(possible_scores), candidates.shape)
+            best_r, best_c = numpy.unravel_index(numpy.argmax(possible_scores),
+                                                 candidates.shape)
             best_score = possible_scores[best_r, best_c]
             if best_score > 0:
                 scores[r, c] += best_score
