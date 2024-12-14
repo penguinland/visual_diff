@@ -27,14 +27,14 @@ def get_lengths(matrix, is_single_file):
     # For each pixel, we need to keep track of the score it can achieve by
     # joining things further down and right from it, and the row and column of
     # the best such pixel to join it with.
-    scores = numpy.zeros((nr, nc), dtype=numpy.int32)
+    scores = numpy.zeros((nr, nc), dtype=numpy.uint32)
     next_r = numpy.zeros((nr, nc), dtype=numpy.int32) - 1
     next_c = numpy.zeros((nr, nc), dtype=numpy.int32) - 1
 
     # Initialize the bottommost and rightmost edges to be the initial scores:
     # they cannot grow further down or right.
-    scores[-1, :] = 2 * numpy.astype(matrix[-1, :], numpy.int32)
-    scores[:, -1] = 2 * numpy.astype(matrix[:, -1], numpy.int32)
+    scores[-1, :] = 2 * numpy.astype(matrix[-1, :], numpy.uint32)
+    scores[:, -1] = 2 * numpy.astype(matrix[:, -1], numpy.uint32)
 
     # Then, walk the rest of matrix from bottom-right to top-left, with each
     # pixel growing as large as it can solely by joining things further right
