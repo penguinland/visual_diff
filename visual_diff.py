@@ -130,15 +130,13 @@ if __name__ == "__main__":
     language = args.language
     if language is None:
         language = guess_language(args.filename_a)
+
     with open(args.filename_a) as f_a:
         data_a = get_tokens(f_a.read(), language)
     # TODO: it might be cool to allow comparisons across languages.
     with open(args.filename_b or args.filename_a) as f_b:
         data_b = get_tokens(f_b.read(), language)
-    tokens_a = data_a.tokens
-    tokens_b = data_b.tokens
-
-    matrix = make_matrix(tokens_a, tokens_b)
+    matrix = make_matrix(data_a.tokens, data_b.tokens)
 
     if args.output_location is None:
         if can_use_gui:
@@ -158,7 +156,7 @@ if __name__ == "__main__":
         # instead only import it if we're actually going to use it.
         from matplotlib import pyplot
 
-        pixel_count = len(tokens_a) * len(tokens_b)
+        pixel_count = len(data_a.tokens) * len(data_b.tokens)
         if pixel_count > 10 * 1000 * 1000 and not args.big_file:
             print("WARNING: the image is over 10 megapixels. Saving very large "
                   "images can use so many resources that your computer "
