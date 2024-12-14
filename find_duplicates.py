@@ -32,15 +32,16 @@ def get_lengths(matrix):
 
     # Initialize the bottommost and rightmost edges to be the initial scores:
     # they cannot grow further down or right.
-    scores[-1, :] = -1 + 2 * matrix[-1, :]
-    scores[:, -1] = -1 + 2 * matrix[:, -1]
+    scores[-1, :] = 2 * numpy.astype(matrix[-1, :], numpy.int32) - 1
+    scores[:, -1] = 2 * numpy.astype(matrix[:, -1], numpy.int32) - 1
+
     # Then, walk the rest of matrix from bottom-right to top-left, with each
     # pixel growing as large as it can solely by joining things further right
     # and down from itself.
     for i in range(r - 2, -1, -1):
         for j in range(c - 2, -1, -1):
-            if not matrix[i, j]:  # Pixel is unset, so it should score -1.
-                return
+            if matrix[i, j] == 0:  # Pixel is unset, so it should score -1.
+                continue
             # Otherwise, it should be at least 1.
             scores[i, j] = 1
 
@@ -50,17 +51,16 @@ def get_lengths(matrix):
             best_r, best_c = numpy.unravel_index(
                     numpy.argmax(possible_scores), candidates.shape)
             best_score = possible_scores[best_r, best_c]
-            if best_score > scores[i, j]:
-                scores[i, j] = best_score
-                next_r[i, j] = best_r
-                next_c[i, j] = best_c
+            if best_score > 0:
+                scores[i, j] += best_score
+                next_r[i, j] = best_r + i + 1
+                next_c[i, j] = best_c + j + 1
 
     # Now, do the opposite: moving top-left to bottom-right, set the scores of
     # all pixels to be as large as we could find.
-    result = numpy.zeros((r, c))
     for i in range(r):
         for j in range(c):
             scores[next_r[i, j], next_c[i, j]] = max(
                     scores[i, j], scores[next_r[i, j], next_c[i, j]])
 
-    return result
+    return scores
