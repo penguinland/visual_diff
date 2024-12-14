@@ -12,6 +12,15 @@ class TestGetLengths(unittest.TestCase):
         data = visual_diff.get_tokens(contents, "python")
         self.matrix = visual_diff.make_matrix(data.tokens, data.tokens)
 
+    @staticmethod
+    def debug_differences(expected, actual):
+        print("expected:")
+        print(expected)
+        print("actual:")
+        print(actual)
+        print("diff:")
+        print(expected - actual)
+
     def test_compare_to_self(self):
         expected = numpy.array([
             #p  (  h  (  1  ,  2  )  )  a  p  (  h  (  "  ,  2  )  )
@@ -36,12 +45,7 @@ class TestGetLengths(unittest.TestCase):
             [0, 0, 0, 0, 0, 0, 0, 1, 6, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],  # )
             ])
         actual = find_duplicates.get_lengths(self.matrix, True)
-        #print("expected:")
-        #print(expected)
-        #print("actual:")
-        #print(actual)
-        #print("diff:")
-        #print(expected - actual)
+        #self.debug_differences(expected, actual)
         self.assertTrue((expected == actual).all())
 
     def test_compare_to_other(self):
@@ -67,14 +71,8 @@ class TestGetLengths(unittest.TestCase):
             [ 0, 0, 0, 0, 0, 0, 0, 6, 1, 0, 0, 0, 0, 0, 0, 0, 0,19, 1],  # )
             [ 0, 0, 0, 0, 0, 0, 0, 1, 6, 0, 0, 0, 0, 0, 0, 0, 0, 1,19]   # )
             ])
-
         actual = find_duplicates.get_lengths(self.matrix, False)
-        #print("expected:")
-        #print(expected)
-        #print("actual:")
-        #print(actual)
-        #print("diff:")
-        #print(expected - actual)
+        #self.debug_differences(expected, actual)
         self.assertTrue((expected == actual).all())
 
 
