@@ -1,6 +1,6 @@
 import numpy
 
-def get_lengths(matrix):
+def get_lengths(matrix, is_single_file):
     """
     Matrix is a 2D numpy array of bools. We return a 2D numpy array of ints,
     where each int corresponds to one of the bools. The ints are a measure of
@@ -27,8 +27,8 @@ def get_lengths(matrix):
     # joining things further down and right from it, and the row and column of
     # the best such pixel to join it with.
     scores = numpy.zeros((r, c), dtype=numpy.int32) - 1
-    next_r = numpy.zeros((r, c), dtype=numpy.int32)
-    next_c = numpy.zeros((r, c), dtype=numpy.int32)
+    next_r = numpy.zeros((r, c), dtype=numpy.int32) - 1
+    next_c = numpy.zeros((r, c), dtype=numpy.int32) - 1
 
     # Initialize the bottommost and rightmost edges to be the initial scores:
     # they cannot grow further down or right.
@@ -45,6 +45,11 @@ def get_lengths(matrix):
             # Otherwise, it should be at least 1.
             scores[i, j] = 1
 
+            if is_single_file and i == j:
+                # A token compared to itself matches but shouldn't be
+                # considered an interesting group.
+                continue
+
             candidates = scores[i+1:, j+1:]
             distances = distance_template[:(r - i - 1), :(c - j - 1)]
             possible_scores = candidates - distances
@@ -60,7 +65,10 @@ def get_lengths(matrix):
     # all pixels to be as large as we could find.
     for i in range(r):
         for j in range(c):
-            scores[next_r[i, j], next_c[i, j]] = max(
-                    scores[i, j], scores[next_r[i, j], next_c[i, j]])
+            nr = next_r[i, j]
+            nc = next_c[i, j]
+            if nr < 0 or nc < 0:
+                continue
+            scores[nr, nc] = max(scores[i, j], scores[nr, nc])
 
     return scores
