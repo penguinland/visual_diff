@@ -31,8 +31,8 @@ def get_lengths(matrix, is_single_file):
 
     # Initialize the bottommost and rightmost edges to be the initial scores:
     # they cannot grow further down or right.
-    scores[-1, :] = 2 * numpy.astype(matrix[-1, :], numpy.uint32)
-    scores[:, -1] = 2 * numpy.astype(matrix[:, -1], numpy.uint32)
+    scores[-1, :] = numpy.astype(matrix[-1, :], numpy.uint32)
+    scores[:, -1] = numpy.astype(matrix[:, -1], numpy.uint32)
 
     # Then, walk the rest of matrix from bottom-right to top-left, with each
     # pixel growing as large as it can solely by joining things further right
