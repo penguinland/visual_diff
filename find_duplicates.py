@@ -19,6 +19,9 @@ def get_lengths(matrix, is_single_file):
       example, a diagonal run of 10 pixels should each have score 10, whereas
       two diagonals of 5 pixels whose endpoints are separated by a knight's
       move should have a score of 9. A single pixel by itself scores 1.
+
+    If is_single_file is set, the main diagonal of the scores are all 1's,
+    because a file shouldn't count as a duplicate of itself.
     """
     nr, nc = matrix.shape
     distance_template = numpy.arange(nr)[:, None] + numpy.arange(nc)
