@@ -35,15 +35,14 @@ def parse_args():
     return parser.parse_args(sys.argv[1:])
 
 
-def get_tokens(filename, language):
+def get_tokens(file_contents, language):
     """
-    We return a file_info.FileInfo object containing details of this file.
+    We return a file_info.FileInfo object containing details of the given
+    file_contents.
     """
-    with open(filename) as f:
-        contents = f.read()
-    toks = code_tokenize.tokenize(contents, lang=language)
+    toks = code_tokenize.tokenize(file_contents, lang=language)
     toks = [t for t in toks if t.type not in ("newline", "comment")]
-    lines = list(contents.split("\n"))
+    lines = list(file_contents.split("\n"))
     constant_types = ("string", "integer", "float", "indent", "dedent")
     token_array = numpy.array(
         [tok.type if tok.type in constant_types else tok.text for tok in toks])
@@ -119,20 +118,25 @@ def get_text_width(args):
     return 100
 
 
+def make_matrix(tokens_a, tokens_b):
+    matrix = numpy.zeros([len(tokens_a), len(tokens_b)], dtype=numpy.uint8)
+    for i, value in enumerate(tokens_a):
+        matrix[i, :] = (tokens_b == value)
+    return matrix
+
+
 if __name__ == "__main__":
     args = parse_args()
     language = args.language
     if language is None:
         language = guess_language(args.filename_a)
-    data_a = get_tokens(args.filename_a, language)
-    # TODO: it might be cool to allow comparisons across languages.
-    data_b = get_tokens(args.filename_b or args.filename_a, language)
-    tokens_a = data_a.tokens
-    tokens_b = data_b.tokens
 
-    matrix = numpy.zeros([len(tokens_a), len(tokens_b)], numpy.uint8)
-    for i, value in enumerate(tokens_a):
-        matrix[i, :] = (tokens_b == value)
+    with open(args.filename_a) as f_a:
+        data_a = get_tokens(f_a.read(), language)
+    # TODO: it might be cool to allow comparisons across languages.
+    with open(args.filename_b or args.filename_a) as f_b:
+        data_b = get_tokens(f_b.read(), language)
+    matrix = make_matrix(data_a.tokens, data_b.tokens)
 
     if args.output_location is None:
         if can_use_gui:
@@ -152,7 +156,7 @@ if __name__ == "__main__":
         # instead only import it if we're actually going to use it.
         from matplotlib import pyplot
 
-        pixel_count = len(tokens_a) * len(tokens_b)
+        pixel_count = len(data_a.tokens) * len(data_b.tokens)
         if pixel_count > 10 * 1000 * 1000 and not args.big_file:
             print("WARNING: the image is over 10 megapixels. Saving very large "
                   "images can use so many resources that your computer "
