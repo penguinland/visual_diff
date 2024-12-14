@@ -35,15 +35,14 @@ def parse_args():
     return parser.parse_args(sys.argv[1:])
 
 
-def get_tokens(filename, language):
+def get_tokens(file_contents, language):
     """
-    We return a file_info.FileInfo object containing details of this file.
+    We return a file_info.FileInfo object containing details of the given
+    file_contents.
     """
-    with open(filename) as f:
-        contents = f.read()
-    toks = code_tokenize.tokenize(contents, lang=language)
+    toks = code_tokenize.tokenize(file_contents, lang=language)
     toks = [t for t in toks if t.type not in ("newline", "comment")]
-    lines = list(contents.split("\n"))
+    lines = list(file_contents.split("\n"))
     constant_types = ("string", "integer", "float", "indent", "dedent")
     token_array = numpy.array(
         [tok.type if tok.type in constant_types else tok.text for tok in toks])
@@ -131,9 +130,11 @@ if __name__ == "__main__":
     language = args.language
     if language is None:
         language = guess_language(args.filename_a)
-    data_a = get_tokens(args.filename_a, language)
+    with open(args.filename_a) as f_a:
+        data_a = get_tokens(f_a.read(), language)
     # TODO: it might be cool to allow comparisons across languages.
-    data_b = get_tokens(args.filename_b or args.filename_a, language)
+    with open(args.filename_b or args.filename_a) as f_b:
+        data_b = get_tokens(f_b.read(), language)
     tokens_a = data_a.tokens
     tokens_b = data_b.tokens
 
