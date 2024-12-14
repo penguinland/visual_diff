@@ -33,14 +33,19 @@ def get_lengths(matrix):
     def find_best(i, j):
         if not matrix[i, j]:  # Pixel is unset, so it should score -1.
             return
-
+        # Otherwise, it should be at least 1.
         scores[i, j] = 1
 
         candidates = scores[i+1:, j+1:]
         distances = distance_template[:(r - i - 1), :(c - j - 1)]
-        best_alternative = numpy.unravel_index(
-                numpy.argmax(candidates - distances), candidates.shape)
-
+        possible_scores = candidates - distances
+        best_r, best_c = numpy.unravel_index(
+                numpy.argmax(possible_scores), candidates.shape)
+        best_score = possible_scores[best_r, best_c]
+        if best_score > scores[i, j]:
+            scores[i, j] = best_score
+            next_r[i, j] = best_r
+            next_c[i, j] = best_c
 
     # Initialize the bottommost and rightmost edges to be the initial scores:
     # they cannot grow further down or right.
