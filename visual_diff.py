@@ -130,7 +130,7 @@ if __name__ == "__main__":
     tokens_a = data_a.tokens
     tokens_b = data_b.tokens
 
-    matrix = numpy.zeros([len(tokens_a), len(tokens_b)], numpy.uint8)
+    matrix = numpy.zeros([len(tokens_a), len(tokens_b)], dtype=numpy.uint8)
     for i, value in enumerate(tokens_a):
         matrix[i, :] = (tokens_b == value)
 
