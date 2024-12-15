@@ -174,4 +174,12 @@ if __name__ == "__main__":
             sys.exit(2)
 
         # Otherwise, all is well.
-        pyplot.imsave(args.output_location, matrix)
+        if args.color:
+            image = numpy.zeros(
+                    [matrix.shape[0], matrix.shape[1], 3], numpy.uint8)
+            image[:, :, 0] = scores
+            image[:, :, 1] = 255
+            image[:, :, 2] = matrix * 255
+
+        else:
+            pyplot.imsave(args.output_location, matrix)
