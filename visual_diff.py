@@ -175,8 +175,7 @@ if __name__ == "__main__":
 
         # Otherwise, all is well.
         if args.color:
-            image = numpy.zeros(
-                    [matrix.shape[0], matrix.shape[1], 3], numpy.uint8)
+            image = numpy.zeros([*matrix.shape, 3], numpy.uint8)
             image[:, :, 0] = scores
             image[:, :, 1] = 255
             image[:, :, 2] = matrix * 255
