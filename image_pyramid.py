@@ -120,9 +120,8 @@ class ImagePyramid:
         min_y >>= scale
         max_x >>= scale
         max_y >>= scale
-        # Avoid roundoff errors: make the truncated edges 1 pixel wider before
-        # expanding, and if it's a few pixels larger than expected, no one
-        # will notice.
+        # To make roundoff errors harder to notice, make the truncated edges 1
+        # pixel wider before expanding. Better to be too big than too small.
         max_x += 1
         max_y += 1
 
