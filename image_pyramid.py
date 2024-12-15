@@ -3,7 +3,7 @@ import numpy
 
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
-    _MAX_TOKEN_CHAIN = 100
+    _MAX_TOKEN_CHAIN = 100  # When coloring, this score is the most extreme
 
     def __init__(self, matrix, sidelength, scores=None):
         self._pyramid = []  # A list of `matrix` at different zoom levels
