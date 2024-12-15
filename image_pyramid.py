@@ -125,7 +125,8 @@ class ImagePyramid:
 
         # Now, duplicate the data until it's grown to the right size.
         for _ in range(-zoom_level):
-            new_image = numpy.zeros([*(2 * image.shape), 3], numpy.uint8)
+            new_image = numpy.zeros(
+                [2 * image.shape[0], 2 * image.shape[1], 3], numpy.uint8)
             for r in [0, 1]:
                 for c in [0, 1]:
                     new_image[r::2, c::2, :] = image

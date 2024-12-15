@@ -142,15 +142,14 @@ if __name__ == "__main__":
     matrix = make_matrix(data_a.tokens, data_b.tokens)
 
     if args.color:
-        scores = find_duplicates.get_lengths(matrix, args.filename_b is None)
+        hues = find_duplicates.get_hues(matrix, args.filename_b is None)
     else:
-        scores = None
+        hues = None
 
     if args.output_location is None:
         if can_use_gui:
             text_width = get_text_width(args)
-            gui.launch(matrix, data_a, data_b, args.map_width, text_width,
-                       scores)
+            gui.launch(matrix, data_a, data_b, args.map_width, text_width, hues)
         else:
             print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
                   "python3-pil.imagetk`. If that doesn't help, open a python3 "
@@ -176,7 +175,7 @@ if __name__ == "__main__":
         # Otherwise, all is well.
         if args.color:
             image = numpy.zeros([*matrix.shape, 3], numpy.uint8)
-            image[:, :, 0] = scores
+            image[:, :, 0] = hues
             image[:, :, 1] = 255
             image[:, :, 2] = matrix * 255
 
