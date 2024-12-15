@@ -17,9 +17,9 @@ def to_hsv_matrix(matrix, hues):
     colored by the hues.
     """
     result = numpy.zeros([*matrix.shape, 3], numpy.uint8)
-    result[:, :, 2] = matrix * 255  # Value
+    result[:, :, 2] = matrix * 255
     if hues is not None:
+        result[:, :, 0] = hues
         result[:, :, 1] = 255  # Saturation
-        result[:, :, 0] = hues  # Hue
     return result
 
