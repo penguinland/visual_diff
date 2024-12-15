@@ -4,16 +4,16 @@ import numpy
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
 
-    def __init__(self, matrix, sidelength, scores=None):
+    def __init__(self, matrix, sidelength, hues=None):
         self._pyramid = []  # A list of `matrix` at different zoom levels
         self._pyramid.append(matrix)
         self._sidelength = sidelength
 
-        if scores is None:
-            self._score_pyramid = None
+        if hues is None:
+            self._hue_pyramid = None
         else:
-            self._score_pyramid = []
-            self._score_pyramid.append(scores)
+            self._hue_pyramid = []
+            self._hue_pyramid.append(hues)
 
         # Zoom out and make the matrix smaller and smaller
         while max(matrix.shape) >= sidelength:
@@ -51,18 +51,18 @@ class ImagePyramid:
                       (quads[1] & numpy.logical_not(quads[2])))
             self._pyramid.append(matrix)
 
-            if scores is not None:
-                # Do the same thing with the scores, except use the most
-                # extreme value. To get the hues to look right (most
-                # problematic is red), we inverted them so low scores indicate
-                # longer runs of duplicated code than high ones. So, use the
-                # minimum instead of the maximum.
-                score_quads = [scores[row:nr:2, col:nc:2]
-                               for row in [0, 1] for col in [0, 1]]
-                scores = numpy.minimum(
-                    numpy.minimum(score_quads[0], score_quads[1]),
-                    numpy.minimum(score_quads[2], score_quads[3]))
-                self._score_pyramid.append(scores)
+            if hues is not None:
+                # Do the same thing with the hues, except use the most extreme
+                # value. To get the hues to look right (most problematic is
+                # red), we inverted them so low hues indicate longer runs of
+                # duplicated code than high ones. So, use the minimum instead
+                # of the maximum.
+                hue_quads = [hues[row:nr:2, col:nc:2]
+                             for row in [0, 1] for col in [0, 1]]
+                hues = numpy.minimum(
+                    numpy.minimum(hue_quads[0], hue_quads[1]),
+                    numpy.minimum(hue_quads[2], hue_quads[3]))
+                self._hue_pyramid.append(hues)
 
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
@@ -96,9 +96,9 @@ class ImagePyramid:
             image = numpy.zeros([*submatrix.shape, 3], numpy.uint8)
             image[:, :, 2] = submatrix * 255
 
-            if self._score_pyramid is not None:
+            if self._hue_pyramid is not None:
                 image[:, :, 0] = (
-                    self._score_pyramid[zoom_level][min_y:max_y, min_x:max_x])
+                    self._hue_pyramid[zoom_level][min_y:max_y, min_x:max_x])
                 image[:, :, 1] = 255
             return image, min_x, min_y
 
@@ -119,8 +119,8 @@ class ImagePyramid:
         image = numpy.zeros([*submatrix.shape, 3], numpy.uint8)
         image[:, :, 2] = submatrix * 255
 
-        if self._score_pyramid is not None:
-            image[:, :, 0] = self._score_pyramid[0][min_y:max_y, min_x:max_x]
+        if self._hue_pyramid is not None:
+            image[:, :, 0] = self._hue_pyramid[0][min_y:max_y, min_x:max_x]
             image[:, :, 1] = 255
 
         # Now, duplicate the data until it's grown to the right size.
