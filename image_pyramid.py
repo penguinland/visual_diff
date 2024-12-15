@@ -1,5 +1,7 @@
 import numpy
 
+import utils
+
 
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
@@ -97,13 +99,12 @@ class ImagePyramid:
         if zoom_level >= 0:
             # No need to do anything special: just return the relevant data
             submatrix = current_data[min_y:max_y, min_x:max_x]
-            image = numpy.zeros([*submatrix.shape, 3], numpy.uint8)
-            image[:, :, 2] = submatrix * 255
-
-            if self._hue_pyramid is not None:
-                image[:, :, 0] = (
-                    self._hue_pyramid[zoom_level][min_y:max_y, min_x:max_x])
-                image[:, :, 1] = 255
+            if self._hue_pyramid is None:
+                subhues = None
+            else:
+                hues = self._hue_pyramid[zoom_level]
+                subhues = hues[min_y:max_y, min_x:max_x]
+            image = utils.to_hsv_matrix(submatrix, subhues)
             return image, min_x, min_y
 
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
@@ -120,12 +121,11 @@ class ImagePyramid:
         max_y += 1
 
         submatrix = current_data[min_y:max_y, min_x:max_x]
-        image = numpy.zeros([*submatrix.shape, 3], numpy.uint8)
-        image[:, :, 2] = submatrix * 255
-
-        if self._hue_pyramid is not None:
-            image[:, :, 0] = self._hue_pyramid[0][min_y:max_y, min_x:max_x]
-            image[:, :, 1] = 255
+        if self._hue_pyramid is None:
+            subhues = None
+        else:
+            subhues = self._hue_pyramid[0][min_y:max_y, min_x:max_x]
+        image = utils.to_hsv_matrix(submatrix, subhues)
 
         # Now, duplicate the data until it's grown to the right size.
         for _ in range(-zoom_level):
