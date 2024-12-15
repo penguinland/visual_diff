@@ -33,6 +33,8 @@ def parse_args():
                         help="map width/height, in pixels")
     parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
+    parser.add_argument("--color", "-c", action="store_true",
+                        help="Color based on the amount of duplication")
     return parser.parse_args(sys.argv[1:])
 
 
@@ -139,8 +141,10 @@ if __name__ == "__main__":
         data_b = get_tokens(f_b.read(), language)
     matrix = make_matrix(data_a.tokens, data_b.tokens)
 
-    scores = find_duplicates.get_lengths(matrix, args.filename_b is None)
-    #scores = None
+    if args.color:
+        scores = find_duplicates.get_lengths(matrix, args.filename_b is None)
+    else:
+        scores = None
 
     if args.output_location is None:
         if can_use_gui:
