@@ -127,19 +127,22 @@ class ImagePyramid:
         max_y += 1
 
         submatrix = current_data[min_y:max_y, min_x:max_x]
-
-        # Now, duplicate the data until it's grown to the right size.
-        for _ in range(-zoom_level):
-            new_submatrix = numpy.zeros([2 * x for x in submatrix.shape])
-            for r in [0, 1]:
-                for c in [0, 1]:
-                    new_submatrix[r::2, c::2] = submatrix
-            submatrix = new_submatrix
-
         image = numpy.zeros(
             [submatrix.shape[0], submatrix.shape[1], 3], numpy.uint8)
         image[:, :, 1] = 255
         image[:, :, 2] = submatrix * 255
+
+        if self._score_pyramid is not None:
+            image[:, :, 0] = self._score_pyramid[0][min_y:max_y, min_x:max_x]
+
+        # Now, duplicate the data until it's grown to the right size.
+        for _ in range(-zoom_level):
+            new_image = numpy.zeros([2 * image.shape[0], 2 * image.shape[1], 3])
+            for r in [0, 1]:
+                for c in [0, 1]:
+                    new_image[r::2, c::2, :] = image
+            image = new_image
+
         return image, min_x << scale, min_y << scale
 
     def zoom(self, amount):
