@@ -3,7 +3,6 @@ import numpy
 
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
-    _MAX_TOKEN_CHAIN = 100  # When coloring, this score is the most extreme
 
     def __init__(self, matrix, sidelength, scores=None):
         self._pyramid = []  # A list of `matrix` at different zoom levels
@@ -13,15 +12,8 @@ class ImagePyramid:
         if scores is None:
             self._score_pyramid = None
         else:
-            normalized_scores = numpy.minimum(
-                self._MAX_TOKEN_CHAIN, numpy.astype(scores, numpy.float32))
-            normalized_scores /= self._MAX_TOKEN_CHAIN
-            # Get the hues to go from blue (lowest score) up to red (highest)
-            normalized_scores = 1 - normalized_scores
-            normalized_scores *= 170
-            normalized_scores = numpy.astype(normalized_scores, numpy.uint8)
             self._score_pyramid = []
-            self._score_pyramid.append(normalized_scores)
+            self._score_pyramid.append(scores)
 
         # Zoom out and make the matrix smaller and smaller
         while max(matrix.shape) >= sidelength:
@@ -65,12 +57,12 @@ class ImagePyramid:
                 # problematic is red), we inverted them so low scores indicate
                 # longer runs of duplicated code than high ones. So, use the
                 # minimum instead of the maximum.
-                score_quads = [normalized_scores[row:nr:2, col:nc:2]
+                score_quads = [scores[row:nr:2, col:nc:2]
                                for row in [0, 1] for col in [0, 1]]
-                normalized_scores = numpy.minimum(
+                scores = numpy.minimum(
                     numpy.minimum(score_quads[0], score_quads[1]),
                     numpy.minimum(score_quads[2], score_quads[3]))
-                self._score_pyramid.append(normalized_scores)
+                self._score_pyramid.append(scores)
 
         # self._zoom_level is the index into self._pyramid to get the current
         # image.

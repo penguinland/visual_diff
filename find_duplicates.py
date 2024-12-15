@@ -1,6 +1,9 @@
 import numpy
 
 
+_MAX_TOKEN_CHAIN = 100  # Sequences at least this long get the most extreme hue
+
+
 def get_lengths(matrix, is_single_file):
     """
     Matrix is a 2D numpy array of bools. We return a 2D numpy array of ints,
@@ -75,4 +78,17 @@ def get_lengths(matrix, is_single_file):
         ss = scores[i,:][has_update]
         scores[rs, cs] = numpy.maximum(scores[rs, cs], ss)
 
+    return scores
+
+
+def get_hues(matrix, is_single_file):
+    scores = get_lengths(matrix, is_single_file)
+    scores = numpy.minimum(self._MAX_TOKEN_CHAIN,
+                           numpy.astype(scores, numpy.float32))
+    scores /= self._MAX_TOKEN_CHAIN
+    # Get the hues to go from blue (lowest score) up to red (highest). Red has
+    # hue 0, while blue is roughly 170.
+    scores = 1 - scores
+    scores *= 170
+    scores = numpy.astype(scores, numpy.uint8)
     return scores
