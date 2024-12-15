@@ -83,9 +83,11 @@ def get_lengths(matrix, is_single_file):
 
 def get_hues(matrix, is_single_file):
     scores = get_lengths(matrix, is_single_file)
-    scores = numpy.minimum(self._MAX_TOKEN_CHAIN,
-                           numpy.astype(scores, numpy.float32))
-    scores /= self._MAX_TOKEN_CHAIN
+    # Cut everything off at the max, then divide by the max to put all values
+    # between 0 and 1.
+    scores = numpy.minimum(
+        _MAX_TOKEN_CHAIN, numpy.astype(scores, numpy.float32))
+    scores /= _MAX_TOKEN_CHAIN
     # Get the hues to go from blue (lowest score) up to red (highest). Red has
     # hue 0, while blue is roughly 170.
     scores = 1 - scores

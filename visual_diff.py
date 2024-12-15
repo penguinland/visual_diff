@@ -3,6 +3,7 @@
 import argparse
 import code_tokenize
 import numpy
+import PIL.Image
 import sys
 
 import file_info
@@ -178,6 +179,7 @@ if __name__ == "__main__":
             image[:, :, 0] = hues
             image[:, :, 1] = 255
             image[:, :, 2] = matrix * 255
-
+            pil_image = PIL.Image.fromarray(image, mode="HSV")
+            pil_image.convert(mode="RGB").save(args.output_location)
         else:
             pyplot.imsave(args.output_location, matrix)
