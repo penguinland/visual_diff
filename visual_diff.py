@@ -150,7 +150,7 @@ if __name__ == "__main__":
     if args.output_location is None:
         if can_use_gui:
             text_width = get_text_width(args)
-            gui.launch(matrix, data_a, data_b, args.map_width, text_width, hues)
+            gui.launch(matrix, hues, data_a, data_b, args.map_width, text_width)
         else:
             print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
                   "python3-pil.imagetk`. If that doesn't help, open a python3 "

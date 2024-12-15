@@ -4,7 +4,10 @@ import numpy
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
 
-    def __init__(self, matrix, sidelength, hues=None):
+    def __init__(self, matrix, hues, sidelength):
+        """
+        The sidelength is how large a sub-image we will return in get_submatrix
+        """
         self._pyramid = []  # A list of `matrix` at different zoom levels
         self._pyramid.append(matrix)
         self._sidelength = sidelength

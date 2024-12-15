@@ -120,11 +120,11 @@ class _Context(tk.Text):
 
 
 class _Gui(tk.Frame):
-    def __init__(self, matrix, data_a, data_b, map_width, text_width, root,
-                 hues=None):
+    def __init__(self, matrix, hues, data_a, data_b, map_width, text_width,
+                 root):
         super().__init__(root)
         self.pack(fill=tk.BOTH, expand="true")
-        self._map = ZoomMap(self, matrix, map_width, hues)
+        self._map = ZoomMap(self, matrix, hues, map_width)
 
         self._contexts = [_Context(self, data, text_width, self._map)
                           for data in (data_a, data_b)]
@@ -137,7 +137,7 @@ class _Gui(tk.Frame):
         self._contexts[1].display(self._map.canvasx(event.x))
 
 
-def launch(matrix, data_a, data_b, map_width, text_width, hues=None):
+def launch(matrix, hues, data_a, data_b, map_width, text_width):
     """
     Creates a new window for the GUI and runs the main program.
     """
@@ -148,7 +148,7 @@ def launch(matrix, data_a, data_b, map_width, text_width, hues=None):
     for char in "wWqQ":
         root.bind("<Control-{}>".format(char), _quit)
 
-    gui = _Gui(matrix, data_a, data_b, map_width, text_width, root, hues)
+    gui = _Gui(matrix, hues, data_a, data_b, map_width, text_width, root)
     while True:
         try:
             root.mainloop()
