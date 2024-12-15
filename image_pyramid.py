@@ -13,9 +13,11 @@ class ImagePyramid:
         if scores is None:
             self._score_pyramid = None
         else:
-            normalized_scores = (
-                numpy.astype(scores, numpy.float32) / self._MAX_TOKEN_CHAIN)
-            normalized_scores = numpy.maximum(1, normalized_scores)
+            normalized_scores = numpy.maximum(
+                self._MAX_TOKEN_CHAIN, numpy.astype(scores, numpy.float32))
+            normalized_scores /= self._MAX_TOKEN_CHAIN
+            normalized_scores *= 255
+            normalized_scores = numpy.astype(normalized_scores, numpy.uint8)
             self._score_pyramid = []
             self._score_pyramid.append(normalized_scores)
 
@@ -96,6 +98,12 @@ class ImagePyramid:
             image = numpy.zeros(
                 [submatrix.shape[0], submatrix.shape[1], 3], numpy.uint8)
             image[:, :, 2] = submatrix * 255
+
+            if self._score_pyramid is not None:
+                score_submatrix = (
+                    self._score_pyramid[zoom_level][min_y:max_y, min_x:max_x])
+                image[:, :, 0] = score_submatrix
+                image[:, :, 1] = 255
             return image, min_x, min_y
 
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
@@ -124,6 +132,7 @@ class ImagePyramid:
 
         image = numpy.zeros(
             [submatrix.shape[0], submatrix.shape[1], 3], numpy.uint8)
+        image[:, :, 1] = 255
         image[:, :, 2] = submatrix * 255
         return image, min_x << scale, min_y << scale
 
