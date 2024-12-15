@@ -93,7 +93,10 @@ class ImagePyramid:
         if zoom_level >= 0:
             # No need to do anything special: just return the relevant data
             submatrix = current_data[min_y:max_y, min_x:max_x]
-            return submatrix * 255, min_x, min_y
+            image = numpy.zeros(
+                [submatrix.shape[0], submatrix.shape[1], 3], numpy.uint8)
+            image[:, :, 2] = submatrix * 255
+            return image, min_x, min_y
 
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
         # then duplicate it a bunch.
@@ -119,7 +122,10 @@ class ImagePyramid:
                     new_submatrix[r::2, c::2] = submatrix
             submatrix = new_submatrix
 
-        return submatrix * 255, min_x << scale, min_y << scale
+        image = numpy.zeros(
+            [submatrix.shape[0], submatrix.shape[1], 3], numpy.uint8)
+        image[:, :, 2] = submatrix * 255
+        return image, min_x << scale, min_y << scale
 
     def zoom(self, amount):
         """
