@@ -6,7 +6,7 @@ import numpy
 import PIL.Image
 import sys
 
-import file_info
+import utils
 import find_duplicates
 
 try:
@@ -41,7 +41,7 @@ def parse_args():
 
 def get_tokens(file_contents, language):
     """
-    We return a file_info.FileInfo object containing details of the given
+    We return a utils.FileInfo object containing details of the given
     file_contents.
     """
     toks = code_tokenize.tokenize(file_contents, lang=language)
@@ -89,7 +89,7 @@ def get_tokens(file_contents, language):
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
 
-    return file_info.FileInfo(token_array, lines, boundaries)
+    return utils.FileInfo(token_array, lines, boundaries)
 
 
 def guess_language(filename):
