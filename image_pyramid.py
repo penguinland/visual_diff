@@ -74,8 +74,9 @@ class ImagePyramid:
 
     def get_submatrix(self, top_left_x, top_left_y):
         """
-        Given the top left corner of a window, we return a matrix containing
-        the relevant sub-image, and the indices of the top-left corner.
+        Given the top left corner of a window, we return a
+        sidelength-by-sidelength-by-3 tensor containing an HSV image of the
+        relevant region, and the indices of the top-left corner.
 
         The image returned is at the current zoom level, 3 times taller and
         wider than the displayed window, so that the center of the window is
