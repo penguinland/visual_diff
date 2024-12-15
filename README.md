@@ -73,6 +73,13 @@ Python files are 80 characters), and you can set the sidelength, in
 pixels, of the GUI's (square) map view using the `--map_width` or `-mw` option
 (default is 600 pixels).
 
+You can also specify `--color` to get a color image instead of black-and-white.
+Non-matching tokens are still black pixels, but matching ones are colored
+based on how long the estimated chain of matches is: blue indicates a short
+chain (likely noise), up through red for a long one (definitely duplicated
+code). However, the algorithm for computing these colors can be very slow for
+large files, so it is disabled by default.
+
 ## Uses
 Finding code that has been copied and pasted or is otherwise similar enough to
 consider refactoring. This is the main use case of this code. These show up
