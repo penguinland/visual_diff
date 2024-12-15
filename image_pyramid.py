@@ -106,9 +106,8 @@ class ImagePyramid:
             image[:, :, 2] = submatrix * 255
 
             if self._score_pyramid is not None:
-                score_submatrix = (
+                image[:, :, 0] = (
                     self._score_pyramid[zoom_level][min_y:max_y, min_x:max_x])
-                image[:, :, 0] = score_submatrix
                 image[:, :, 1] = 255
             return image, min_x, min_y
 
@@ -128,15 +127,16 @@ class ImagePyramid:
         submatrix = current_data[min_y:max_y, min_x:max_x]
         image = numpy.zeros(
             [submatrix.shape[0], submatrix.shape[1], 3], numpy.uint8)
-        image[:, :, 1] = 255
         image[:, :, 2] = submatrix * 255
 
         if self._score_pyramid is not None:
             image[:, :, 0] = self._score_pyramid[0][min_y:max_y, min_x:max_x]
+            image[:, :, 1] = 255
 
         # Now, duplicate the data until it's grown to the right size.
         for _ in range(-zoom_level):
-            new_image = numpy.zeros([2 * image.shape[0], 2 * image.shape[1], 3])
+            new_image = numpy.zeros(
+                [2 * image.shape[0], 2 * image.shape[1], 3], numpy.uint8)
             for r in [0, 1]:
                 for c in [0, 1]:
                     new_image[r::2, c::2, :] = image
