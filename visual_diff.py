@@ -157,14 +157,6 @@ if __name__ == "__main__":
                   "shell, `import gui`, and see what's going wrong.")
             sys.exit(1)
     else:
-        # Only import matplotlib if we're going to use it. There's some weird
-        # behavior on Macs in which matplotlib works fine on its own, and PIL
-        # works fine on its own, but if you import matplotlib and then try
-        # *using* PIL for the GUI, we have an uncaught NSException.
-        # Consequently, we don't import matplotlib at the top of the file, and
-        # instead only import it if we're actually going to use it.
-        from matplotlib import pyplot
-
         pixel_count = len(data_a.tokens) * len(data_b.tokens)
         if pixel_count > 10 * 1000 * 1000 and not args.big_file:
             print("WARNING: the image is over 10 megapixels. Saving very large "
@@ -174,9 +166,6 @@ if __name__ == "__main__":
             sys.exit(2)
 
         # Otherwise, all is well.
-        if args.color:
-            image = utils.to_hsv_matrix(matrix, hues)
-            pil_image = PIL.Image.fromarray(image, mode="HSV")
-            pil_image.convert(mode="RGB").save(args.output_location)
-        else:
-            pyplot.imsave(args.output_location, matrix)
+        image = utils.to_hsv_matrix(matrix, hues)
+        pil_image = PIL.Image.fromarray(image, mode="HSV")
+        pil_image.convert(mode="RGB").save(args.output_location)
