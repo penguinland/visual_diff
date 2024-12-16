@@ -6,8 +6,8 @@ import numpy
 import PIL.Image
 import sys
 
-import utils
 import find_duplicates
+import utils
 
 try:
     # To get the GUI to work, you'll need to be able to install the TK bindings
