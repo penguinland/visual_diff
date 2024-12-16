@@ -1,6 +1,9 @@
 import numpy
 
 
+_MAX_TOKEN_CHAIN = 100  # Sequences at least this long get the most extreme hue
+
+
 def get_lengths(matrix, is_single_file):
     """
     Matrix is a 2D numpy array of bools. We return a 2D numpy array of ints,
@@ -9,11 +12,12 @@ def get_lengths(matrix, is_single_file):
 
     This number is calculated as follows:
     - The number of a False pixel is 0.
-    - The "cost" of joining two pixels into a segment is the Manhattan distance
-      between the location just below-right of the first pixel and the second
-      pixel. For example, two pixels immediately diagonal from each other cost
-      nothing to join together, while joining two pixels a knights move apart
-      has a cost of 1.
+    - The "cost" of joining two pixels into a segment is the square of the
+      Manhattan distance between the location just below-right of the first
+      pixel and the second pixel. For example, two pixels immediately diagonal
+      from each other cost nothing to join together, while joining two pixels a
+      knights move apart has a cost of 1, and two pixels diagonal from each
+      other but with a skipped-over pixel in the middle have a cost of 4.
     - The final score of a True pixel is the maximum value of (the number of
       pixels in the group minus the cost of performing all the joins). For
       example, a diagonal run of 10 pixels should each have score 10, whereas
@@ -24,7 +28,8 @@ def get_lengths(matrix, is_single_file):
     because a file shouldn't count as a duplicate of itself.
     """
     nr, nc = matrix.shape
-    distance_template = numpy.arange(nr)[:, None] + numpy.arange(nc)
+    distance_template = numpy.square(numpy.arange(nr)[:, None] +
+                                     numpy.arange(nc))
     # For each pixel, we need to keep track of the score it can achieve by
     # joining things further down and right from it, and the row and column of
     # the best such pixel to join it with.
@@ -73,4 +78,19 @@ def get_lengths(matrix, is_single_file):
         ss = scores[i,:][has_update]
         scores[rs, cs] = numpy.maximum(scores[rs, cs], ss)
 
+    return scores
+
+
+def get_hues(matrix, is_single_file):
+    scores = get_lengths(matrix, is_single_file)
+    # Cut everything off at the max, then divide by the max to put all values
+    # between 0 and 1.
+    scores = numpy.minimum(
+        _MAX_TOKEN_CHAIN, numpy.astype(scores, numpy.float32))
+    scores /= _MAX_TOKEN_CHAIN
+    # Get the hues to go from blue (lowest score) up to red (highest). Red has
+    # hue 0, while blue is roughly 170.
+    scores = 1 - scores
+    scores *= 170
+    scores = numpy.astype(scores, numpy.uint8)
     return scores

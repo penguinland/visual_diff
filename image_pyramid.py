@@ -1,13 +1,24 @@
 import numpy
 
+import utils
+
 
 class ImagePyramid:
     _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
 
-    def __init__(self, matrix, sidelength):
+    def __init__(self, matrix, hues, sidelength):
+        """
+        The sidelength is how large a sub-image we will return in get_submatrix
+        """
         self._pyramid = []  # A list of `matrix` at different zoom levels
         self._pyramid.append(matrix)
         self._sidelength = sidelength
+
+        if hues is None:
+            self._hue_pyramid = None
+        else:
+            self._hue_pyramid = []
+            self._hue_pyramid.append(hues)
 
         # Zoom out and make the matrix smaller and smaller
         while max(matrix.shape) >= sidelength:
@@ -45,6 +56,19 @@ class ImagePyramid:
                       (quads[1] & numpy.logical_not(quads[2])))
             self._pyramid.append(matrix)
 
+            if hues is not None:
+                # Do the same thing with the hues, except use the most extreme
+                # value. To get the hues to look right (most problematic is
+                # red), we inverted them so low hues indicate longer runs of
+                # duplicated code than high ones. So, use the minimum instead
+                # of the maximum.
+                hue_quads = [hues[row:nr:2, col:nc:2]
+                             for row in [0, 1] for col in [0, 1]]
+                hues = numpy.minimum(
+                    numpy.minimum(hue_quads[0], hue_quads[1]),
+                    numpy.minimum(hue_quads[2], hue_quads[3]))
+                self._hue_pyramid.append(hues)
+
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
         self._zoom_level = 0  # Start at 100%
@@ -52,8 +76,9 @@ class ImagePyramid:
 
     def get_submatrix(self, top_left_x, top_left_y):
         """
-        Given the top left corner of a window, we return a matrix containing
-        the relevant sub-image, and the indices of the top-left corner.
+        Given the top left corner of a window, we return a
+        sidelength-by-sidelength-by-3 tensor containing an HSV image of the
+        relevant region, and the indices of the top-left corner.
 
         The image returned is at the current zoom level, 3 times taller and
         wider than the displayed window, so that the center of the window is
@@ -74,7 +99,13 @@ class ImagePyramid:
         if zoom_level >= 0:
             # No need to do anything special: just return the relevant data
             submatrix = current_data[min_y:max_y, min_x:max_x]
-            return submatrix, min_x, min_y
+            if self._hue_pyramid is None:
+                subhues = None
+            else:
+                hues = self._hue_pyramid[zoom_level]
+                subhues = hues[min_y:max_y, min_x:max_x]
+            image = utils.to_hsv_matrix(submatrix, subhues)
+            return image, min_x, min_y
 
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
         # then duplicate it a bunch.
@@ -84,23 +115,28 @@ class ImagePyramid:
         min_y >>= scale
         max_x >>= scale
         max_y >>= scale
-        # Avoid roundoff errors: make the truncated edges 1 pixel wider before
-        # expanding, and if it's a few pixels larger than expected, no one
-        # will notice.
+        # To make roundoff errors harder to notice, make the truncated edges 1
+        # pixel wider before expanding. Better to be too big than too small.
         max_x += 1
         max_y += 1
 
         submatrix = current_data[min_y:max_y, min_x:max_x]
+        if self._hue_pyramid is None:
+            subhues = None
+        else:
+            subhues = self._hue_pyramid[0][min_y:max_y, min_x:max_x]
+        image = utils.to_hsv_matrix(submatrix, subhues)
 
         # Now, duplicate the data until it's grown to the right size.
         for _ in range(-zoom_level):
-            new_submatrix = numpy.zeros([2 * x for x in submatrix.shape])
+            new_image = numpy.zeros(
+                [2 * image.shape[0], 2 * image.shape[1], 3], numpy.uint8)
             for r in [0, 1]:
                 for c in [0, 1]:
-                    new_submatrix[r::2, c::2] = submatrix
-            submatrix = new_submatrix
+                    new_image[r::2, c::2, :] = image
+            image = new_image
 
-        return submatrix, min_x << scale, min_y << scale
+        return image, min_x << scale, min_y << scale
 
     def zoom(self, amount):
         """

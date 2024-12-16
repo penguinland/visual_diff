@@ -3,9 +3,11 @@
 import argparse
 import code_tokenize
 import numpy
+import PIL.Image
 import sys
 
-import file_info
+import find_duplicates
+import utils
 
 try:
     # To get the GUI to work, you'll need to be able to install the TK bindings
@@ -32,12 +34,14 @@ def parse_args():
                         help="map width/height, in pixels")
     parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
+    parser.add_argument("--color", "-c", action="store_true",
+                        help="Color based on the amount of duplication")
     return parser.parse_args(sys.argv[1:])
 
 
 def get_tokens(file_contents, language):
     """
-    We return a file_info.FileInfo object containing details of the given
+    We return a utils.FileInfo object containing details of the given
     file_contents.
     """
     toks = code_tokenize.tokenize(file_contents, lang=language)
@@ -85,7 +89,7 @@ def get_tokens(file_contents, language):
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
 
-    return file_info.FileInfo(token_array, lines, boundaries)
+    return utils.FileInfo(token_array, lines, boundaries)
 
 
 def guess_language(filename):
@@ -138,24 +142,21 @@ if __name__ == "__main__":
         data_b = get_tokens(f_b.read(), language)
     matrix = make_matrix(data_a.tokens, data_b.tokens)
 
+    if args.color:
+        hues = find_duplicates.get_hues(matrix, args.filename_b is None)
+    else:
+        hues = None
+
     if args.output_location is None:
         if can_use_gui:
             text_width = get_text_width(args)
-            gui.launch(matrix, data_a, data_b, args.map_width, text_width)
+            gui.launch(matrix, hues, data_a, data_b, args.map_width, text_width)
         else:
             print("ERROR: Cannot load GUI. Try doing a `sudo apt-get install "
                   "python3-pil.imagetk`. If that doesn't help, open a python3 "
                   "shell, `import gui`, and see what's going wrong.")
             sys.exit(1)
     else:
-        # Only import matplotlib if we're going to use it. There's some weird
-        # behavior on Macs in which matplotlib works fine on its own, and PIL
-        # works fine on its own, but if you import matplotlib and then try
-        # *using* PIL for the GUI, we have an uncaught NSException.
-        # Consequently, we don't import matplotlib at the top of the file, and
-        # instead only import it if we're actually going to use it.
-        from matplotlib import pyplot
-
         pixel_count = len(data_a.tokens) * len(data_b.tokens)
         if pixel_count > 10 * 1000 * 1000 and not args.big_file:
             print("WARNING: the image is over 10 megapixels. Saving very large "
@@ -165,4 +166,6 @@ if __name__ == "__main__":
             sys.exit(2)
 
         # Otherwise, all is well.
-        pyplot.imsave(args.output_location, matrix)
+        image = utils.to_hsv_matrix(matrix, hues)
+        pil_image = PIL.Image.fromarray(image, mode="HSV")
+        pil_image.convert(mode="RGB").save(args.output_location)
