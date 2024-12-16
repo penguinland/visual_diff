@@ -1,4 +1,3 @@
-from functools import partial
 from math import ceil
 import tkinter as tk
 import tkinter.font as tkfont
