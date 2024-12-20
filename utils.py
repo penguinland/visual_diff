@@ -23,3 +23,29 @@ def to_hsv_matrix(matrix, hues):
         result[:, :, 1] = 255  # Saturation
     return result
 
+
+class UnionFind:  # Sometimes named DisjointSet.
+    def __init__(self):
+        self._size = 1
+        self._root = self
+
+    def _get_root(self):
+        if self._root is self:
+            return self
+
+        self._root = self._root._get_root()
+        return self._root
+
+    def size(self):
+        return self._get_root()._size
+
+    def merge(self, other):
+        if self.size() > other.size():
+            large_root = self._get_root()
+            small_root = other._get_root()
+        else:
+            large_root = other._get_root()
+            small_root = self._get_root()
+
+        small_root._root = large_root
+        large_root._size += small_root.size()
