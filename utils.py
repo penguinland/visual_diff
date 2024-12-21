@@ -24,10 +24,19 @@ def to_hsv_matrix(matrix, hues):
     return result
 
 
-class UnionFind:  # Sometimes named DisjointSet.
-    def __init__(self):
+class SegmentUnionFind:
+    """
+    UnionFind is sometimes named DisjointSet. Our data structure is different
+    from the usual one because it represents a set of duplicated tokens, with a
+    top-right and bottom-left coordinate, in addition to the size.
+    """
+    def __init__(self, r, c):
         self._size = 1
         self._root = self
+        self._top_r = r
+        self._top_c = c
+        self._bottom_r = r
+        self._bottom_c = c
 
     def _get_root(self):
         if self._root is self:
@@ -49,3 +58,10 @@ class UnionFind:  # Sometimes named DisjointSet.
 
         small_root._root = large_root
         large_root._size += small_root.size()
+
+        large_root._top_r, large_root._top_c = min(
+            (small_root._top_r, small_root._top_c),
+            (large_root._top_r, large_root._top_c))
+        large_root._bottom_r, large_root._bottom_c = max(
+            (small_root._bottom_r, small_root._bottom_c),
+            (large_root._bottom_r, large_root._bottom_c))
