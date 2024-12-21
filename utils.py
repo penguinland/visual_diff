@@ -82,10 +82,9 @@ def reheapify(heap, index):
     if left_child_index >= n:
         return  # The index is a leaf.
 
-    if right_child_index >= n:
-        child_index = left_child_index  # The right child doesn't exist
-    else:
-        # Both children exist. Find the smallest one.
+    if right_child_index >= n:  # The right child doesn't exist
+        child_index = left_child_index
+    else:  # Both children exist. Find the smallest one.
         if heap[left_child_index].size() < heap[right_child_index].size():
             child_index = left_child_index
         else:
