@@ -30,13 +30,14 @@ class SegmentUnionFind:
     from the usual one because it represents a set of duplicated tokens, with a
     top-right and bottom-left coordinate, in addition to the size.
     """
-    def __init__(self, r, c):
+    def __init__(self, r, c, index):
         self._size = 1
         self._root = self
         self._top_r = r
         self._top_c = c
         self._bottom_r = r
         self._bottom_c = c
+        self.index = index  # Indicates location within a minheap array
 
     def _get_root(self):
         if self._root is self:
@@ -95,4 +96,6 @@ def reheapify(heap, index):
 
     # Otherwise, swap them and recurse
     heap[index], heap[child_index] = heap[child_index], heap[index]
+    heap[index      ].index = index
+    heap[child_index].index = child_index
     reheapify(heap, child_index)
