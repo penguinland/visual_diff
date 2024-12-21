@@ -95,6 +95,6 @@ def reheapify(heap, index):
 
     # Otherwise, swap them and recurse
     heap[index], heap[child_index] = heap[child_index], heap[index]
-    heap[index      ].index = index
-    heap[child_index].index = child_index
+    heap[index      ]._get_root().index = index
+    heap[child_index]._get_root().index = child_index
     reheapify(heap, child_index)
