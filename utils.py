@@ -65,3 +65,34 @@ class SegmentUnionFind:
         large_root._bottom_r, large_root._bottom_c = max(
             (small_root._bottom_r, small_root._bottom_c),
             (large_root._bottom_r, large_root._bottom_c))
+
+
+def reheapify(heap, index):
+    """
+    heap is a list of SegmentUnionFinds, in nearly heap order (each element has
+    smaller size than its two children, located at twice its index). The
+    "nearly" part is that the item at the given index has grown in size, and
+    might need to be pushed further into the (min)heap.
+    """
+    n = len(heap)
+    left_child_index = 2 * index
+    right_child_index = left_child_index + 1
+
+    if left_child_index >= n:
+        return  # The index is a leaf.
+
+    if right_child_index >= n:
+        child_index = left_child_index  # The right child doesn't exist
+    else:
+        # Both children exist. Find the smallest one.
+        if heap[left_child_index].size() < heap[right_child_index].size():
+            child_index = left_child_index
+        else:
+            child_index = right_child_index
+
+    if heap[child_index].size() >= heap[index].size():
+        return  # We're already still in heap order!
+
+    # Otherwise, swap them and recurse
+    heap[index], heap[child_index] = heap[child_index], heap[index]
+    reheapify(heap, child_index)
