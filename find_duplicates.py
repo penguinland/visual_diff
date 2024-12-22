@@ -5,8 +5,6 @@ from utils import SegmentUnionFind, reheapify, heap_pop
 
 _MAX_TOKEN_CHAIN = 100  # Sequences at least this long get the most extreme hue
 
-orig_print = print
-print = (lambda _: 1)
 
 def get_lengths(matrix, is_single_file):
     """
@@ -17,7 +15,6 @@ def get_lengths(matrix, is_single_file):
     If is_single_file is set, the main diagonal of the scores are all 1's,
     because a file shouldn't count as a duplicate of itself.
     """
-    global print
     nr, nc = matrix.shape
     distance_template = numpy.square(numpy.arange(nr)[:, None] +
                                      numpy.arange(nc))
@@ -36,28 +33,19 @@ def get_lengths(matrix, is_single_file):
                 segments[r, c] = SegmentUnionFind(r, c, i)
                 segment_heap.append(segments[r, c])
                 i += 1
-    orig_print(f"finished initializing {i} segments")
 
     max_distance = 1
     while segment_heap:  # While we still have segments left
         new_max_distance = 1e6
-        orig_print(f"now considering distance {max_distance}")
-        if max_distance == 16:
-            print = orig_print
         segments_to_consider_again = set()
         for current in segment_heap:
-            #orig_print(f"now considering {current}")
             current = current.get_root()
             #current = heap_pop(segment_heap).get_root()
-            print("")
             to_merge = find_mergeable_segment(current, segments, max_distance)
-            print(f"best we found was {to_merge}")
 
             if to_merge is not None:
-                print(f"merging {to_merge} with {current}")
                 merge_index = to_merge.index
                 current.merge(to_merge)
-                print(f"...resulting in {current.get_root()}")
                 #reheapify(segment_heap, merge_index)
 
             if current.size() > max_distance:
@@ -90,7 +78,6 @@ def find_mergeable_segment(current, segments, max_distance=None):
     Two segments are mergeable if the Manhattan distance between them is smaller
     than both their sizes.
     """
-    print(f"top of find_mergeable_segment: {current}")
     if max_distance is None:
         max_distance = current.size()
 
@@ -99,7 +86,6 @@ def find_mergeable_segment(current, segments, max_distance=None):
     def update_candidate(candidate):
         nonlocal best_candidate, best_candidate_size
         if candidate.size() > best_candidate_size:
-            print("found better candidate!")
             best_candidate = candidate
             best_candidate_size = candidate.size()
 
@@ -116,7 +102,6 @@ def find_mergeable_segment(current, segments, max_distance=None):
             if candidate == 0:
                 continue
             candidate = candidate.get_root()
-            print(f"considering candidate found at ({cand_r}, {cand_c}): {candidate}")
             cand_end_r = candidate.top_r
             cand_end_c = candidate.top_c
             # The 2 is the distance from an endpoint to the closest place to
@@ -124,7 +109,6 @@ def find_mergeable_segment(current, segments, max_distance=None):
             dist = abs(r - cand_end_r) + abs(c - cand_end_c) - 2
             if any(dist > x for x in
                    (max_distance, candidate.size(), current.size())):
-                print("candidate too far away")
                 continue
             update_candidate(candidate)
     return best_candidate
