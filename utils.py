@@ -33,10 +33,8 @@ class SegmentUnionFind:
     def __init__(self, r, c):
         self._size = 1
         self._root = self
-        self.top_r = r
-        self.top_c = c
-        self.bottom_r = r
-        self.bottom_c = c
+        self.top = (r, c)
+        self.bottom = (r, c)
 
     def get_root(self):
         if self._root is self:
@@ -59,19 +57,15 @@ class SegmentUnionFind:
         large_root._size += small_root.size()
         small_root._root = large_root
 
-        if (small_root.top_r + small_root.top_c <
-            large_root.top_r + large_root.top_c):
+        if sum(small_root.top) < sum(large_root.top):
             # The top of the small section is further towards the top-left
             # corner. Use it as the new top.
-            large_root.top_r = small_root.top_r
-            large_root.top_c = small_root.top_c
+            large_root.top = small_root.top
 
-        if (small_root.bottom_r + small_root.bottom_c >
-            large_root.bottom_r + large_root.bottom_c):
+        if sum(small_root.bottom) > sum(large_root.bottom):
             # The bottom of the small section is further towards the
             # bottom-right corner. Use it as the new bottom.
-            large_root.bottom_r = small_root.bottom_r
-            large_root.bottom_c = small_root.bottom_c
+            large_root.bottom = small_root.bottom
 
     def __str__(self):
         root = self.get_root()

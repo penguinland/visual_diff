@@ -89,7 +89,7 @@ def find_mergeable_segment(current, segments, max_distance=None):
             best_candidate = candidate
             best_candidate_size = candidate.size()
 
-    r, c = current.bottom_r, current.bottom_c
+    r, c = current.bottom
     for i in range(max_distance):
         for j in range(max_distance):
             cand_r = r + i + 1
@@ -102,8 +102,7 @@ def find_mergeable_segment(current, segments, max_distance=None):
             if candidate == 0:
                 continue
             candidate = candidate.get_root()
-            cand_end_r = candidate.top_r
-            cand_end_c = candidate.top_c
+            cand_end_r, cand_end_c = candidate.top
             # The 2 is the distance from an endpoint to the closest place to
             # search (a diagonal step away).
             dist = abs(r - cand_end_r) + abs(c - cand_end_c) - 2
