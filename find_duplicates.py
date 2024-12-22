@@ -41,7 +41,8 @@ def get_lengths(matrix, is_single_file):
         segments_to_consider_again = []
         for current in segments:
             current = current.get_root()
-            to_merge = find_mergeable_segment(current, segment_matrix, max_distance)
+            to_merge = find_mergeable_segment(
+                    current, segment_matrix, max_distance)
 
             if to_merge is not None:
                 current.merge(to_merge)
@@ -71,15 +72,16 @@ def get_lengths(matrix, is_single_file):
 
 def find_mergeable_segment(current, segment_matrix, max_distance=None):
     """
-    current is a SegmentUnionFind, and segment_matrix is a 2D list of such objects.
-    We return the largest SegmentUnionFind we can merge with current, or None if
-    none are available.
+    current is a SegmentUnionFind, and segment_matrix is a 2D array of such
+    objects. We return the largest SegmentUnionFind we can merge with current,
+    or None if none are available.
 
     Two segments are mergeable if the Manhattan distance between them is smaller
     than both their sizes.
     """
     if max_distance is None:
         max_distance = current.size()
+    nr, nc = segment_matrix.shape
 
     best_candidate = None
     best_candidate_size = -1
@@ -94,7 +96,7 @@ def find_mergeable_segment(current, segment_matrix, max_distance=None):
         for j in range(max_distance):
             cand_r = r + i + 1
             cand_c = c + j + 1
-            if cand_r >= segment_matrix.shape[0] or cand_c >= segment_matrix.shape[1]:
+            if cand_r >= nr or cand_c >= nc:
                 # We're out-of-bounds, so skip looking further in this row, and
                 # go on to the next row.
                 break
