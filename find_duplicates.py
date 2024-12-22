@@ -35,9 +35,8 @@ def get_lengths(matrix, is_single_file):
                 i += 1
 
     while segment_heap:  # While we still have segments left
-        current = heapq.heappop(segment_heap)
-        size = current.size()
-        to_merge = IMPLEMENT_ME(current)
+        current = heap_pop(segment_heap)
+        to_merge = find_mergeable_segment(current, segments)
         if to_merge is not None:
             merge_index = to_merge.index
             current.merge(to_merge)
@@ -50,7 +49,7 @@ def get_lengths(matrix, is_single_file):
         for c in range(nc):
             if segments[r, c] is not None:
                 scores[r, c] = segments[r, c].size()
-            if r == c and is_single_file:
+            elif r == c and is_single_file:
                 # We didn't merge these with anything, but should still count
                 # them in the final output.
                 scores[r, c] = 1
