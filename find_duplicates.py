@@ -49,7 +49,12 @@ def get_lengths(matrix, is_single_file):
             if current.size() > max_distance:
                 segments_to_consider_again.add(current)
                 new_max_distance = min(new_max_distance, current.size())
-        segment_heap = segments_to_consider_again
+
+        # We might have added segments that were later joined together. Remove
+        # duplicates before joining again.
+        segment_heap = set()
+        for segment in segments_to_consider_again:
+            segment_heap.add(segment.get_root())
         #max_distance += 1
         max_distance = new_max_distance
 

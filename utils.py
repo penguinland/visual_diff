@@ -60,12 +60,19 @@ class SegmentUnionFind:
         large_root._size += small_root.size()
         small_root._root = large_root
 
-        large_root.top_r, large_root.top_c = min(
-            (small_root.top_r, small_root.top_c),
-            (large_root.top_r, large_root.top_c))
-        large_root.bottom_r, large_root.bottom_c = max(
-            (small_root.bottom_r, small_root.bottom_c),
-            (large_root.bottom_r, large_root.bottom_c))
+        if (small_root.top_r + small_root.top_c <
+            large_root.top_r + large_root.top_c):
+            # The top of the small section is further towards the top-left
+            # corner. Use it as the new top.
+            large_root.top_r = small_root.top_r
+            large_root.top_c = small_root.top_c
+
+        if (small_root.bottom_r + small_root.bottom_c >
+            large_root.bottom_r + large_root.bottom_c):
+            # The bottom of the small section is further towards the
+            # bottom-right corner. Use it as the new bottom.
+            large_root.bottom_r = small_root.bottom_r
+            large_root.bottom_c = small_root.bottom_c
 
     def __str__(self):
         root = self.get_root()
