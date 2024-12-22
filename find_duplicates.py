@@ -23,16 +23,15 @@ def get_lengths(matrix, is_single_file):
     # of Nonetype or SegmentUnionFind objects. segment_heap is a minheap
     # containing those same objects.
     segments = numpy.zeros((nr, nc), dtype=numpy.object_)
-    i = 0
     segment_heap = []
     for r in range(nr):
         for c in range(nc):
             if r == c and is_single_file:
                 continue  # Skip pixels on the main diagonal
             if matrix[r, c] != 0:
-                segments[r, c] = SegmentUnionFind(r, c, i)
-                segment_heap.append(segments[r, c])
-                i += 1
+                new_segment = SegmentUnionFind(r, c)
+                segments[r, c] = new_segment
+                segment_heap.append(new_segment)
 
     while segment_heap:  # While we still have segments left
         # The maximum distance to look over is the smallest distance that is as
@@ -47,7 +46,6 @@ def get_lengths(matrix, is_single_file):
             to_merge = find_mergeable_segment(current, segments, max_distance)
 
             if to_merge is not None:
-                merge_index = to_merge.index
                 current.merge(to_merge)
 
             if current.size() > max_distance:
