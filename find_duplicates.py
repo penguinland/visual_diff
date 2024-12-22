@@ -17,8 +17,8 @@ def get_lengths(matrix, is_single_file):
     """
     nr, nc = matrix.shape
 
-    # Initialization: segment_matrix has the same shape is matrix, but is either full
-    # of Nonetype or SegmentUnionFind objects. segments is a minheap
+    # Initialization: segment_matrix has the same shape is matrix, but is either
+    # full of 0's or SegmentUnionFind objects. segments is a list or set
     # containing those same objects.
     segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
     segments = []
