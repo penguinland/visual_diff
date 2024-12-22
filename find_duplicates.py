@@ -62,7 +62,7 @@ def get_lengths(matrix, is_single_file):
     return scores
 
 
-def find_mergeable_segment(current, segments):
+def find_mergeable_segment(current, segments, max_distance=None):
     """
     current is a SegmentUnionFind, and segments is a 2D list of such objects.
     We return the largest SegmentUnionFind we can merge with current, or None if
@@ -72,7 +72,8 @@ def find_mergeable_segment(current, segments):
     than both their sizes.
     """
     #print(f"top of find_mergeable_segment: {current}")
-    size = current.size()
+    if max_distance is None:
+        max_distance = current.size()
 
     best_candidate = None
     best_candidate_size = -1
@@ -84,8 +85,8 @@ def find_mergeable_segment(current, segments):
             best_candidate_size = candidate.size()
 
     r, c = current.bottom_r, current.bottom_c
-    for i in range(size):
-        for j in range(size):
+    for i in range(max_distance):
+        for j in range(max_distance):
             cand_r = r + i + 1
             cand_c = c + j + 1
             if cand_r >= segments.shape[0] or cand_c >= segments.shape[1]:
@@ -100,14 +101,15 @@ def find_mergeable_segment(current, segments):
             # The 2 is the distance from an endpoint to the closest place to
             # search (a diagonal step away).
             dist = abs(r - cand_end_r) + abs(c - cand_end_c) - 2
-            if dist > size or dist > candidate.size():
+            if any(dist > x for x in
+                   (max_distance, candidate.size(), current.size())):
                 #print("candidate too far away")
                 continue
             update_candidate(candidate)
 
     r, c = current.top_r, current.top_c
-    for i in range(size):
-        for j in range(size):
+    for i in range(max_distance):
+        for j in range(max_distance):
             cand_r = r - i - 1
             cand_c = c - j - 1
             if cand_r < 0 or cand_c < 0:
@@ -120,7 +122,8 @@ def find_mergeable_segment(current, segments):
             cand_end_r = candidate.bottom_r
             cand_end_c = candidate.bottom_c
             dist = abs(r - cand_end_r) + abs(c - cand_end_c) - 2
-            if dist > size or dist > candidate.size():
+            if any(dist > x for x in
+                   (max_distance, candidate.size(), current.size())):
                 #print("candidate too far away")
                 continue
             update_candidate(candidate)
