@@ -18,10 +18,10 @@ def get_lengths(matrix, is_single_file):
     nr, nc = matrix.shape
 
     # Initialization: segment_matrix has the same shape is matrix, but is either full
-    # of Nonetype or SegmentUnionFind objects. segment_heap is a minheap
+    # of Nonetype or SegmentUnionFind objects. segments is a minheap
     # containing those same objects.
     segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
-    segment_heap = []
+    segments = []
     for r in range(nr):
         for c in range(nc):
             if r == c and is_single_file:
@@ -29,17 +29,17 @@ def get_lengths(matrix, is_single_file):
             if matrix[r, c] != 0:
                 new_segment = SegmentUnionFind(r, c)
                 segment_matrix[r, c] = new_segment
-                segment_heap.append(new_segment)
+                segments.append(new_segment)
 
-    while segment_heap:  # While we still have segments left
+    while segments:  # While we still have segments left
         # The maximum distance to look over is the smallest distance that is as
         # far as any segment can reach. That way, small segments near each
         # other get to grow without a large, far-away segment inserting itself,
         # and we don't waste time looking at too-small a distance that needs to
         # be repeated later.
-        max_distance = min(segment.size() for segment in segment_heap)
+        max_distance = min(segment.size() for segment in segments)
         segments_to_consider_again = []
-        for current in segment_heap:
+        for current in segments:
             current = current.get_root()
             to_merge = find_mergeable_segment(current, segment_matrix, max_distance)
 
@@ -51,9 +51,9 @@ def get_lengths(matrix, is_single_file):
 
         # We might have added segments that were later joined together. Remove
         # duplicates before joining again.
-        segment_heap = set()
+        segments = set()
         for segment in segments_to_consider_again:
-            segment_heap.add(segment.get_root())
+            segments.add(segment.get_root())
 
     # Finally, output the final sizes of all the SegmentUnionFinds as the final
     # scores.
