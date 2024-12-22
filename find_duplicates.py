@@ -156,11 +156,10 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
             if candidate == 0:
                 continue
             candidate = candidate.get_root()
+
             cand_end_r, cand_end_c = candidate.top
-            # The 2 is the distance from an endpoint to the closest place to
-            # search (a diagonal step away).
-            dist = abs(r - cand_end_r) + abs(c - cand_end_c) - 2
-            if any(dist > x for x in
+            dist = abs(r + 1 - cand_end_r) + abs(c + 1 - cand_end_c)
+            if any(dist > d for d in
                    (max_distance, candidate.size(), current.size())):
                 continue
             update_candidate(candidate)
