@@ -35,18 +35,25 @@ def get_lengths(matrix, is_single_file):
                 i += 1
     print(f"finished initializing {i} segments")
 
+    max_distance = 1
     while segment_heap:  # While we still have segments left
-        current = heap_pop(segment_heap).get_root()
-        #print("")
-        to_merge = find_mergeable_segment(current, segments)
-        #print(f"best we found was {to_merge}")
+        segments_to_consider_again = []
+        for current in segment_heap:
+            current = current.get_root()
+            #current = heap_pop(segment_heap).get_root()
+            #print("")
+            to_merge = find_mergeable_segment(current, segments, max_distance)
+            #print(f"best we found was {to_merge}")
 
-        if to_merge is not None:
-            #print(f"merging {to_merge} with {current}")
-            merge_index = to_merge.index
-            current.merge(to_merge)
-            #print(f"...resulting in {current.get_root()}")
-            reheapify(segment_heap, merge_index)
+            if to_merge is not None:
+                #print(f"merging {to_merge} with {current}")
+                merge_index = to_merge.index
+                current.merge(to_merge)
+                #print(f"...resulting in {current.get_root()}")
+                #reheapify(segment_heap, merge_index)
+                segments_to_consider_again.append(to_merge)
+        segment_heap = segments_to_consider_again
+        max_distance += 1
 
     # Finally, output the final sizes of all the SegmentUnionFinds as the final
     # scores.
