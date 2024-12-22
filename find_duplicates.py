@@ -56,12 +56,12 @@ class _SegmentUnionFind:
 
 def _get_lengths(matrix, is_single_file):
     """
-    Matrix is a 2D numpy array of bools. We return a 2D numpy array of ints,
-    where each int corresponds to one of the bools. The ints are a measure of
-    how long a chain of bools is.
+    Matrix is a 2D numpy array of unit8s. We return a 2D numpy array of uint32s,
+    which are a measure of how long a chain of nonzero values from the original
+    matrix is.
 
-    If is_single_file is set, the main diagonal of the scores are all 1's,
-    because a file shouldn't count as a duplicate of itself.
+    If is_single_file is set, the main diagonal will be all 1's, because a file
+    shouldn't count as a duplicate of itself.
     """
     nr, nc = matrix.shape
 
