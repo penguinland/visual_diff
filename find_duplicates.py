@@ -65,9 +65,9 @@ def get_lengths(matrix, is_single_file):
     """
     nr, nc = matrix.shape
 
-    # Initialization: segment_matrix has the same shape is matrix, but is either
-    # full of 0's or SegmentUnionFind objects. segments is a list or set
-    # containing those same objects.
+    # Initialization: segment_matrix has the same shape as matrix, but is either
+    # full of 0's or SegmentUnionFind objects. segments will be a list (or later
+    # a set) containing those same objects.
     segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
     segments = []
     for r in range(nr):
@@ -79,11 +79,11 @@ def get_lengths(matrix, is_single_file):
                 segment_matrix[r, c] = new_segment
                 segments.append(new_segment)
 
-    while segments:  # While we still have segments left
+    while segments:
         # The maximum distance to look over is the smallest distance that is as
         # far as any segment can reach. That way, small segments near each
         # other get to grow without a large, far-away segment inserting itself,
-        # and we don't waste time looking at too-small a distance that needs to
+        # but we don't waste time looking at too small a distance that needs to
         # be repeated later.
         max_distance = min(segment.size() for segment in segments)
 
@@ -95,9 +95,9 @@ def get_lengths(matrix, is_single_file):
         segments_to_consider_again = []
         for current in segments:
             current = current.get_root()
+
             to_merge = find_mergeable_segment(
                     current, segment_matrix, max_distance)
-
             if to_merge is not None:
                 current.merge(to_merge)
 
