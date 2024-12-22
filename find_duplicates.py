@@ -47,7 +47,7 @@ class SegmentUnionFind:
             # bottom-right corner. Use it as the new bottom.
             large_root.bottom = small_root.bottom
 
-    def __str__(self):
+    def __str__(self):  # Used solely for debugging
         root = self.get_root()
         return (f"(Segment size {root.size()} "
                 f"from ({root.top_r}, {root.top_c}) "
