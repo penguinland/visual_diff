@@ -4,7 +4,7 @@ import numpy
 _MAX_TOKEN_CHAIN = 100  # Sequences at least this long get the most extreme hue
 
 
-class SegmentUnionFind:
+class _SegmentUnionFind:
     """
     UnionFind is sometimes named DisjointSet. Our data structure is different
     from the usual one because it represents a set of duplicated tokens, with a
@@ -54,7 +54,7 @@ class SegmentUnionFind:
                 f"to ({root.bottom_r}, {root.bottom_c}))")
 
 
-def get_lengths(matrix, is_single_file):
+def _get_lengths(matrix, is_single_file):
     """
     Matrix is a 2D numpy array of bools. We return a 2D numpy array of ints,
     where each int corresponds to one of the bools. The ints are a measure of
@@ -66,8 +66,8 @@ def get_lengths(matrix, is_single_file):
     nr, nc = matrix.shape
 
     # Initialization: segment_matrix has the same shape as matrix, but is either
-    # full of 0's or SegmentUnionFind objects. segments will be a list (or later
-    # a set) containing those same objects.
+    # full of 0's or _SegmentUnionFind objects. segments will be a list (or
+    # later a set) containing those same objects.
     segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
     segments = []
     for r in range(nr):
@@ -75,7 +75,7 @@ def get_lengths(matrix, is_single_file):
             if r == c and is_single_file:
                 continue  # Skip pixels on the main diagonal
             if matrix[r, c] != 0:
-                new_segment = SegmentUnionFind(r, c)
+                new_segment = _SegmentUnionFind(r, c)
                 segment_matrix[r, c] = new_segment
                 segments.append(new_segment)
 
@@ -96,7 +96,7 @@ def get_lengths(matrix, is_single_file):
         for current in segments:
             current = current.get_root()
 
-            to_merge = find_mergeable_segment(
+            to_merge = _find_mergeable_segment(
                     current, segment_matrix, max_distance)
             if to_merge is not None:
                 current.merge(to_merge)
@@ -124,10 +124,10 @@ def get_lengths(matrix, is_single_file):
     return scores
 
 
-def find_mergeable_segment(current, segment_matrix, max_distance=None):
+def _find_mergeable_segment(current, segment_matrix, max_distance=None):
     """
-    current is a SegmentUnionFind, and segment_matrix is a 2D array of such
-    objects. We return the largest SegmentUnionFind we can merge with current,
+    current is a _SegmentUnionFind, and segment_matrix is a 2D array of such
+    objects. We return the largest _SegmentUnionFind we can merge with current,
     or None if none are available.
 
     Two segments are mergeable if the Manhattan distance between them is smaller
@@ -170,7 +170,7 @@ def find_mergeable_segment(current, segment_matrix, max_distance=None):
 
 
 def get_hues(matrix, is_single_file):
-    scores = get_lengths(matrix, is_single_file)
+    scores = _get_lengths(matrix, is_single_file)
     # Cut everything off at the max, then divide by the max to put all values
     # between 0 and 1.
     scores = numpy.minimum(

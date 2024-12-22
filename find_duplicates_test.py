@@ -45,7 +45,7 @@ class TestGetLengths(unittest.TestCase):
             [0, 0, 0, 0, 0, 0, 0, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],  # )
             [0, 0, 0, 0, 0, 0, 0, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],  # )
             ])
-        actual = find_duplicates.get_lengths(self.matrix, True)
+        actual = find_duplicates._get_lengths(self.matrix, True)
         #self.debug_differences(expected, actual)
         self.assertTrue((expected - actual == 0).all())
 
@@ -72,7 +72,7 @@ class TestGetLengths(unittest.TestCase):
             [ 0, 0, 0, 0, 0, 0, 0, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0,19, 1],  # )
             [ 0, 0, 0, 0, 0, 0, 0, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1,19]   # )
             ])
-        actual = find_duplicates.get_lengths(self.matrix, False)
+        actual = find_duplicates._get_lengths(self.matrix, False)
         #self.debug_differences(expected, actual)
         self.assertTrue((expected - actual == 0).all())
 
