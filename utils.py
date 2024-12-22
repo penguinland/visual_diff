@@ -70,10 +70,10 @@ class SegmentUnionFind:
 
 def reheapify(heap, index):
     """
-    heap is a list of SegmentUnionFinds, in nearly heap order (each element has
-    smaller size than its two children, located at twice its index). The
-    "nearly" part is that the item at the given index has grown in size, and
-    might need to be pushed further into the (min)heap.
+    heap is a list of SegmentUnionFinds that are their own roots, in nearly heap
+    order (each element has smaller size than its two children, located at twice
+    its index). The "nearly" part is that the item at the given index has grown
+    in size, and might need to be pushed further into the (min)heap.
     """
     n = len(heap)
     left_child_index = 2 * index
@@ -98,3 +98,16 @@ def reheapify(heap, index):
     heap[index      ]._get_root().index = index
     heap[child_index]._get_root().index = child_index
     reheapify(heap, child_index)
+
+
+def heap_pop(heap):
+    """
+    heap is a list of SegmentUnionFinds, in heap order. We return the smallest
+    item, while keeping the rest of the heap ordered.
+    """
+    # Swap the smallest value (the one to return) with the very end element.
+    heap[0], heap[-1] = heap[-1], heap[0]
+    heap[0].index = 0
+    minimum = heap.pop()
+    reheapify(heap, 0)
+    return minimum
