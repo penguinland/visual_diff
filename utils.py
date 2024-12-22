@@ -33,39 +33,46 @@ class SegmentUnionFind:
     def __init__(self, r, c, index):
         self._size = 1
         self._root = self
-        self._top_r = r
-        self._top_c = c
-        self._bottom_r = r
-        self._bottom_c = c
+        self.top_r = r
+        self.top_c = c
+        self.bottom_r = r
+        self.bottom_c = c
         self.index = index  # Indicates location within a minheap array
 
-    def _get_root(self):
+    def get_root(self):
         if self._root is self:
             return self
 
-        self._root = self._root._get_root()
+        self._root = self._root.get_root()
         return self._root
 
     def size(self):
-        return self._get_root()._size
+        return self.get_root()._size
 
     def merge(self, other):
         if self.size() > other.size():
-            large_root = self._get_root()
-            small_root = other._get_root()
+            large_root = self.get_root()
+            small_root = other.get_root()
         else:
-            large_root = other._get_root()
-            small_root = self._get_root()
+            large_root = other.get_root()
+            small_root = self.get_root()
 
-        small_root._root = large_root
         large_root._size += small_root.size()
+        small_root._root = large_root
 
-        large_root._top_r, large_root._top_c = min(
-            (small_root._top_r, small_root._top_c),
-            (large_root._top_r, large_root._top_c))
-        large_root._bottom_r, large_root._bottom_c = max(
-            (small_root._bottom_r, small_root._bottom_c),
-            (large_root._bottom_r, large_root._bottom_c))
+        large_root.top_r, large_root.top_c = min(
+            (small_root.top_r, small_root.top_c),
+            (large_root.top_r, large_root.top_c))
+        large_root.bottom_r, large_root.bottom_c = max(
+            (small_root.bottom_r, small_root.bottom_c),
+            (large_root.bottom_r, large_root.bottom_c))
+
+    def __str__(self):
+        root = self.get_root()
+        return (f"(Segment size {root.size()} "
+                f"from ({root.top_r}, {root.top_c}) "
+                f"to ({root.bottom_r}, {root.bottom_c}))")
+
 
 
 def reheapify(heap, index):
