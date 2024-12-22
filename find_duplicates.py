@@ -38,6 +38,12 @@ def get_lengths(matrix, is_single_file):
         # and we don't waste time looking at too-small a distance that needs to
         # be repeated later.
         max_distance = min(segment.size() for segment in segments)
+
+        if max_distance > _MAX_TOKEN_CHAIN:
+            # All remaining segments are so long that they'll already get the
+            # most extreme color. Don't bother merging further.
+            break
+
         segments_to_consider_again = []
         for current in segments:
             current = current.get_root()
