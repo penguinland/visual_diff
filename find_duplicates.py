@@ -16,8 +16,6 @@ def get_lengths(matrix, is_single_file):
     because a file shouldn't count as a duplicate of itself.
     """
     nr, nc = matrix.shape
-    distance_template = numpy.square(numpy.arange(nr)[:, None] +
-                                     numpy.arange(nc))
 
     # Initialization: segments has the same shape is matrix, but is either full
     # of Nonetype or SegmentUnionFind objects. segment_heap is a minheap
