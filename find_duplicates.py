@@ -124,17 +124,15 @@ def _get_lengths(matrix, is_single_file):
     return scores
 
 
-def _find_mergeable_segment(current, segment_matrix, max_distance=None):
+def _find_mergeable_segment(current, segment_matrix, max_distance):
     """
     current is a _SegmentUnionFind, and segment_matrix is a 2D array of such
-    objects. We return the largest _SegmentUnionFind we can merge with current,
-    or None if none are available.
+    objects. We return the largest _SegmentUnionFind below-right of current that
+    we can merge with, or None if none are available.
 
     Two segments are mergeable if the Manhattan distance between them is smaller
     than both their sizes.
     """
-    if max_distance is None:
-        max_distance = current.size()
     nr, nc = segment_matrix.shape
 
     best_candidate = None
