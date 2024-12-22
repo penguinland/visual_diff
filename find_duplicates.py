@@ -97,7 +97,9 @@ def find_mergeable_segment(current, segments, max_distance=None):
             cand_r = r + i + 1
             cand_c = c + j + 1
             if cand_r >= segments.shape[0] or cand_c >= segments.shape[1]:
-                continue
+                # We're out-of-bounds, so skip looking further in this row, and
+                # go on to the next row.
+                break
             candidate = segments[cand_r, cand_c]
             if candidate == 0:
                 continue
@@ -113,28 +115,6 @@ def find_mergeable_segment(current, segments, max_distance=None):
                 #print("candidate too far away")
                 continue
             update_candidate(candidate)
-
-    r, c = current.top_r, current.top_c
-    for i in range(max_distance):
-        for j in range(max_distance):
-            cand_r = r - i - 1
-            cand_c = c - j - 1
-            if cand_r < 0 or cand_c < 0:
-                continue
-            candidate = segments[cand_r, cand_c]
-            if candidate == 0:
-                continue
-            candidate = candidate.get_root()
-            #print(f"considering candidate found at ({cand_r}, {cand_c}): {candidate}")
-            cand_end_r = candidate.bottom_r
-            cand_end_c = candidate.bottom_c
-            dist = abs(r - cand_end_r) + abs(c - cand_end_c) - 2
-            if any(dist > x for x in
-                   (max_distance, candidate.size(), current.size())):
-                #print("candidate too far away")
-                continue
-            update_candidate(candidate)
-
     return best_candidate
 
 
