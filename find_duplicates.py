@@ -123,10 +123,15 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
     """
     current is a _SegmentUnionFind, and segment_matrix is a 2D array of such
     objects. We return the largest _SegmentUnionFind below-right of current that
-    we can merge with, or None if none are available.
+    we can merge with, or None if none are available. We only look at most
+    max_distance away from the location diagonal from current's bottom-right
+    corner (using the Manhattan distance).
 
-    Two segments are mergeable if the Manhattan distance between them is smaller
-    than both their sizes.
+    Two segments are mergeable if the Manhattan distance between the
+    bottom-right end of one and the top-left end of the other is at most 2 more
+    than both their sizes (the purpose of the 2 being that two segments
+    immediately diagonal from each other should be considered a distance 0
+    apart).
     """
     nr, nc = segment_matrix.shape
 
@@ -141,8 +146,8 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
     r, c = current.bottom
     for i in range(max_distance):
         for j in range(max_distance - i):
-            cand_r = r + i + 1
-            cand_c = c + j + 1
+            cand_r = r + 1 + i
+            cand_c = c + 1 + j
             if cand_r >= nr or cand_c >= nc:
                 # We're out-of-bounds, so skip looking further in this row, and
                 # go on to the next row.
