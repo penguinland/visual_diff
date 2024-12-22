@@ -1,6 +1,6 @@
 import numpy
 
-from utils import SegmentUnionFind, reheapify, heap_pop
+from utils import SegmentUnionFind
 
 
 _MAX_TOKEN_CHAIN = 100  # Sequences at least this long get the most extreme hue
@@ -40,13 +40,11 @@ def get_lengths(matrix, is_single_file):
         segments_to_consider_again = set()
         for current in segment_heap:
             current = current.get_root()
-            #current = heap_pop(segment_heap).get_root()
             to_merge = find_mergeable_segment(current, segments, max_distance)
 
             if to_merge is not None:
                 merge_index = to_merge.index
                 current.merge(to_merge)
-                #reheapify(segment_heap, merge_index)
 
             if current.size() > max_distance:
                 segments_to_consider_again.add(current)
