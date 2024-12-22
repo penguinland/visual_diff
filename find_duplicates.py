@@ -87,11 +87,6 @@ def _get_lengths(matrix, is_single_file):
         # be repeated later.
         max_distance = min(segment.size() for segment in segments)
 
-        if max_distance > _MAX_TOKEN_CHAIN:
-            # All remaining segments are so long that they'll already get the
-            # most extreme color. Don't bother merging further.
-            break
-
         segments_to_consider_again = []
         for current in segments:
             current = current.get_root()
@@ -145,7 +140,7 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
 
     r, c = current.bottom
     for i in range(max_distance):
-        for j in range(max_distance):
+        for j in range(max_distance - i):
             cand_r = r + i + 1
             cand_c = c + j + 1
             if cand_r >= nr or cand_c >= nc:
@@ -159,8 +154,7 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
 
             cand_end_r, cand_end_c = candidate.top
             dist = abs(r + 1 - cand_end_r) + abs(c + 1 - cand_end_c)
-            if any(dist > d for d in
-                   (max_distance, candidate.size(), current.size())):
+            if dist > candidate.size() or dist > current.size():
                 continue
             update_candidate(candidate)
     return best_candidate
