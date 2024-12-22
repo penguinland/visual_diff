@@ -34,10 +34,14 @@ def get_lengths(matrix, is_single_file):
                 segment_heap.append(segments[r, c])
                 i += 1
 
-    max_distance = 1
     while segment_heap:  # While we still have segments left
-        new_max_distance = 1e6
-        segments_to_consider_again = set()
+        # The maximum distance to look over is the smallest distance that is as
+        # far as any segment can reach. That way, small segments near each
+        # other get to grow without a large, far-away segment inserting itself,
+        # and we don't waste time looking at too-small a distance that needs to
+        # be repeated later.
+        max_distance = min(segment.size() for segment in segment_heap)
+        segments_to_consider_again = []
         for current in segment_heap:
             current = current.get_root()
             to_merge = find_mergeable_segment(current, segments, max_distance)
@@ -47,16 +51,13 @@ def get_lengths(matrix, is_single_file):
                 current.merge(to_merge)
 
             if current.size() > max_distance:
-                segments_to_consider_again.add(current)
-                new_max_distance = min(new_max_distance, current.size())
+                segments_to_consider_again.append(current)
 
         # We might have added segments that were later joined together. Remove
         # duplicates before joining again.
         segment_heap = set()
         for segment in segments_to_consider_again:
             segment_heap.add(segment.get_root())
-        #max_distance += 1
-        max_distance = new_max_distance
 
     # Finally, output the final sizes of all the SegmentUnionFinds as the final
     # scores.
