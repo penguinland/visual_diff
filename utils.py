@@ -22,4 +22,3 @@ def to_hsv_matrix(matrix, hues):
         result[:, :, 0] = hues
         result[:, :, 1] = 255  # Saturation
     return result
-

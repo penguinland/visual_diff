@@ -4,85 +4,178 @@ import numpy
 _MAX_TOKEN_CHAIN = 100  # Sequences at least this long get the most extreme hue
 
 
-def get_lengths(matrix, is_single_file):
+class _SegmentUnionFind:
     """
-    Matrix is a 2D numpy array of bools. We return a 2D numpy array of ints,
-    where each int corresponds to one of the bools. The ints are a measure of
-    how long a chain of bools is.
+    UnionFind is sometimes named DisjointSet. Our data structure is different
+    from the usual one because it represents a set of duplicated tokens, with a
+    top-right and bottom-left coordinate, in addition to the size.
+    """
+    def __init__(self, r, c):
+        self._size = 1
+        self._root = self
+        self.top = (r, c)
+        self.bottom = (r, c)
 
-    This number is calculated as follows:
-    - The number of a False pixel is 0.
-    - The "cost" of joining two pixels into a segment is the square of the
-      Manhattan distance between the location just below-right of the first
-      pixel and the second pixel. For example, two pixels immediately diagonal
-      from each other cost nothing to join together, while joining two pixels a
-      knights move apart has a cost of 1, and two pixels diagonal from each
-      other but with a skipped-over pixel in the middle have a cost of 4.
-    - The final score of a True pixel is the maximum value of (the number of
-      pixels in the group minus the cost of performing all the joins). For
-      example, a diagonal run of 10 pixels should each have score 10, whereas
-      two diagonals of 5 pixels whose endpoints are separated by a knight's
-      move should have a score of 9. A single pixel by itself scores 1.
+    def get_root(self):
+        if self._root is self:
+            return self
 
-    If is_single_file is set, the main diagonal of the scores are all 1's,
-    because a file shouldn't count as a duplicate of itself.
+        self._root = self._root.get_root()
+        return self._root
+
+    def size(self):
+        return self.get_root()._size
+
+    def merge(self, other):
+        if self.size() > other.size():
+            large_root = self.get_root()
+            small_root = other.get_root()
+        else:
+            large_root = other.get_root()
+            small_root = self.get_root()
+
+        large_root._size += small_root.size()
+        small_root._root = large_root
+
+        if sum(small_root.top) < sum(large_root.top):
+            # The top of the small section is further towards the top-left
+            # corner. Use it as the new top.
+            large_root.top = small_root.top
+
+        if sum(small_root.bottom) > sum(large_root.bottom):
+            # The bottom of the small section is further towards the
+            # bottom-right corner. Use it as the new bottom.
+            large_root.bottom = small_root.bottom
+
+    def __str__(self):  # Used solely for debugging
+        root = self.get_root()
+        return (f"(Segment size {root.size()} "
+                f"from ({root.top_r}, {root.top_c}) "
+                f"to ({root.bottom_r}, {root.bottom_c}))")
+
+
+def _get_lengths(matrix, is_single_file):
+    """
+    matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
+    which are a measure of how long a chain of nonzero values from the original
+    matrix is.
+
+    If is_single_file is set, the main diagonal will be all 1's, because a file
+    shouldn't count as a duplicate of itself.
     """
     nr, nc = matrix.shape
-    distance_template = numpy.square(numpy.arange(nr)[:, None] +
-                                     numpy.arange(nc))
-    # For each pixel, we need to keep track of the score it can achieve by
-    # joining things further down and right from it, and the row and column of
-    # the best such pixel to join it with.
+
+    # Initialization: segment_matrix has the same shape as matrix, but is either
+    # full of 0's or _SegmentUnionFind objects. segments will be an iterable
+    # (either a list or a set) containing those same objects.
+    segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
+    segments = []
+    for r in range(nr):
+        for c in range(nc):
+            if r == c and is_single_file:
+                continue  # Skip pixels on the main diagonal
+            if matrix[r, c] != 0:
+                new_segment = _SegmentUnionFind(r, c)
+                segment_matrix[r, c] = new_segment
+                segments.append(new_segment)
+
+    while segments:
+        # The maximum distance to look over is the smallest distance that is as
+        # far as any segment can reach. That way, small segments near each
+        # other get to grow without a large, far-away segment inserting itself,
+        # but we don't waste time looking at too small a distance that needs to
+        # be repeated later.
+        max_distance = min(segment.size() for segment in segments)
+        # Keep track of segments whose size is larger than max_distance and thus
+        # might be able to merge over larger distances next time.
+        larger_segments = []
+
+        for current in segments:
+            current = current.get_root()
+
+            to_merge = _find_mergeable_segment(
+                    current, segment_matrix, max_distance)
+            if to_merge is not None:
+                current.merge(to_merge)
+
+            if current.size() > max_distance:
+                larger_segments.append(current)
+
+        # larger_segments might contain segments that were subsequently joined
+        # together. Remove duplicates before merging again.
+        segments = set(segment.get_root() for segment in larger_segments)
+
+    # Finally, output the final sizes of all the _SegmentUnionFinds as the final
+    # scores.
     scores = numpy.zeros((nr, nc), dtype=numpy.uint32)
-    next_r = numpy.zeros((nr, nc), dtype=numpy.int32) - 1
-    next_c = numpy.zeros((nr, nc), dtype=numpy.int32) - 1
-
-    # Initialize the bottommost and rightmost edges to be the initial scores:
-    # they cannot grow further down or right.
-    scores[-1, :] = numpy.astype(matrix[-1, :], numpy.uint32)
-    scores[:, -1] = numpy.astype(matrix[:, -1], numpy.uint32)
-
-    # Then, walk the rest of matrix from bottom-right to top-left, with each
-    # pixel growing as large as it can solely by joining things further right
-    # and down from itself.
-    for r in range(nr - 2, -1, -1):
-        for c in range(nc - 2, -1, -1):
-            if matrix[r, c] == 0:  # Pixel is unset, so it should score 0.
-                continue
-            # Otherwise, it should be at least 1.
-            scores[r, c] = 1
-
-            if is_single_file and r == c:
-                # A token compared to itself matches but shouldn't be
-                # considered an interesting group.
-                continue
-
-            candidates = scores[r+1:, c+1:]
-            distances = distance_template[:(nr - r - 1), :(nc - c - 1)]
-            possible_scores = candidates - distances
-            best_r, best_c = numpy.unravel_index(numpy.argmax(possible_scores),
-                                                 candidates.shape)
-            best_score = possible_scores[best_r, best_c]
-            if best_score > 0:
-                scores[r, c] += best_score
-                next_r[r, c] = best_r + r + 1
-                next_c[r, c] = best_c + c + 1
-
-    # Now, do the opposite: moving top-left to bottom-right, set the scores of
-    # all pixels to be as large as we could find.
-    for i in range(nr):
-        has_update = numpy.logical_and(numpy.greater_equal(next_r[i, :], 0),
-                                       numpy.greater_equal(next_c[i, :], 0))
-        rs = next_r[i,:][has_update]
-        cs = next_c[i,:][has_update]
-        ss = scores[i,:][has_update]
-        scores[rs, cs] = numpy.maximum(scores[rs, cs], ss)
-
+    for r in range(nr):
+        for c in range(nc):
+            if segment_matrix[r, c] != 0:
+                scores[r, c] = segment_matrix[r, c].size()
+            elif r == c and is_single_file:
+                # We didn't merge these with anything, but should still count
+                # them in the final output.
+                scores[r, c] = 1
     return scores
 
 
+def _find_mergeable_segment(current, segment_matrix, max_distance):
+    """
+    current is a _SegmentUnionFind, and segment_matrix is a 2D array of such
+    objects. We return the largest _SegmentUnionFind below-right of current that
+    we can merge with, or None if none are available. We only look at most
+    max_distance away from the location diagonal from current's bottom-right
+    corner (using the Manhattan distance).
+
+    Two segments are mergeable if the Manhattan distance between the
+    bottom-right end of one and the top-left end of the other is at most 2 more
+    than each of their sizes (the purpose of the 2 being that two segments
+    immediately diagonal from each other should be considered a distance 0
+    apart).
+    """
+    nr, nc = segment_matrix.shape
+
+    best_candidate = None
+    best_candidate_size = -1
+    def update_candidate(candidate):
+        nonlocal best_candidate, best_candidate_size
+        if candidate.size() > best_candidate_size:
+            best_candidate = candidate
+            best_candidate_size = candidate.size()
+
+    r, c = current.bottom
+    for i in range(max_distance):
+        candidate_r = r + 1 + i
+        if candidate_r >= nr:
+            # We're out-of-bounds, and any row beyond this is also out of
+            # bounds. Give up already.
+            break
+
+        for j in range(max_distance - i):
+            candidate_c = c + 1 + j
+            if candidate_c >= nc:
+                # We're out-of-bounds, so skip looking further in this row, and
+                # go on to the next row.
+                break
+
+            candidate = segment_matrix[candidate_r, candidate_c]
+            if candidate == 0:  # No segment in this location
+                continue
+            candidate = candidate.get_root()
+
+            cand_end_r, cand_end_c = candidate.top
+            dist = abs(r + 1 - cand_end_r) + abs(c + 1 - cand_end_c)
+            # We want both segments' size to be at least as large as the
+            # distance between them. To even call this function, current's size
+            # is at least max_distance, so we don't need to check that again.
+            if dist <= candidate.size():
+                update_candidate(candidate)
+    # We've now explored every possible cell at most max_distance below current.
+    return best_candidate
+
+
 def get_hues(matrix, is_single_file):
-    scores = get_lengths(matrix, is_single_file)
+    scores = _get_lengths(matrix, is_single_file)
     # Cut everything off at the max, then divide by the max to put all values
     # between 0 and 1.
     scores = numpy.minimum(
