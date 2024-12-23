@@ -153,6 +153,12 @@ def _get_lengths(matrix, is_single_file):
             segment = pixel_to_segment.get((r, c))
             if segment is not None:
                 scores[r, c] = segment.size()
+            elif matrix[r, c] != 0:
+                # The pixel was set in the original matrix, but we didn't
+                # create a segment for it.  Either it's a lone pixel by itself,
+                # or it's on the main diagonal of a file compared to itself.
+                # Either way, it scores 1.
+                scores[r, c] = 1
     return scores
 
 
