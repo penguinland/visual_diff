@@ -56,7 +56,7 @@ class _SegmentUnionFind:
 
 def _get_lengths(matrix, is_single_file):
     """
-    Matrix is a 2D numpy array of unit8s. We return a 2D numpy array of uint32s,
+    matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
     which are a measure of how long a chain of nonzero values from the original
     matrix is.
 
