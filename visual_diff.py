@@ -169,6 +169,6 @@ if __name__ == "__main__":
             sys.exit(2)
 
         # Otherwise, all is well.
-        image = utils.to_hsv_matrix(matrix, hues)
-        pil_image = PIL.Image.fromarray(image, mode="HSV")
+        image = utils.to_rgb_matrix(matrix, hues)
+        pil_image = PIL.Image.fromarray(image)
         pil_image.convert(mode="RGB").save(args.output_location)

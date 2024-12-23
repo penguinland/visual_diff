@@ -99,7 +99,7 @@ class ZoomMap(tk.Canvas):
 
     @staticmethod
     def _to_image(matrix):
-        image = PIL.Image.fromarray(matrix, mode="HSV")
+        image = PIL.Image.fromarray(matrix)
         return PIL.ImageTk.PhotoImage(image)
 
     @property

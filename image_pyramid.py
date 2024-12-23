@@ -104,7 +104,7 @@ class ImagePyramid:
             else:
                 hues = self._hue_pyramid[zoom_level]
                 subhues = hues[min_y:max_y, min_x:max_x]
-            image = utils.to_hsv_matrix(submatrix, subhues)
+            image = utils.to_rgb_matrix(submatrix, subhues)
             return image, min_x, min_y
 
         # Otherwise, we're zoomed in more than 100%. Grab the data we want,
@@ -125,7 +125,7 @@ class ImagePyramid:
             subhues = None
         else:
             subhues = self._hue_pyramid[0][min_y:max_y, min_x:max_x]
-        image = utils.to_hsv_matrix(submatrix, subhues)
+        image = utils.to_rgb_matrix(submatrix, subhues)
 
         # Now, duplicate the data until it's grown to the right size.
         for _ in range(-zoom_level):
