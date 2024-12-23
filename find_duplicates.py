@@ -86,8 +86,10 @@ def _get_lengths(matrix, is_single_file):
         # but we don't waste time looking at too small a distance that needs to
         # be repeated later.
         max_distance = min(segment.size() for segment in segments)
+        # Keep track of segments whose size is larger than max_distance and thus
+        # might be able to merge over larger distances next time.
+        larger_segments = []
 
-        segments_to_consider_again = []
         for current in segments:
             current = current.get_root()
 
@@ -97,13 +99,11 @@ def _get_lengths(matrix, is_single_file):
                 current.merge(to_merge)
 
             if current.size() > max_distance:
-                segments_to_consider_again.append(current)
+                larger_segments.append(current)
 
-        # We might have added segments that were later joined together. Remove
-        # duplicates before joining again.
-        segments = set()
-        for segment in segments_to_consider_again:
-            segments.add(segment.get_root())
+        # larger_segments might contain segments that were subsequently joined
+        # together. Remove duplicates before merging again.
+        segments = set(segment.get_root() for segment in larger_segments)
 
     # Finally, output the final sizes of all the SegmentUnionFinds as the final
     # scores.
