@@ -66,8 +66,8 @@ def _get_lengths(matrix, is_single_file):
     nr, nc = matrix.shape
 
     # Initialization: segment_matrix has the same shape as matrix, but is either
-    # full of 0's or _SegmentUnionFind objects. segments will be a list (or
-    # later a set) containing those same objects.
+    # full of 0's or _SegmentUnionFind objects. segments will be an iterable
+    # (either a list or a set) containing those same objects.
     segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
     segments = []
     for r in range(nr):
