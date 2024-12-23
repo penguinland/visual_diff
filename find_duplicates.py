@@ -145,23 +145,32 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
 
     r, c = current.bottom
     for i in range(max_distance):
+        candidate_r = r + 1 + i
+        if candidate_r >= nr:
+            # We're out-of-bounds, and any row beyond this is also out of
+            # bounds. Give up already.
+            break
+
         for j in range(max_distance - i):
-            candidate_r = r + 1 + i
             candidate_c = c + 1 + j
-            if candidate_r >= nr or candidate_c >= nc:
+            if candidate_c >= nc:
                 # We're out-of-bounds, so skip looking further in this row, and
                 # go on to the next row.
                 break
+
             candidate = segment_matrix[candidate_r, candidate_c]
-            if candidate == 0:
+            if candidate == 0:  # No segment in this location
                 continue
             candidate = candidate.get_root()
 
             cand_end_r, cand_end_c = candidate.top
             dist = abs(r + 1 - cand_end_r) + abs(c + 1 - cand_end_c)
-            if dist > candidate.size() or dist > current.size():
-                continue
-            update_candidate(candidate)
+            # We want both segments' size to be at least as large as the
+            # distance between them. To even call this function, current's size
+            # is at least max_distance, so we don't need to check that again.
+            if dist <= candidate.size():
+                update_candidate(candidate)
+    # We've now explored every possible cell at most max_distance below current.
     return best_candidate
 
 
