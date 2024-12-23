@@ -72,7 +72,8 @@ def _initialize_segments(matrix, is_single_file):
     # Initialization: segment_matrix has the same shape as matrix, but is either
     # full of 0's or _SegmentUnionFind objects. segments will be an iterable
     # (either a list or a set) containing those same objects.
-    segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
+    #segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
+    segment_matrix = {}
     segments = []
     for r in range(nr):
         for c in range(nc):
@@ -82,7 +83,7 @@ def _initialize_segments(matrix, is_single_file):
             # diagonal from them can never grow. So, as we initialize things,
             # grow each segment as long as it can be with a straight diagonal,
             # and don't bother initializing anything of size 1.
-            if segment_matrix[r, c] != 0:
+            if (r, c) in segment_matrix:
                 continue  # Already added as part of a contiguous segment.
             if r == c and is_single_file:
                 continue  # Skip pixels on the main diagonal
@@ -99,7 +100,7 @@ def _initialize_segments(matrix, is_single_file):
             new_segment = _SegmentUnionFind(
                     (r, c), (r + size - 1, c + size - 1), size)
             for i in range(size):
-                segment_matrix[r + i, c + i] = new_segment
+                segment_matrix[(r + i, c + i)] = new_segment
             segments.append(new_segment)
     return segments, segment_matrix
 
@@ -129,7 +130,7 @@ def _get_lengths(matrix, is_single_file):
             current = current.get_root()
 
             to_merge = _find_mergeable_segment(
-                    current, segment_matrix, max_distance)
+                    current, segment_matrix, max_distance, matrix.shape)
             if to_merge is not None:
                 current.merge(to_merge)
 
@@ -142,16 +143,17 @@ def _get_lengths(matrix, is_single_file):
 
     # Finally, output the final sizes of all the _SegmentUnionFinds as the final
     # scores.
-    nr, nc = segment_matrix.shape
+    nr, nc = matrix.shape
     scores = numpy.zeros((nr, nc), dtype=numpy.uint32)
     for r in range(nr):
         for c in range(nc):
-            if segment_matrix[r, c] != 0:
-                scores[r, c] = segment_matrix[r, c].size()
+            segment = segment_matrix.get((r, c))
+            if segment is not None:
+                scores[r, c] = segment.size()
     return scores
 
 
-def _find_mergeable_segment(current, segment_matrix, max_distance):
+def _find_mergeable_segment(current, segment_matrix, max_distance, shape):
     """
     current is a _SegmentUnionFind, and segment_matrix is a 2D array of such
     objects. We return the largest _SegmentUnionFind below-right of current that
@@ -165,7 +167,7 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
     immediately diagonal from each other should be considered a distance 0
     apart).
     """
-    nr, nc = segment_matrix.shape
+    nr, nc = shape
 
     best_candidate = None
     best_candidate_size = -1
@@ -190,8 +192,8 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
                 # go on to the next row.
                 break
 
-            candidate = segment_matrix[candidate_r, candidate_c]
-            if candidate == 0:  # No segment in this location
+            candidate = segment_matrix.get((candidate_r, candidate_c))
+            if candidate is None:  # No segment in this location
                 continue
             candidate = candidate.get_root()
 
