@@ -16,11 +16,11 @@ class _SegmentUnionFind:
     # roughly two thirds.
     __slots__ = ("_size", "_root", "top", "bottom")
 
-    def __init__(self, top, bottom, size):
+    def __init__(self, r, c, size):
         self._size = size
         self._root = None  # Might be another _SegmentUnionFind after merging
-        self.top = top
-        self.bottom = bottom
+        self.top = (r, c)
+        self.bottom = (r + size - 1, c + size - 1)
 
     def get_root(self):
         if self._root is None:
@@ -97,8 +97,7 @@ def _initialize_segments(matrix, is_single_file):
             if size == 1:  # Trivial segment: Don't bother trying to merge more.
                 continue
             # Otherwise, we've found a nontrivial segment. Add it in!
-            new_segment = _SegmentUnionFind(
-                    (r, c), (r + size - 1, c + size - 1), size)
+            new_segment = _SegmentUnionFind(r, c, size)
             for i in range(size):
                 segment_matrix[(r + i, c + i)] = new_segment
             segments.append(new_segment)
