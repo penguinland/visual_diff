@@ -158,11 +158,11 @@ def get_lengths(matrix, is_single_file):
 
 def _find_mergeable_segment(current, pixel_to_segment, max_distance, shape):
     """
-    current is a _SegmentUnionFind, and pixel_to_segment is a 2D array of such
-    objects. We return the largest _SegmentUnionFind below-right of current that
-    we can merge with, or None if none are available. We only look at most
-    max_distance away from the location diagonal from current's bottom-right
-    corner (using the Manhattan distance).
+    current is a _SegmentUnionFind, and pixel_to_segment is a dict mapping pixel
+    coordinates to _SegmentUnionFind objects. We return the largest
+    _SegmentUnionFind below-right of current that we can merge with, or None if
+    none are available. We only look at most max_distance away from the location
+    diagonal from current's bottom-right corner (using the Manhattan distance).
 
     Two segments are mergeable if the Manhattan distance between the
     bottom-right end of one and the top-left end of the other is at most 2 more
