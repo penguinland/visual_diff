@@ -10,6 +10,12 @@ class _SegmentUnionFind:
     from the usual one because it represents a set of duplicated tokens, with a
     top-right and bottom-left coordinate, in addition to the size.
     """
+    # Save memory by telling Python exactly what fields we use, which means the
+    # Python interpreter doesn't allocate a dict for all the extra fields we
+    # might add later. This reduces the memory usage of _SegmentUnionFind by
+    # roughly two thirds.
+    __slots__ = ("_size", "_root", "top", "bottom")
+
     def __init__(self, top, bottom, size):
         self._size = size
         self._root = None  # Might be another _SegmentUnionFind after merging
