@@ -10,11 +10,11 @@ class _SegmentUnionFind:
     from the usual one because it represents a set of duplicated tokens, with a
     top-right and bottom-left coordinate, in addition to the size.
     """
-    def __init__(self, r, c):
-        self._size = 1
+    def __init__(self, top, bottom, size):
+        self._size = size
         self._root = None  # Might become a reference to another _SegmentUnionFind after merging
-        self.top = (r, c)
-        self.bottom = (r, c)
+        self.top = top
+        self.bottom = bottom
 
     def get_root(self):
         if self._root is None:
@@ -72,12 +72,26 @@ def _get_lengths(matrix, is_single_file):
     segments = []
     for r in range(nr):
         for c in range(nc):
+            # An optimization: lone pixels that don't have anything immediately diagonal from them
+            # can never grow. So, as we initialize things, grow each segment as long as it can be
+            # with a straight diagonal, and don't bother initializing anything of size 1.
+            if segment_matrix[r, c] != 0:
+                continue  # Already added as part of a contiguous segment.
             if r == c and is_single_file:
                 continue  # Skip pixels on the main diagonal
-            if matrix[r, c] != 0:
-                new_segment = _SegmentUnionFind(r, c)
-                segment_matrix[r, c] = new_segment
-                segments.append(new_segment)
+            if matrix[r, c] == 0:
+                continue
+            # See whether this segment is more than just a dot.
+            size = 0
+            while r + size < nr and c + size < nc and matrix[r + size, c + size] != 0:
+                size += 1
+            if size == 1:  # This is a trivial segment. Don't bother trying to merge more.
+                continue
+            # Otherwise, we've found a nontrivial segment. Add it in!
+            new_segment = _SegmentUnionFind((r, c), (r + size - 1, c + size - 1), size)
+            for i in range(size):
+                segment_matrix[r + i, c + i] = new_segment
+            segments.append(new_segment)
 
     while segments:
         # The maximum distance to look over is the smallest distance that is as
