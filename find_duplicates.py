@@ -17,6 +17,13 @@ class _SegmentUnionFind:
     __slots__ = ("_size", "_root", "top", "bottom")
 
     def __init__(self, r, c, size):
+        """
+        The arguments passed in are the coordinates of the top-left pixel, and
+        the number of pixels on a straight diagonal line to the end of this
+        segment. We do this to avoid allocating a bunch of 1-pixel segments
+        that are either never going to be used or about to be joined with their
+        immediate diagonals.
+        """
         self._size = size
         self._root = None  # Might be another _SegmentUnionFind after merging
         self.top = (r, c)
@@ -63,9 +70,10 @@ class _SegmentUnionFind:
 def _initialize_segments(matrix, is_single_file):
     """
     Returns a tuple of (segments, segment_matrix). These are a list of
-    _SegmentUnionFinds and a 2D array whose values are all either 0 or those
-    same _SegmentUnionFinds, each of which has size at least 2. These have
-    already merged as many immediate-diagonal neighbors as possible.
+    _SegmentUnionFinds and a dict mapping coordinates to the _SegmentUnionFinds
+    they make up (same ones as in the list).  Each _SegmentUnionFind has size
+    at least 2: these have already merged as many immediate-diagonal neighbors
+    as possible.
     """
     nr, nc = matrix.shape
 
