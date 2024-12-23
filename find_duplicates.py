@@ -12,12 +12,12 @@ class _SegmentUnionFind:
     """
     def __init__(self, r, c):
         self._size = 1
-        self._root = self
+        self._root = None  # Might become a reference to another _SegmentUnionFind after merging
         self.top = (r, c)
         self.bottom = (r, c)
 
     def get_root(self):
-        if self._root is self:
+        if self._root is None:
             return self
 
         self._root = self._root.get_root()
