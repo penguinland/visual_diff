@@ -146,13 +146,13 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
     r, c = current.bottom
     for i in range(max_distance):
         for j in range(max_distance - i):
-            cand_r = r + 1 + i
-            cand_c = c + 1 + j
-            if cand_r >= nr or cand_c >= nc:
+            candidate_r = r + 1 + i
+            candidate_c = c + 1 + j
+            if candidate_r >= nr or candidate_c >= nc:
                 # We're out-of-bounds, so skip looking further in this row, and
                 # go on to the next row.
                 break
-            candidate = segment_matrix[cand_r, cand_c]
+            candidate = segment_matrix[candidate_r, candidate_c]
             if candidate == 0:
                 continue
             candidate = candidate.get_root()
