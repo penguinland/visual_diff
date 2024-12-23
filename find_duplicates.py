@@ -108,7 +108,7 @@ def _initialize_segments(matrix, is_single_file):
     return segments, pixel_to_segment
 
 
-def _get_lengths(matrix, is_single_file):
+def get_lengths(matrix, is_single_file):
     """
     matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
     which are a measure of how long a chain of nonzero values from the original
@@ -215,7 +215,7 @@ def _find_mergeable_segment(current, pixel_to_segment, max_distance, shape):
 
 
 def get_hues(matrix, is_single_file):
-    scores = _get_lengths(matrix, is_single_file)
+    scores = get_lengths(matrix, is_single_file)
     # Cut everything off at the max, then divide by the max to put all values
     # between 0 and 1.
     scores = numpy.minimum(
