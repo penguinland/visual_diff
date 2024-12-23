@@ -147,18 +147,15 @@ def _get_lengths(matrix, is_single_file):
     # Finally, output the final sizes of all the _SegmentUnionFinds as the final
     # scores.
     nr, nc = matrix.shape
-    scores = numpy.zeros((nr, nc), dtype=numpy.uint32)
+    # For every pixel not involved in a segment, its score is 0 if it was not
+    # set in the original, and 1 if it was (it's either a lone pixel or it's on
+    # the main diagonal of a file compared to itself).
+    scores = (matrix != 0).astype(numpy.uint32)
     for r in range(nr):
         for c in range(nc):
             segment = pixel_to_segment.get((r, c))
             if segment is not None:
                 scores[r, c] = segment.size()
-            elif matrix[r, c] != 0:
-                # The pixel was set in the original matrix, but we didn't
-                # create a segment for it.  Either it's a lone pixel by itself,
-                # or it's on the main diagonal of a file compared to itself.
-                # Either way, it scores 1.
-                scores[r, c] = 1
     return scores
 
 
