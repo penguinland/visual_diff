@@ -140,6 +140,9 @@ if __name__ == "__main__":
     # TODO: it might be cool to allow comparisons across languages.
     with open(args.filename_b or args.filename_a) as f_b:
         data_b = get_tokens(f_b.read(), language)
+    print(f"Comparing a file with {len(data_a.tokens)} tokens to "
+          f"one that has {len(data_b.tokens)}: final image has "
+          f"{len(data_a.tokens) * len(data_b.tokens)} pixels.")
     matrix = make_matrix(data_a.tokens, data_b.tokens)
 
     if args.color:

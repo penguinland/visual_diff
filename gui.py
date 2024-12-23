@@ -1,4 +1,3 @@
-from functools import partial
 from math import ceil
 import tkinter as tk
 import tkinter.font as tkfont
@@ -148,7 +147,10 @@ def launch(matrix, hues, data_a, data_b, map_width, text_width):
     for char in "wWqQ":
         root.bind("<Control-{}>".format(char), _quit)
 
-    gui = _Gui(matrix, hues, data_a, data_b, map_width, text_width, root)
+    # We construct a _Gui object, but don't bother holding on to a reference to
+    # it because we're never going to touch it again. It doesn't get garbage
+    # collected because `root` holds a reference to it.
+    _Gui(matrix, hues, data_a, data_b, map_width, text_width, root)
     while True:
         try:
             root.mainloop()
