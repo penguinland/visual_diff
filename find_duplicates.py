@@ -105,7 +105,7 @@ def _get_lengths(matrix, is_single_file):
         # together. Remove duplicates before merging again.
         segments = set(segment.get_root() for segment in larger_segments)
 
-    # Finally, output the final sizes of all the SegmentUnionFinds as the final
+    # Finally, output the final sizes of all the _SegmentUnionFinds as the final
     # scores.
     scores = numpy.zeros((nr, nc), dtype=numpy.uint32)
     for r in range(nr):
