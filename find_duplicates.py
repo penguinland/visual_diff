@@ -72,6 +72,8 @@ def _get_lengths(matrix, is_single_file):
     segments = []
     for r in range(nr):
         for c in range(nc):
+            if matrix[r, c] == 0:
+                continue
             # An optimization: lone pixels that don't have anything immediately diagonal from them
             # can never grow. So, as we initialize things, grow each segment as long as it can be
             # with a straight diagonal, and don't bother initializing anything of size 1.
@@ -79,12 +81,12 @@ def _get_lengths(matrix, is_single_file):
                 continue  # Already added as part of a contiguous segment.
             if r == c and is_single_file:
                 continue  # Skip pixels on the main diagonal
-            if matrix[r, c] == 0:
-                continue
+
             # See whether this segment is more than just a dot.
             size = 0
             while r + size < nr and c + size < nc and matrix[r + size, c + size] != 0:
                 size += 1
+
             if size == 1:  # This is a trivial segment. Don't bother trying to merge more.
                 continue
             # Otherwise, we've found a nontrivial segment. Add it in!
