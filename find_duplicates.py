@@ -83,7 +83,7 @@ def _get_lengths(matrix, is_single_file):
                 continue  # Skip pixels on the main diagonal
 
             # See whether this segment is more than just a dot.
-            size = 0
+            size = 1
             while r + size < nr and c + size < nc and matrix[r + size, c + size] != 0:
                 size += 1
 
@@ -128,10 +128,6 @@ def _get_lengths(matrix, is_single_file):
         for c in range(nc):
             if segment_matrix[r, c] != 0:
                 scores[r, c] = segment_matrix[r, c].size()
-            elif r == c and is_single_file:
-                # We didn't merge these with anything, but should still count
-                # them in the final output.
-                scores[r, c] = 1
     return scores
 
 
