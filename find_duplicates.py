@@ -129,7 +129,7 @@ def _find_mergeable_segment(current, segment_matrix, max_distance):
 
     Two segments are mergeable if the Manhattan distance between the
     bottom-right end of one and the top-left end of the other is at most 2 more
-    than both their sizes (the purpose of the 2 being that two segments
+    than each of their sizes (the purpose of the 2 being that two segments
     immediately diagonal from each other should be considered a distance 0
     apart).
     """
