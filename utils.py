@@ -31,11 +31,9 @@ def to_rgb_matrix(matrix, hues):
         rgb_floats = colorsys.hsv_to_rgb(*hsv_floats)
         return numpy.array([x * 255 for x in rgb_floats], numpy.uint8)
 
-    hsv_matrix = to_hsv_matrix(matrix, hues)
-    rgb_matrix = numpy.zeros(hsv_matrix.shape, numpy.uint8)
-    nr, nc, _ = hsv_matrix.shape
+    pixel_matrix = to_hsv_matrix(matrix, hues)
+    nr, nc, _ = pixel_matrix.shape
     for r in range(nr):
         for c in range(nc):
-            rgb_matrix[r, c, :] = pixel_hsv_to_rgb(hsv_matrix[r, c, :])
-
-    return rgb_matrix
+            pixel_matrix[r, c, :] = pixel_hsv_to_rgb(pixel_matrix[r, c, :])
+    return pixel_matrix
