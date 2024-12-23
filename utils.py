@@ -39,14 +39,3 @@ def to_rgb_matrix(matrix, hues):
             rgb_matrix[r, c, :] = pixel_hsv_to_rgb(hsv_matrix[r, c, :])
 
     return rgb_matrix
-
-matrix = numpy.array([[1, 1], [1, 0]], dtype=numpy.uint8)
-hues = numpy.array([[0, 170], [45, 170]], dtype=numpy.uint32)
-rgb = to_rgb_matrix(matrix, hues)
-bw = to_rgb_matrix(matrix, None)
-
-print(matrix)
-print(hues)
-print(rgb)
-print(bw)
-print(rgb[1, 0, :])
