@@ -12,7 +12,7 @@ class _SegmentUnionFind:
     """
     def __init__(self, top, bottom, size):
         self._size = size
-        self._root = None  # Might become a reference to another _SegmentUnionFind after merging
+        self._root = None  # Might be another _SegmentUnionFind after merging
         self.top = top
         self.bottom = bottom
 
@@ -56,9 +56,10 @@ class _SegmentUnionFind:
 
 def _initialize_segments(matrix, is_single_file):
     """
-    Returns a tuple of (segments, segment_matrix). These are a list of _SegmentUnionFinds and a 2D
-    array whose values are all either 0 or those same _SegmentUnionFinds, each of which has size at
-    least 2. These have already merged as many immediate-diagonal neighbors as possible.
+    Returns a tuple of (segments, segment_matrix). These are a list of
+    _SegmentUnionFinds and a 2D array whose values are all either 0 or those
+    same _SegmentUnionFinds, each of which has size at least 2. These have
+    already merged as many immediate-diagonal neighbors as possible.
     """
     nr, nc = matrix.shape
 
@@ -71,9 +72,10 @@ def _initialize_segments(matrix, is_single_file):
         for c in range(nc):
             if matrix[r, c] == 0:
                 continue
-            # An optimization: lone pixels that don't have anything immediately diagonal from them
-            # can never grow. So, as we initialize things, grow each segment as long as it can be
-            # with a straight diagonal, and don't bother initializing anything of size 1.
+            # An optimization: lone pixels that don't have anything immediately
+            # diagonal from them can never grow. So, as we initialize things,
+            # grow each segment as long as it can be with a straight diagonal,
+            # and don't bother initializing anything of size 1.
             if segment_matrix[r, c] != 0:
                 continue  # Already added as part of a contiguous segment.
             if r == c and is_single_file:
@@ -81,13 +83,15 @@ def _initialize_segments(matrix, is_single_file):
 
             # See whether this segment is more than just a dot.
             size = 1
-            while r + size < nr and c + size < nc and matrix[r + size, c + size] != 0:
+            while (r + size < nr and c + size < nc and
+                   matrix[r + size, c + size] != 0):
                 size += 1
 
-            if size == 1:  # This is a trivial segment. Don't bother trying to merge more.
+            if size == 1:  # Trivial segment: Don't bother trying to merge more.
                 continue
             # Otherwise, we've found a nontrivial segment. Add it in!
-            new_segment = _SegmentUnionFind((r, c), (r + size - 1, c + size - 1), size)
+            new_segment = _SegmentUnionFind(
+                    (r, c), (r + size - 1, c + size - 1), size)
             for i in range(size):
                 segment_matrix[r + i, c + i] = new_segment
             segments.append(new_segment)
