@@ -54,14 +54,11 @@ class _SegmentUnionFind:
                 f"to ({root.bottom_r}, {root.bottom_c}))")
 
 
-def _get_lengths(matrix, is_single_file):
+def _initialize_segments(matrix, is_single_file):
     """
-    matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
-    which are a measure of how long a chain of nonzero values from the original
-    matrix is.
-
-    If is_single_file is set, the main diagonal will be all 1's, because a file
-    shouldn't count as a duplicate of itself.
+    Returns a tuple of (segments, segment_matrix). These are a list of _SegmentUnionFinds and a 2D
+    array whose values are all either 0 or those same _SegmentUnionFinds, each of which has size at
+    least 2. These have already merged as many immediate-diagonal neighbors as possible.
     """
     nr, nc = matrix.shape
 
@@ -94,7 +91,19 @@ def _get_lengths(matrix, is_single_file):
             for i in range(size):
                 segment_matrix[r + i, c + i] = new_segment
             segments.append(new_segment)
+    return segments, segment_matrix
 
+
+def _get_lengths(matrix, is_single_file):
+    """
+    matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
+    which are a measure of how long a chain of nonzero values from the original
+    matrix is.
+
+    If is_single_file is set, the main diagonal will be all 1's, because a file
+    shouldn't count as a duplicate of itself.
+    """
+    segments, segment_matrix = _initialize_segments(matrix, is_single_file)
     while segments:
         # The maximum distance to look over is the smallest distance that is as
         # far as any segment can reach. That way, small segments near each
@@ -123,6 +132,7 @@ def _get_lengths(matrix, is_single_file):
 
     # Finally, output the final sizes of all the _SegmentUnionFinds as the final
     # scores.
+    nr, nc = segment_matrix.shape
     scores = numpy.zeros((nr, nc), dtype=numpy.uint32)
     for r in range(nr):
         for c in range(nc):
