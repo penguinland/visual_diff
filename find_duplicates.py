@@ -69,7 +69,7 @@ class _SegmentUnionFind:
 
 def _initialize_segments(matrix, is_single_file):
     """
-    Returns a tuple of (segments, segment_matrix). These are a list of
+    Returns a tuple of (segments, pixel_to_segment). These are a list of
     _SegmentUnionFinds and a dict mapping coordinates to the _SegmentUnionFinds
     they make up (same ones as in the list).  Each _SegmentUnionFind has size
     at least 2: these have already merged as many immediate-diagonal neighbors
@@ -77,11 +77,11 @@ def _initialize_segments(matrix, is_single_file):
     """
     nr, nc = matrix.shape
 
-    # Initialization: segment_matrix has the same shape as matrix, but is either
+    # Initialization: pixel_to_segment has the same shape as matrix, but is either
     # full of 0's or _SegmentUnionFind objects. segments will be an iterable
     # (either a list or a set) containing those same objects.
-    #segment_matrix = numpy.zeros((nr, nc), dtype=numpy.object_)
-    segment_matrix = {}
+    #pixel_to_segment = numpy.zeros((nr, nc), dtype=numpy.object_)
+    pixel_to_segment = {}
     segments = []
     for r in range(nr):
         for c in range(nc):
@@ -91,7 +91,7 @@ def _initialize_segments(matrix, is_single_file):
             # diagonal from them can never grow. So, as we initialize things,
             # grow each segment as long as it can be with a straight diagonal,
             # and don't bother initializing anything of size 1.
-            if (r, c) in segment_matrix:
+            if (r, c) in pixel_to_segment:
                 continue  # Already added as part of a contiguous segment.
             if r == c and is_single_file:
                 continue  # Skip pixels on the main diagonal
@@ -107,9 +107,9 @@ def _initialize_segments(matrix, is_single_file):
             # Otherwise, we've found a nontrivial segment. Add it in!
             new_segment = _SegmentUnionFind(r, c, size)
             for i in range(size):
-                segment_matrix[(r + i, c + i)] = new_segment
+                pixel_to_segment[(r + i, c + i)] = new_segment
             segments.append(new_segment)
-    return segments, segment_matrix
+    return segments, pixel_to_segment
 
 
 def _get_lengths(matrix, is_single_file):
@@ -121,7 +121,7 @@ def _get_lengths(matrix, is_single_file):
     If is_single_file is set, the main diagonal will be all 1's, because a file
     shouldn't count as a duplicate of itself.
     """
-    segments, segment_matrix = _initialize_segments(matrix, is_single_file)
+    segments, pixel_to_segment = _initialize_segments(matrix, is_single_file)
     while segments:
         # The maximum distance to look over is the smallest distance that is as
         # far as any segment can reach. That way, small segments near each
@@ -137,7 +137,7 @@ def _get_lengths(matrix, is_single_file):
             current = current.get_root()
 
             to_merge = _find_mergeable_segment(
-                    current, segment_matrix, max_distance, matrix.shape)
+                    current, pixel_to_segment, max_distance, matrix.shape)
             if to_merge is not None:
                 current.merge(to_merge)
 
@@ -154,15 +154,15 @@ def _get_lengths(matrix, is_single_file):
     scores = numpy.zeros((nr, nc), dtype=numpy.uint32)
     for r in range(nr):
         for c in range(nc):
-            segment = segment_matrix.get((r, c))
+            segment = pixel_to_segment.get((r, c))
             if segment is not None:
                 scores[r, c] = segment.size()
     return scores
 
 
-def _find_mergeable_segment(current, segment_matrix, max_distance, shape):
+def _find_mergeable_segment(current, pixel_to_segment, max_distance, shape):
     """
-    current is a _SegmentUnionFind, and segment_matrix is a 2D array of such
+    current is a _SegmentUnionFind, and pixel_to_segment is a 2D array of such
     objects. We return the largest _SegmentUnionFind below-right of current that
     we can merge with, or None if none are available. We only look at most
     max_distance away from the location diagonal from current's bottom-right
@@ -199,7 +199,7 @@ def _find_mergeable_segment(current, segment_matrix, max_distance, shape):
                 # go on to the next row.
                 break
 
-            candidate = segment_matrix.get((candidate_r, candidate_c))
+            candidate = pixel_to_segment.get((candidate_r, candidate_c))
             if candidate is None:  # No segment in this location
                 continue
             candidate = candidate.get_root()
