@@ -70,19 +70,15 @@ class _SegmentUnionFind:
 def _initialize_segments(matrix, is_single_file):
     """
     Returns a tuple of (segments, pixel_to_segment). These are a list of
-    _SegmentUnionFinds and a dict mapping coordinates to the _SegmentUnionFinds
-    they make up (same ones as in the list).  Each _SegmentUnionFind has size
-    at least 2: these have already merged as many immediate-diagonal neighbors
-    as possible.
+    _SegmentUnionFinds and a dict mapping pixel coordinates to the
+    _SegmentUnionFinds they make up (same ones as in the list).  Each
+    _SegmentUnionFind has size at least 2: these have already merged as many
+    immediate-diagonal neighbors as possible.
     """
     nr, nc = matrix.shape
 
-    # Initialization: pixel_to_segment has the same shape as matrix, but is either
-    # full of 0's or _SegmentUnionFind objects. segments will be an iterable
-    # (either a list or a set) containing those same objects.
-    #pixel_to_segment = numpy.zeros((nr, nc), dtype=numpy.object_)
-    pixel_to_segment = {}
     segments = []
+    pixel_to_segment = {}
     for r in range(nr):
         for c in range(nc):
             if matrix[r, c] == 0:
@@ -102,13 +98,13 @@ def _initialize_segments(matrix, is_single_file):
                    matrix[r + size, c + size] != 0):
                 size += 1
 
-            if size == 1:  # Trivial segment: Don't bother trying to merge more.
+            if size == 1:  # Trivial segment: don't bother
                 continue
             # Otherwise, we've found a nontrivial segment. Add it in!
             new_segment = _SegmentUnionFind(r, c, size)
+            segments.append(new_segment)
             for i in range(size):
                 pixel_to_segment[(r + i, c + i)] = new_segment
-            segments.append(new_segment)
     return segments, pixel_to_segment
 
 
