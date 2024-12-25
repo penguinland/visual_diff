@@ -42,8 +42,7 @@ def _find_boundary(i, tok, toks, most_recent_line):
             # ends just before the start of the next token.
             assert(tok.new_line_before)
             end = toks[i + 1].ast_node.start_point
-            start = (end[0], 0)
-            return start, end
+            return (end[0], 0), end
         elif tok.type == "dedent":
             # If there are other non-dedent tokens after us, we can use
             # their starting column as our ending column.
