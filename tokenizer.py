@@ -28,8 +28,8 @@ def get_tokens(file_contents, language):
 def _find_boundary(i, tok, toks, most_recent_line):
     """
     toks is a list of all tokens in a file. tok is the token at index i. We
-    return a (start, end) tuple of where this token is, where each of those is
-    itself a (row, col) tuple.
+    return a ((start_r, start_c), (end_r, end_c)) tuple of the row and column at
+    which this token starts and ends.
     """
     try:
         start = tok.ast_node.start_point
