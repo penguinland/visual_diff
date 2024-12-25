@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import code_tokenize
 import collections
 import numpy

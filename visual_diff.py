@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import code_tokenize
-import numpy
 import PIL.Image
 import sys
 
@@ -37,7 +35,7 @@ def parse_args():
                         help="Expected maximum line width, in characters")
     parser.add_argument("--color", "-c", action="store_true",
                         help="Color based on the amount of duplication")
-    return parser.parse_args(sys.argv[1:])
+    return parser.parse_args()
 
 
 def guess_language(filename):
