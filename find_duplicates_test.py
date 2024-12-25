@@ -3,14 +3,15 @@ import numpy
 import unittest
 
 import find_duplicates
-import visual_diff
+import tokenizer
+import utils
 
 
 class TestGetLengths(unittest.TestCase):
     def setUp(self):
         contents = 'print(hello(1, 2)) and print(hello("hi", 2))'
-        data = visual_diff.get_tokens(contents, "python")
-        self.matrix = visual_diff.make_matrix(data.tokens, data.tokens)
+        data = tokenizer.get_tokens(contents, "python")
+        self.matrix = utils.make_matrix(data.tokens, data.tokens)
 
     @staticmethod
     def debug_differences(expected, actual):
