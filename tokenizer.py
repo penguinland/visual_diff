@@ -27,13 +27,13 @@ def get_tokens(file_contents, language):
 
 def _find_boundary(i, tok, toks, most_recent_line):
     """
-    This helper function returns the start and end tuples (in (row, col)
-    format) for the given token with the given index into toks.
+    toks is a list of all tokens in a file. tok is the token at index i. We
+    return a (start, end) tuple of where this token is, where each of those is
+    itself a (row, col) tuple.
     """
     try:
         start = tok.ast_node.start_point
         end = tok.ast_node.end_point
-        most_recent_line = end[0]
         return start, end
     except AttributeError:  # Token doesn't have a start_point or end_point
         if tok.type == "indent":
@@ -54,8 +54,7 @@ def _find_boundary(i, tok, toks, most_recent_line):
             except IndexError:
                 # No following tokens: we hit EOF. We probably can't display
                 # this token.
-                line = most_recent_line
-                return (line, 0), (line, 0)
+                return (most_recent_line, 0), (most_recent_line, 0)
             # Otherwise, we found a non-dedent token: stop where it starts
             end = toks[next_i].ast_node.start_point
             return (end[0], 0), end
