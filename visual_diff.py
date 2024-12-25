@@ -132,13 +132,6 @@ def get_text_width(args):
     return 100
 
 
-def make_matrix(tokens_a, tokens_b):
-    matrix = numpy.zeros([len(tokens_a), len(tokens_b)], dtype=numpy.uint8)
-    for i, value in enumerate(tokens_a):
-        matrix[i, :] = (tokens_b == value)
-    return matrix
-
-
 if __name__ == "__main__":
     args = parse_args()
     language = args.language
@@ -153,7 +146,7 @@ if __name__ == "__main__":
     print(f"Comparing a file with {len(data_a.tokens)} tokens to "
           f"one that has {len(data_b.tokens)}: final image has "
           f"{len(data_a.tokens) * len(data_b.tokens)} pixels.")
-    matrix = make_matrix(data_a.tokens, data_b.tokens)
+    matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
 
     if args.color:
         hues = find_duplicates.get_hues(matrix, args.filename_b is None)

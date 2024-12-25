@@ -22,3 +22,10 @@ def to_hsv_matrix(matrix, hues):
         result[:, :, 0] = hues
         result[:, :, 1] = 255  # Saturation
     return result
+
+
+def make_matrix(tokens_a, tokens_b):
+    matrix = numpy.zeros([len(tokens_a), len(tokens_b)], dtype=numpy.uint8)
+    for i, value in enumerate(tokens_a):
+        matrix[i, :] = (tokens_b == value)
+    return matrix
