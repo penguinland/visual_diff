@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 
 import code_tokenize
+import collections
 import numpy
 
-import utils
+
+# The tokens is a list of tokens contained in a file.
+# The lines is a list of strings containing the file contents.
+# The boundaries is a list of ((start_row, start_col), (end_row, end_col))
+#     tuples for each token.
+FileInfo = collections.namedtuple("FileInfo", ["tokens", "lines", "boundaries"])
 
 
 def get_tokens(file_contents, language):
     """
-    We return a utils.FileInfo object containing details of the given
+    We return a FileInfo object containing details of the given
     file_contents.
     """
     toks = code_tokenize.tokenize(file_contents, lang=language)
@@ -66,4 +72,4 @@ def get_tokens(file_contents, language):
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
 
-    return utils.FileInfo(token_array, lines, boundaries)
+    return FileInfo(token_array, lines, boundaries)
