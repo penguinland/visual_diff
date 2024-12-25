@@ -32,9 +32,8 @@ def _find_boundary(i, tok, toks, most_recent_line):
     column at which this token starts and ends.
     """
     try:
-        start = tok.ast_node.start_point
-        end = tok.ast_node.end_point
-        return start, end
+        node = tok.ast_node
+        return node.start_point, node.end_point
     except AttributeError:  # Token doesn't have a start_point or end_point
         match tok.type:
             case "indent":
