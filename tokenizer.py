@@ -26,43 +26,47 @@ def get_tokens(file_contents, language):
 
 
 def _get_boundaries(toks):
-    boundaries = []
-    most_recent_line = 0  # Used when parsing dedents
-    for i, t in enumerate(toks):
+    most_recent_line = 0  # Used when parsing dedents in Python
+
+    def find_boundary(i, tok):  # Helper function
+        nonlocal most_recent_line
         try:
-            # Most tokens contain their start and end values. However, the
-            # tokenizer we use starts counting lines at 0, and we need to
-            # start counting at 1. So, add 1 to all line indices.
             start = t.ast_node.start_point
             end = t.ast_node.end_point
             most_recent_line = end[0]
-            boundaries.append(((start[0] + 1, start[1]), (end[0] + 1, end[1])))
-        except AttributeError:
+            return start, end
+        except AttributeError:  # Token doesn't have a start_point or end_point
             if t.type == "indent":
                 # When we add indentation, it's on the same line as the next
                 # token. Pretend it starts at the beginning of the line and
                 # ends just before the start of the next token.
                 assert(t.new_line_before)
-                next_t = toks[i+1]
-                line = next_t.ast_node.start_point[0] + 1
-                boundaries.append(
-                    ((line, 0), (line, next_t.ast_node.start_point[1])))
+                end = toks[i+1].ast_node.start_point
+                start = (end[0], 0)
+                return start, end
             elif t.type == "dedent":
                 # If there are other non-dedent tokens after us, we can use
                 # their starting column as our ending column.
                 next_i = i
-                while next_i < len(toks) and toks[next_i].type == "dedent":
-                    next_i += 1
-                if next_i == len(toks):  # No following tokens: we hit EOF.
+                try:
+                    while toks[next_i].type == "dedent":
+                        next_i += 1
+                except IndexError:
                     # No following tokens: we hit EOF. We probably can't display
                     # this token.
                     line = most_recent_line
-                    end_column = 0
-                else:  # We found a non-dedent token: we stop where it starts
-                    line, end_column = toks[next_i].ast_node.start_point
-                # Remember we number our lines starting at 1, not 0.
-                boundaries.append(((line + 1, 0), (line + 1, end_column)))
+                    return (line, 0), (line, 0)
+                # Otherwise, we found a non-dedent token: stop where it starts
+                end = toks[next_i].ast_node.start_point
+                return (end[0], 0), end
             else:
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
+
+    boundaries = []
+    for i, t in enumerate(toks):
+        start, end = find_boundary(i, t)
+        # The tokenizer we use starts counting lines at 0, and we need to start
+        # counting at 1. So, add 1 to all line indices.
+        boundaries.append(((start[0] + 1, start[1]), (end[0] + 1, end[1])))
     return boundaries
