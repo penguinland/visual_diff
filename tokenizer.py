@@ -27,7 +27,7 @@ def get_tokens(file_contents, language):
 
 def _get_boundaries(toks):
     boundaries = []
-    most_recent_line = 1  # Used when parsing dedents
+    most_recent_line = 0  # Used when parsing dedents
     for i, t in enumerate(toks):
         try:
             # Most tokens contain their start and end values. However, the
@@ -35,7 +35,7 @@ def _get_boundaries(toks):
             # start counting at 1. So, add 1 to all line indices.
             start = t.ast_node.start_point
             end = t.ast_node.end_point
-            most_recent_line = end[0] + 1
+            most_recent_line = end[0]
             boundaries.append(((start[0] + 1, start[1]), (end[0] + 1, end[1])))
         except AttributeError:
             if t.type == "indent":
