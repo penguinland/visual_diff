@@ -21,7 +21,11 @@ def get_tokens(file_contents, language):
     constant_types = ("string", "integer", "float", "indent", "dedent")
     token_array = numpy.array(
         [tok.type if tok.type in constant_types else tok.text for tok in toks])
+    boundaries = _get_boundaries(toks)
+    return FileInfo(token_array, lines, boundaries)
 
+
+def _get_boundaries(toks):
     boundaries = []
     for i, t in enumerate(toks):
         try:
@@ -69,5 +73,4 @@ def get_tokens(file_contents, language):
             else:
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
-
-    return FileInfo(token_array, lines, boundaries)
+    return boundaries
