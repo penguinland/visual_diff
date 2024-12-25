@@ -31,20 +31,20 @@ def _get_boundaries(toks):
     def find_boundary(i, tok):  # Helper function
         nonlocal most_recent_line
         try:
-            start = t.ast_node.start_point
-            end = t.ast_node.end_point
+            start = tok.ast_node.start_point
+            end = tok.ast_node.end_point
             most_recent_line = end[0]
             return start, end
         except AttributeError:  # Token doesn't have a start_point or end_point
-            if t.type == "indent":
+            if tok.type == "indent":
                 # When we add indentation, it's on the same line as the next
                 # token. Pretend it starts at the beginning of the line and
                 # ends just before the start of the next token.
-                assert(t.new_line_before)
+                assert(tok.new_line_before)
                 end = toks[i+1].ast_node.start_point
                 start = (end[0], 0)
                 return start, end
-            elif t.type == "dedent":
+            elif tok.type == "dedent":
                 # If there are other non-dedent tokens after us, we can use
                 # their starting column as our ending column.
                 next_i = i
@@ -60,12 +60,12 @@ def _get_boundaries(toks):
                 end = toks[next_i].ast_node.start_point
                 return (end[0], 0), end
             else:
-                print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
+                print("UNEXPECTED TOKEN!", i, tok, type(tok), dir(tok))
                 raise
 
     boundaries = []
-    for i, t in enumerate(toks):
-        start, end = find_boundary(i, t)
+    for i, tok in enumerate(toks):
+        start, end = find_boundary(i, tok)
         # The tokenizer we use starts counting lines at 0, and we need to start
         # counting at 1. So, add 1 to all line indices.
         boundaries.append(((start[0] + 1, start[1]), (end[0] + 1, end[1])))
