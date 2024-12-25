@@ -88,12 +88,12 @@ def get_tokens(file_contents, language):
                 # If there are other non-dedent tokens after us, we can use
                 # their starting column as our ending column.
                 next_i = i
-                while next_i < len(toks) and toks[i].type == "dedent":
+                while next_i < len(toks) and toks[next_i].type == "dedent":
                     next_i += 1
                 if next_i == len(toks):  # No following tokens: we hit EOF
                     end_column = 0
                 else:  # We found a non-dedent token: we stop where it starts
-                    end_column = toks[i].ast_node.start_point[1]
+                    end_column = toks[next_i].ast_node.start_point[1]
                 boundaries.append(((line, 0), (line, end_column)))
             else:
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
