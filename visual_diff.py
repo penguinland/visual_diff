@@ -69,7 +69,7 @@ def get_tokens(file_contents, language):
                 next_t = toks[i+1]
                 line = next_t.ast_node.start_point[0] + 1
                 boundaries.append(
-                    ((line, 0), (line, next_t.ast_node.start_point[1]-1)))
+                    ((line, 0), (line, next_t.ast_node.start_point[1])))
             elif t.type == "dedent":
                 # We might be the very last token. Look backwards to the last
                 # non-dedent token: we're on the line after that. It's unclear
