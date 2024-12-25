@@ -72,9 +72,10 @@ def get_tokens(file_contents, language):
                     ((line, 0), (line, next_t.ast_node.start_point[1])))
             elif t.type == "dedent":
                 # We might be the very last token. Look backwards to the last
-                # non-dedent token: we're on the line after that. It's unclear
-                # what the width of an unindent should be: we make it 0 wide,
-                # which is not technically correct but good enough anyway.
+                # non-dedent token: we're on the line after that. If there are
+                # non-dedent tokens after us, we can find our end column by
+                # looking at that token's start column, but if we're the end of
+                # the file, just make our width 0.
                 di = 0
                 prev_t = t
                 while prev_t.type == "dedent":
@@ -84,7 +85,16 @@ def get_tokens(file_contents, language):
                 # our line. The parser starts counting at line 0, but we start
                 # at line 1, so add another 1 to match.
                 line = prev_t.ast_node.end_point[0] + 2
-                boundaries.append(((line, 0), (line, 0)))
+                # If there are other non-dedent tokens after us, we can use
+                # their starting column as our ending column.
+                next_i = i
+                while next_i < len(toks) and toks[i].type == "dedent":
+                    next_i += 1
+                if next_i == len(toks):  # No following tokens: we hit EOF
+                    end_column = 0
+                else:  # We found a non-dedent token: we stop where it starts
+                    end_column = toks[i].ast_node.start_point[1]
+                boundaries.append(((line, 0), (line, end_column)))
             else:
                 print("UNEXPECTED TOKEN!", i, t, type(t), dir(t))
                 raise
