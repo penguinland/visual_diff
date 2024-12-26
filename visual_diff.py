@@ -35,8 +35,8 @@ def parse_args():
                         help="map width/height, in pixels")
     parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
-    parser.add_argument("--color", "-c", action="store_true",
-                        help="Color based on the amount of duplication")
+    parser.add_argument("--black_and_white", "-bw", action="store_true",
+                        help="Don't color based on the amount of duplication")
     return parser.parse_args()
 
 
@@ -87,16 +87,17 @@ if __name__ == "__main__":
           f"{pixel_count} pixels.")
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
 
-    if args.color:
+    if args.black_and_white:
+        hues = None
+    else:
         if pixel_count > PIXELS_IN_BIG_FILE and not args.big_file:
             print("WARNING: the image is over 50 megapixels. Coloring very "
                   "large images can use so many resources that your computer "
                   "will freeze. To perform this action anyway, use the "
-                  "--big_file flag.")
+                  "--big_file flag. To skip coloring and use a "
+                  "black-and-white image, use the --black_and_white flag.")
             sys.exit(3)
         hues = find_duplicates.get_hues(matrix, args.filename_b is None)
-    else:
-        hues = None
 
     if args.output_location is None:
         if can_use_gui:
