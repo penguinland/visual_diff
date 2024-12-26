@@ -64,7 +64,7 @@ formats should work, including `.png`, `.gif`, `.jpg`, and `.bmp`.
 Saving images to a file takes much more memory than displaying them to the
 screen (because they involve compression algorithms), so doing this with large
 images can freeze your whole system. So, by default we refuse to save any
-image that is over 10 megapixels. This can be overridden with the `--big_file`
+image that is over 50 megapixels. This can be overridden with the `--big_file`
 flag, but **use that at your own peril.**
 
 When using the GUI, you can set the maximum line length for the code displayed
@@ -78,7 +78,9 @@ Non-matching tokens are still black pixels, but matching ones are colored
 based on how long the estimated chain of matches is: blue indicates a short
 chain (likely noise), up through red for a long one (definitely duplicated
 code). However, the algorithm for computing these colors can be very slow for
-large files, so it is disabled by default.
+large files, so it is disabled by default. If you want to use it with files over
+50 megapixels, you will again need to use `--big_file`: it can take gigabytes of
+memory and minutes of time to color large images.
 
 ## Uses
 Finding code that has been copied and pasted or is otherwise similar enough to
