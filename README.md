@@ -112,7 +112,8 @@ token(s) represented by the pixel the mouse is pointing to.
 
 Boilerplate code that repeats itself a lot clearly looks like it repeats:
 
-![example of boilerplate code](./screenshots/grpc-boilerplate.png)
+![example of boilerplate code with lots of repetition: there are many diagonal
+lines](./screenshots/grpc-boilerplate.png)
 
 Here's a short file compared to a longer file which was created by copying the
 short file and modifying it:
