@@ -101,8 +101,7 @@ as diagonal lines in the image.
   code from each other. There are better tools for this task, but `visual_diff`
   is better than nothing.
 - Cheating on homework by making sure that the code you have copied and pasted
-  has been modified enough that it no longer looks copied and pasted.
-  :upside_down_face:
+  has been modified enough that it no longer looks copied and pasted. 🙃
 
 ## Examples
 
