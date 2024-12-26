@@ -3,6 +3,29 @@ A tool for generating a visual comparison of two files of source code.
 
 ![screenshot of the tool in use](./screenshots/boilerplate.png)
 
+The main program is `visual_diff.py`. You can either specify 1 or 2 different
+filenames containing source code as arguments to it. With 2 files, it compares
+one to the other; with only 1 file it compares the file to itself.
+
+Each file is treated as a sequence of lexical tokens. A token is the smallest
+semantic piece of a program; tokens include keywords like "if" and "for",
+parentheses, variable names, etc. We then generate an image, in which the pixel
+in row i and column j is set if the ith token from the first file and the jth
+token from the second file are equal. All string literals are considered equal
+regardless of their contents; all literal numbers are considered equal, too.
+
+When you run the program, a graphical user interface will open up in which you
+can explore the image. Use the scroll wheel to zoom in and out, click-and-drag
+to pan around, and mouse around the image to explore the code. Quit with
+control-Q or control-W. The intention is for the GUI to be very similar to
+Google Maps, OpenStreetMap, or other map exploration interfaces.
+
+Below the map are two snippets of code, indicating which token(s) your mouse is
+currently pointing to. The top snippet indicates the code for the row that your
+mouse is on, and the bottom snippit is for the column. In large images, as you
+zoom out, multiple tokens will be combined into single pixels in the image, and
+multiple tokens will be highlighted in these snippets.
+
 ## Prerequisites
 You'll need [Tcl/Tk bindings](https://docs.python.org/3/library/tkinter.html)
 for Python. This might require installing something outside of your virtual
@@ -27,60 +50,46 @@ or update it yourself and send us a pull request!).
 ## Options
 The short version: run `visual_diff.py --help` for info.
 
-The main program is `visual_diff.py`. You can either specify 1 or 2 different
-filenames containing source code as arguments to it. With 2 files, it compares
-one to the other; with only 1 file it compares the file to itself. Both files
-should be written in the same language (though I have vague plans to change
-that in the future!).
-
-Each file is treated as a sequence of lexical tokens. A token is the smallest
-semantic piece of a program; tokens include keywords like "if" and "for",
-parentheses, variable names, etc. We then generate an
-image, in which the pixel in row i and column j is set if the ith token from
-the first file and the jth token from the second file are equal. All strings
-are considered equal regardless of their contents; all numbers are considered
-equal, too.
-
-When you run the program, a graphical user interface will open up in which you
-can explore the image. Use the scroll wheel to zoom in and out, click-and-drag
-to pan around, and mouse around the image to explore the code. Quit with
-control-Q or control-W. The intention is for the GUI to be very similar to
-Google Maps, OpenStreetMap, or other map exploration interfaces.
-
 The program can recognize a handful of languages from the file extension (e.g.,
 `.py` or `.go`). If you want to use a language that is not automatically
 recognized, you can do so with the `--language` flag. We use
 [`tree_sitter`](https://tree-sitter.github.io/tree-sitter/) for tokenizing,
 and it supports [many dozens of
 languages](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers).
-If manually setting the language is a common annoyance for you, please send us
-a PR with your file extension and language! The place to change is in
-`visual_diff.py`, in the `guess_language` function.
+Both files must be written in the same language (though I have vague plans to
+change that in the future!). If manually setting the language is a common
+annoyance for you, please send us a PR with your file extension and language!
+The place to change is in `visual_diff.py`, in the `guess_language()` function.
+
+By default, the program will attempt to color the pixels of matching tokens:
+blue pixels are probably noise (e.g., two periods that have no other matching
+tokens nearby), whereas red pixels are definitely duplicated code. Sequences of
+pixels get their colors by joining together chains of matching pixels near each
+other. When comparing a single file to itself, the main diagonal is artificially
+suppressed to blue, because of course each token is equal to itself.
+
+The coloring algorithm can be both memory- and time-intensive. For images larger
+than 50 megapixels (roughly 1300 lines of code in each file), we exit with
+warnings, rather than risk having your computer freeze when it runs out of
+memory. To work around this, you can use the `--black_and_white` option to skip
+coloring, or the `--big_file` option to color anyway (but use the latter at your
+own peril!).
 
 If you specify an `--output_location`, then instead of opening the GUI, the
 image will be saved to file and then the program will exit. Most popular image
 formats should work, including `.png`, `.gif`, `.jpg`, and `.bmp`.
 
 Saving images to a file takes much more memory than displaying them to the
-screen (because they involve compression algorithms), so doing this with large
-images can freeze your whole system. So, by default we refuse to save any
-image that is over 50 megapixels. This can be overridden with the `--big_file`
-flag, but **use that at your own peril.**
+screen (because most image formats involve compression algorithms), so doing
+this with large images can again freeze your whole system. So, by default we
+refuse to save any image that is over 50 megapixels. This can again be
+overridden with the `--big_file` flag, but again **use that at your own peril.**
 
 When using the GUI, you can set the maximum line length for the code displayed
 using the `--text_width` or `-tw` option (default is 100 characters, except
 Python files are 80 characters), and you can set the sidelength, in
 pixels, of the GUI's (square) map view using the `--map_width` or `-mw` option
 (default is 600 pixels).
-
-You can also specify `--color` to get a color image instead of black-and-white.
-Non-matching tokens are still black pixels, but matching ones are colored
-based on how long the estimated chain of matches is: blue indicates a short
-chain (likely noise), up through red for a long one (definitely duplicated
-code). However, the algorithm for computing these colors can be very slow for
-large files, so it is disabled by default. If you want to use it with files over
-50 megapixels, you will again need to use `--big_file`: it can take gigabytes of
-memory and minutes of time to color large images.
 
 ## Uses
 Finding code that has been copied and pasted or is otherwise similar enough to
