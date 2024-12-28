@@ -18,6 +18,9 @@ except ImportError:
     can_use_gui = False
 
 
+PIXELS_IN_BIG_FILE = 50 * 1000 * 1000  # 50 megapixels
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("filename_a", help="File to analyze")
@@ -32,8 +35,8 @@ def parse_args():
                         help="map width/height, in pixels")
     parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
-    parser.add_argument("--color", "-c", action="store_true",
-                        help="Color based on the amount of duplication")
+    parser.add_argument("--black_and_white", "-bw", action="store_true",
+                        help="Don't color based on the amount of duplication")
     return parser.parse_args()
 
 
@@ -78,15 +81,23 @@ if __name__ == "__main__":
     # TODO: it might be cool to allow comparisons across languages.
     with open(args.filename_b or args.filename_a) as f_b:
         data_b = tokenizer.get_tokens(f_b.read(), language)
+    pixel_count = len(data_a.tokens) * len(data_b.tokens)
     print(f"Comparing a file with {len(data_a.tokens)} tokens to "
           f"one that has {len(data_b.tokens)}: final image has "
-          f"{len(data_a.tokens) * len(data_b.tokens)} pixels.")
+          f"{pixel_count} pixels.")
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
 
-    if args.color:
-        hues = find_duplicates.get_hues(matrix, args.filename_b is None)
-    else:
+    if args.black_and_white:
         hues = None
+    else:
+        if pixel_count > PIXELS_IN_BIG_FILE and not args.big_file:
+            print("WARNING: the image is over 50 megapixels. Coloring very "
+                  "large images can use so many resources that your computer "
+                  "will freeze. To perform this action anyway, use the "
+                  "--big_file flag. To skip coloring and use a "
+                  "black-and-white image, use the --black_and_white flag.")
+            sys.exit(3)
+        hues = find_duplicates.get_hues(matrix, args.filename_b is None)
 
     if args.output_location is None:
         if can_use_gui:
@@ -98,8 +109,7 @@ if __name__ == "__main__":
                   "shell, `import gui`, and see what's going wrong.")
             sys.exit(1)
     else:
-        pixel_count = len(data_a.tokens) * len(data_b.tokens)
-        if pixel_count > 10 * 1000 * 1000 and not args.big_file:
+        if pixel_count > PIXELS_IN_BIG_FILE and not args.big_file:
             print("WARNING: the image is over 10 megapixels. Saving very large "
                   "images can use so many resources that your computer "
                   "will freeze. To perform this action anyway, use the "
