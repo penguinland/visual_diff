@@ -131,7 +131,9 @@ show up as very regular structures:
 
 If you zoom out in a very large file, each pixel of the map will contain
 multiple tokens within it. Duplicated code will still show up as a diagonal
-line even if the individual pixels only match partially.
+line even if the individual pixels only match partially. This file was large
+enough that I used the `--black_and_white` flag to skip the coloring, which
+saved gigabytes of memory and multiple minutes of startup time.
 
 ![a zoomed-out view shows each pixel represents multiple tokens in the file](./screenshots/multitoken-matching.png)
 
