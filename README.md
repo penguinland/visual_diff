@@ -81,9 +81,9 @@ formats should work, including `.png`, `.gif`, `.jpg`, and `.bmp`.
 
 Saving images to a file takes much more memory than displaying them to the
 screen (because most image formats involve compression algorithms), so doing
-this with large images can again freeze your whole system. So, by default we
-refuse to save any image that is over 50 megapixels. This can again be
-overridden with the `--big_file` flag, but again **use that at your own peril.**
+this with large images can again freeze your whole system. By default, we refuse
+to save any image that is over 50 megapixels. This can be overridden with the
+`--big_file` flag, but again **use that at your own peril.**
 
 When using the GUI, you can set the maximum line length for the code displayed
 using the `--text_width` or `-tw` option (default is 100 characters, except
