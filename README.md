@@ -105,9 +105,8 @@ as diagonal lines in the image.
 
 ## Examples
 
-The mouse cursor has been artificially colored purple in order to better
-distinguish it from the background. The context at the bottom highlights the
-token(s) represented by the pixel the mouse is pointing to.
+The context at the bottom highlights the token(s) represented by the pixel the
+mouse is pointing to.
 
 Boilerplate code that repeats itself a lot clearly looks like it repeats:
 
@@ -120,7 +119,8 @@ short file and modifying it:
 ![example of a short file compared to a long file made from modifying the short one](./screenshots/gps.png)
 
 This is a single file compared to itself, where the second half of the file
-was created by modifying a copy of the first half:
+was created by modifying a copy of the first half. There are also some helper
+functions repeated in the first half and repeated again in the second half:
 
 ![a file whose second half is a modified copy of the first half](./screenshots/screenshot1.png)
 
@@ -134,6 +134,9 @@ multiple tokens within it. Duplicated code will still show up as a diagonal
 line even if the individual pixels only match partially. This file was large
 enough that I used the `--black_and_white` flag to skip the coloring, which
 saved gigabytes of memory and multiple minutes of startup time.
+
+The mouse cursor has been artificially colored purple in order to better
+distinguish it from the background.
 
 ![a zoomed-out view shows each pixel represents multiple tokens in the file](./screenshots/multitoken-matching.png)
 
