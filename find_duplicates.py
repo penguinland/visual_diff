@@ -148,7 +148,6 @@ def _get_segments(matrix, is_single_file):
 
     # Finally, output the final sizes of all the _SegmentUnionFinds as the final
     # scores.
-    nr, nc = matrix.shape
     # For every pixel not involved in a segment, its score is 0 if it was not
     # set in the original, and 1 if it was (it's either a lone pixel or it's on
     # the main diagonal of a file compared to itself).
