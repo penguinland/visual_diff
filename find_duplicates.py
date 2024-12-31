@@ -111,13 +111,9 @@ def _initialize_segments(matrix, is_single_file):
 def _get_segments(matrix, is_single_file):
     """
     matrix is a 2D numpy array of uint8s. is_single_file is a boolean. We return
-    a tuple of (length_image, segments), where length_image is a 2D numpy array
-    of uint32s, which are a measure of how long a chain of nonzero values from
-    the original matrix is, and segments is a set of _SegmentUnionFinds
-    describing all the segments found while creating length_image.
-
-    If is_single_file is set, the main diagonal will be all 1's, because a file
-    shouldn't count as a duplicate of itself.
+    a map from (row, col) pairs to _SegmentUnionFinds for each pixel set in the
+    original matrix. If is_single_file is set, we do not include pixels on the
+    main diagonal, because a file shouldn't count as a duplicate of itself.
     """
     segments, pixel_to_segment = _initialize_segments(matrix, is_single_file)
     while segments:
@@ -145,16 +141,7 @@ def _get_segments(matrix, is_single_file):
         # larger_segments might contain segments that were subsequently joined
         # together. Remove duplicates before merging again.
         segments = set(segment.get_root() for segment in larger_segments)
-
-    # Finally, output the final sizes of all the _SegmentUnionFinds as the final
-    # scores.
-    # For every pixel not involved in a segment, its score is 0 if it was not
-    # set in the original, and 1 if it was (it's either a lone pixel or it's on
-    # the main diagonal of a file compared to itself).
-    scores = (matrix != 0).astype(numpy.uint32)
-    for (r, c), segment in pixel_to_segment.items():
-        scores[r, c] = segment.size()
-    return scores, segments
+    return pixel_to_segment
 
 
 def get_lengths(matrix, is_single_file):
@@ -166,7 +153,13 @@ def get_lengths(matrix, is_single_file):
     If is_single_file is set, the main diagonal will be all 1's, because a file
     shouldn't count as a duplicate of itself.
     """
-    image, _ = _get_segments(matrix, is_single_file)
+    pixel_to_segment = _get_segments(matrix, is_single_file)
+    # For every pixel not involved in a segment, its score is 0 if it was not
+    # set in the original, and 1 if it was (it's either a lone pixel or it's on
+    # the main diagonal of a file compared to itself).
+    scores = (matrix != 0).astype(numpy.uint32)
+    for (r, c), segment in pixel_to_segment.items():
+        scores[r, c] = segment.size()
     return image
 
 
@@ -178,8 +171,10 @@ def get_segments(matrix, is_single_file):
     If is_single_file is set, the main diagonal cannot be joined into a segment,
     because a file shouldn't count as a duplicate of itself.
     """
-    _, segments = _get_segments(matrix, is_single_file)
-    return set(segment.get_root() for segment in segments)
+    pixel_to_segment = _get_segments(matrix, is_single_file)
+    # Collect all the segments and remove duplicates.
+    segments = set(segment.get_root() for segment in pixel_to_segment.values())
+    return segments
 
 
 def _find_mergeable_segment(current, pixel_to_segment, max_distance, shape):
