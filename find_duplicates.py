@@ -71,7 +71,7 @@ def _initialize_segments(matrix, is_single_file):
     """
     Returns a tuple of (segments, pixel_to_segment). These are a list of
     _SegmentUnionFinds and a dict mapping pixel coordinates to the
-    _SegmentUnionFinds they make up (same ones as in the list).  Each
+    _SegmentUnionFinds they make up (same ones as in the list). Each
     _SegmentUnionFind has size at least 2: these have already merged as many
     immediate-diagonal neighbors as possible.
     """
@@ -157,9 +157,9 @@ def get_lengths(matrix, is_single_file):
     # For every pixel not involved in a segment, its score is 0 if it was not
     # set in the original, and 1 if it was (it's either a lone pixel or it's on
     # the main diagonal of a file compared to itself).
-    scores = (matrix != 0).astype(numpy.uint32)
+    image = (matrix != 0).astype(numpy.uint32)
     for (r, c), segment in pixel_to_segment.items():
-        scores[r, c] = segment.size()
+        image[r, c] = segment.size()
     return image
 
 
