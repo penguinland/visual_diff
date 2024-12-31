@@ -108,7 +108,7 @@ def _initialize_segments(matrix, is_single_file):
     return segments, pixel_to_segment
 
 
-def _get_segments(matrix, is_single_file):
+def _get_pixel_to_segment(matrix, is_single_file):
     """
     matrix is a 2D numpy array of uint8s. is_single_file is a boolean. We return
     a map from (row, col) pairs to _SegmentUnionFinds for each pixel set in the
@@ -153,7 +153,7 @@ def get_lengths(matrix, is_single_file):
     If is_single_file is set, the main diagonal will be all 1's, because a file
     shouldn't count as a duplicate of itself.
     """
-    pixel_to_segment = _get_segments(matrix, is_single_file)
+    pixel_to_segment = _get_pixel_to_segment(matrix, is_single_file)
     # For every pixel not involved in a segment, its score is 0 if it was not
     # set in the original, and 1 if it was (it's either a lone pixel or it's on
     # the main diagonal of a file compared to itself).
@@ -171,7 +171,7 @@ def get_segments(matrix, is_single_file):
     If is_single_file is set, the main diagonal cannot be joined into a segment,
     because a file shouldn't count as a duplicate of itself.
     """
-    pixel_to_segment = _get_segments(matrix, is_single_file)
+    pixel_to_segment = _get_pixel_to_segment(matrix, is_single_file)
     # Collect all the segments and remove duplicates.
     segments = set(segment.get_root() for segment in pixel_to_segment.values())
     return segments
