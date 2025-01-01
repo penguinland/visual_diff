@@ -59,7 +59,7 @@ languages](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers).
 Both files must be written in the same language (though I have vague plans to
 change that in the future!). If manually setting the language is a common
 annoyance for you, please send us a PR with your file extension and language!
-The place to change is in `visual_diff.py`, in the `guess_language()` function.
+The place to change is in `utils.py`, in the `guess_language()` function.
 
 By default, the program will attempt to color the pixels of matching tokens:
 blue pixels are probably noise (e.g., two periods that have no other matching
