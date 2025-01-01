@@ -59,7 +59,7 @@ languages](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers).
 Both files must be written in the same language (though I have vague plans to
 change that in the future!). If manually setting the language is a common
 annoyance for you, please send us a PR with your file extension and language!
-The place to change is in `visual_diff.py`, in the `guess_language()` function.
+The place to change is in `utils.py`, in the `guess_language()` function.
 
 By default, the program will attempt to color the pixels of matching tokens:
 blue pixels are probably noise (e.g., two periods that have no other matching
@@ -145,5 +145,9 @@ This code was predominantly written by Alan Davidson. He got the
 idea from a talk he saw at DEFCON 2006, in which [Dan
 Kaminsky](https://dankaminsky.com/) showed a very similar tool he had built to
 compare binaries made from the same source code using different compilers.
-Here are [slides he made](http://www.slideshare.net/dakami/dmk-shmoo2007) for a
-very similar talk at SchmooCon 2007 (start around slide 45).
+Here are [slides he made](https://www.slideshare.net/slideshow/dmk-shmoo2007/5920322#45)
+for a very similar talk at SchmooCon 2007 (start around slide 45).
+
+## Running the tests
+
+`python -m unittest discover -p '*_test.py'`

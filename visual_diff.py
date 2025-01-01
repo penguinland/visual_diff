@@ -40,28 +40,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def guess_language(filename):
-    file_type = filename.split(".")[-1]
-    known_types = {  # Sorted by language (sorted by value, not key!)
-        "c":      "c",
-        "h":      "cpp",  # Might be C or C++, err on the side of caution
-        "cc":     "cpp",
-        "hh":     "cpp",
-        "cpp":    "cpp",
-        "hpp":    "cpp",
-        "go":     "go",
-        "js":     "javascript",
-        "py":     "python",
-        "svelte": "svelte",
-        "ts":     "typescript",
-        }
-    expected_language = known_types.get(file_type)
-    if expected_language is not None:
-        return expected_language
-    raise ValueError(f"Cannot infer language for unknown file extension "
-                     f"'.{file_type}'. Set language explicitly")
-
-
 def get_text_width(args):
     if args.text_width is not None:
         return args.text_width
@@ -74,13 +52,13 @@ if __name__ == "__main__":
     args = parse_args()
     language = args.language
     if language is None:
-        language = guess_language(args.filename_a)
+        language = utils.guess_language(args.filename_a)
 
-    with open(args.filename_a) as f_a:
-        data_a = tokenizer.get_tokens(f_a.read(), language)
     # TODO: it might be cool to allow comparisons across languages.
-    with open(args.filename_b or args.filename_a) as f_b:
-        data_b = tokenizer.get_tokens(f_b.read(), language)
+    data_a, data_b = (tokenizer.get_file_tokens(filename, language)
+                      for filename in (args.filename_a,
+                                       args.filename_b or args.filename_a))
+
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
     print(f"Comparing a file with {len(data_a.tokens)} tokens to "
           f"one that has {len(data_b.tokens)}: final image has "

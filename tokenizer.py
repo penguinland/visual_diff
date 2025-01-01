@@ -2,12 +2,21 @@ import code_tokenize
 import collections
 import numpy
 
+import utils
+
 
 # The tokens is a list of tokens contained in a file.
 # The lines is a list of strings containing the file contents.
 # The boundaries is a list of ((start_row, start_col), (end_row, end_col))
 #     tuples for each token.
 FileInfo = collections.namedtuple("FileInfo", ["tokens", "lines", "boundaries"])
+
+
+def get_file_tokens(filename, language=None):
+    if language is None:
+        language = utils.guess_language(filename)
+    with open(filename) as f:
+        return get_tokens(f.read(), language)
 
 
 def get_tokens(file_contents, language):

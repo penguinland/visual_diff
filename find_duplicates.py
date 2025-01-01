@@ -71,7 +71,7 @@ def _initialize_segments(matrix, is_single_file):
     """
     Returns a tuple of (segments, pixel_to_segment). These are a list of
     _SegmentUnionFinds and a dict mapping pixel coordinates to the
-    _SegmentUnionFinds they make up (same ones as in the list).  Each
+    _SegmentUnionFinds they make up (same ones as in the list). Each
     _SegmentUnionFind has size at least 2: these have already merged as many
     immediate-diagonal neighbors as possible.
     """
@@ -108,17 +108,24 @@ def _initialize_segments(matrix, is_single_file):
     return segments, pixel_to_segment
 
 
-def get_lengths(matrix, is_single_file):
+def _get_pixel_to_segment(matrix, is_single_file):
     """
-    matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
-    which are a measure of how long a chain of nonzero values from the original
-    matrix is.
-
-    If is_single_file is set, the main diagonal will be all 1's, because a file
-    shouldn't count as a duplicate of itself.
+    matrix is a 2D numpy array of uint8s. is_single_file is a boolean. We return
+    a map from (row, col) pairs to _SegmentUnionFinds for each pixel set in the
+    original matrix. If is_single_file is set, we do not include pixels on the
+    main diagonal, because a file shouldn't count as a duplicate of itself.
     """
     segments, pixel_to_segment = _initialize_segments(matrix, is_single_file)
     while segments:
+        # To prevent flaky tests, we need to be deterministic, which means we
+        # need to sort the segments. Try merging the largest ones first, and
+        # among ties, go for the ones closest to the top-left corner first. If
+        # there are still ties, just pick some arbitrary order.
+        def key(segment):
+            root = segment.get_root()
+            return (-root.size(), sum(root.top), *root.top, *root.bottom)
+        segments = sorted(segments, key=key)
+
         # The maximum distance to look over is the smallest distance that is as
         # far as any segment can reach. That way, small segments near each
         # other get to grow without a large, far-away segment inserting itself,
@@ -143,17 +150,40 @@ def get_lengths(matrix, is_single_file):
         # larger_segments might contain segments that were subsequently joined
         # together. Remove duplicates before merging again.
         segments = set(segment.get_root() for segment in larger_segments)
+    return pixel_to_segment
 
-    # Finally, output the final sizes of all the _SegmentUnionFinds as the final
-    # scores.
-    nr, nc = matrix.shape
+
+def get_lengths(matrix, is_single_file):
+    """
+    matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
+    which are a measure of how long a chain of nonzero values from the original
+    matrix is.
+
+    If is_single_file is set, the main diagonal will be all 1's, because a file
+    shouldn't count as a duplicate of itself.
+    """
+    pixel_to_segment = _get_pixel_to_segment(matrix, is_single_file)
     # For every pixel not involved in a segment, its score is 0 if it was not
     # set in the original, and 1 if it was (it's either a lone pixel or it's on
     # the main diagonal of a file compared to itself).
-    scores = (matrix != 0).astype(numpy.uint32)
+    image = (matrix != 0).astype(numpy.uint32)
     for (r, c), segment in pixel_to_segment.items():
-        scores[r, c] = segment.size()
-    return scores
+        image[r, c] = segment.size()
+    return image
+
+
+def get_segments(matrix, is_single_file):
+    """
+    matrix is a 2D numpy array of uint8s. We return set of _SegmentUnionFinds
+    describing all the segments we found in the matrix.
+
+    If is_single_file is set, the main diagonal cannot be joined into a segment,
+    because a file shouldn't count as a duplicate of itself.
+    """
+    pixel_to_segment = _get_pixel_to_segment(matrix, is_single_file)
+    # Collect all the segments and remove duplicates.
+    segments = set(segment.get_root() for segment in pixel_to_segment.values())
+    return segments
 
 
 def _find_mergeable_segment(current, pixel_to_segment, max_distance, shape):
