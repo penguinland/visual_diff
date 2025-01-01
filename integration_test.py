@@ -11,6 +11,25 @@ import utils
 
 
 class TestGetLengths(unittest.TestCase):
+    @staticmethod
+    def generate_image(filename_a, filename_b):
+        data_a = tokenizer.get_file_tokens(f"examples/{filename_a}")
+        data_b = tokenizer.get_file_tokens(f"examples/{filename_b}")
+        matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
+        hues = find_duplicates.get_hues(matrix, (filename_a == filename_b))
+        temporary_matrix = utils.to_hsv_matrix(matrix, hues)
+        # We need to convert to RGB space before comparing. In HSV space, there
+        # are lots of triples that should be considered identical (e.g., when
+        # the value is 0, it doesn't matter what the saturation is).
+        actual_image = PIL.Image.fromarray(temporary_matrix,
+                                           mode="HSV").convert(mode="RGB")
+        return actual_image
+
+    def assertImagesMatch(self, expected_filename, actual_image):
+        expected_image = PIL.Image.open(f"test_images/{expected_filename}")
+        self.assertEqual(list(actual_image.getdata()),
+                         list(expected_image.getdata()))
+
     @parameterized.expand((("cpp_example.hpp",),
                           ("index.js",),
                           ("lsbattle_entity_wireframe.py",),
@@ -18,22 +37,18 @@ class TestGetLengths(unittest.TestCase):
                           ("server.go",),
                           ))
     def test_single_file(self, filename):
-        data = tokenizer.get_file_tokens(f"examples/{filename}")
-        matrix = utils.make_matrix(data.tokens, data.tokens)
-        hues = find_duplicates.get_hues(matrix, True)
-        temporary_matrix = utils.to_hsv_matrix(matrix, hues)
-        # We need to convert to RGB space before comparing. In HSV space, there
-        # are lots of triples that should be considered identical (e.g., when
-        # the value is 0, it doesn't matter what the saturation is).
-        actual_image = PIL.Image.fromarray(temporary_matrix,
-                                           mode="HSV").convert(mode="RGB")
-
+        actual_image = self.generate_image(filename, filename)
         # Surely there's a better way to replace a file extension, but I can't
         # think of it right now.
-        image_filename = f"test_images/{filename.split('.')[0]}.png"
-        expected_image = PIL.Image.open(image_filename)
-        self.assertEqual(list(actual_image.getdata()),
-                         list(expected_image.getdata()))
+        image_filename = f"{filename.split('.')[0]}.png"
+        self.assertImagesMatch(image_filename, actual_image)
+
+
+    @parameterized.expand((("gpsnmea.go", "gpsrtk.go", "gps.png"),
+                          ))
+    def test_two_files(self, filename_a, filename_b, image_filename):
+        actual_image = self.generate_image(filename_a, filename_b)
+        self.assertImagesMatch(image_filename, actual_image)
 
 
 if __name__ == '__main__':
