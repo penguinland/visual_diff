@@ -54,11 +54,11 @@ if __name__ == "__main__":
     if language is None:
         language = utils.guess_language(args.filename_a)
 
-    with open(args.filename_a) as f_a:
-        data_a = tokenizer.get_tokens(f_a.read(), language)
     # TODO: it might be cool to allow comparisons across languages.
-    with open(args.filename_b or args.filename_a) as f_b:
-        data_b = tokenizer.get_tokens(f_b.read(), language)
+    data_a, data_b = (tokenizer.get_file_tokens(filename, language)
+                      for filename in (args.filename_a,
+                                       args.filename_b or args.filename_a))
+
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
     print(f"Comparing a file with {len(data_a.tokens)} tokens to "
           f"one that has {len(data_b.tokens)}: final image has "
