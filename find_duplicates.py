@@ -117,6 +117,15 @@ def _get_pixel_to_segment(matrix, is_single_file):
     """
     segments, pixel_to_segment = _initialize_segments(matrix, is_single_file)
     while segments:
+        # To prevent flaky tests, we need to be deterministic, which means we
+        # need to sort the segments. Try merging the largest ones first, and
+        # among ties, go for the ones closest to the top-left corner first. If
+        # there are still ties, just pick some arbitrary order.
+        def key(segment):
+            root = segment.get_root()
+            return (-root.size(), sum(root.top), *root.top, *root.bottom)
+        segments = sorted(segments, key=key)
+
         # The maximum distance to look over is the smallest distance that is as
         # far as any segment can reach. That way, small segments near each
         # other get to grow without a large, far-away segment inserting itself,

@@ -27,28 +27,13 @@ class TestGetLengths(unittest.TestCase):
         # the value is 0, it doesn't matter what the saturation is).
         actual_image = PIL.Image.fromarray(temporary_matrix,
                                            mode="HSV").convert(mode="RGB")
-        actual_matrix = numpy.array(actual_image.getdata()).reshape(
-                actual_image.size[1], actual_image.size[0], 3)
 
         # Surely there's a better way to replace a file extension, but I can't
         # think of it right now.
         image_filename = f"test_images/{filename.split('.')[0]}.png"
         expected_image = PIL.Image.open(image_filename)
-        expected_matrix = numpy.array(expected_image.getdata()).reshape(
-                expected_image.size[1], expected_image.size[0], 3)
-        #print("actual:", actual_matrix[:10, :10, :])
-        #print("expected:", expected_matrix[:10, :10, :])
-        for r in range(expected_matrix.shape[0]):
-            for c in range(expected_matrix.shape[1]):
-
-                e = expected_matrix[r, c, :]
-                a = actual_matrix[r, c, :]
-                if (e != a).any():
-                    print(f"pixel {r}, {c} differs! Expected {e} but got {a}, "
-                          f"for '{data.tokens[r]}' at {data.boundaries[r]} vs. "
-                          f"for '{data.tokens[c]}' at {data.boundaries[c]} vs. "
-                          )
-        self.assertLess(numpy.sum(actual_matrix != expected_matrix), 1)
+        self.assertEqual(list(actual_image.getdata()),
+                         list(expected_image.getdata()))
 
 
 if __name__ == '__main__':
