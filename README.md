@@ -147,3 +147,7 @@ Kaminsky](https://dankaminsky.com/) showed a very similar tool he had built to
 compare binaries made from the same source code using different compilers.
 Here are [slides he made](https://www.slideshare.net/slideshow/dmk-shmoo2007/5920322#45)
 for a very similar talk at SchmooCon 2007 (start around slide 45).
+
+## Running the tests
+
+`python -m unittest discover -p '*_test.py'`
