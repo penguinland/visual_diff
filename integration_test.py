@@ -17,10 +17,10 @@ class TestGetLengths(unittest.TestCase):
         matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
         hues = find_duplicates.get_hues(matrix, (filename_a == filename_b))
         actual_matrix = utils.to_hsv_matrix(matrix, hues)
+        actual_image = PIL.Image.fromarray(actual_matrix, mode="HSV")
         # We need to convert to RGB space before comparing. In HSV space, there
         # are lots of triples that should be considered identical (e.g., when
         # the value is 0, it doesn't matter what the saturation is).
-        actual_image = PIL.Image.fromarray(actual_matrix, mode="HSV")
         return actual_image.convert(mode="RGB")
 
     def assertImagesMatch(self, expected_filename, actual_image):
