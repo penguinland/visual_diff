@@ -1,6 +1,9 @@
 import numpy
 
 
+PIXELS_IN_BIG_FILE = 50 * 1000 * 1000  # 50 megapixels
+
+
 def to_hsv_matrix(matrix, hues):
     """
     The matrix is a 2D array of uint8's. The hues are either None or another 2D
