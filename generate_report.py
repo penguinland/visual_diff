@@ -55,7 +55,7 @@ def compare_files(filename_a, filename_b, language):
     # Otherwise...
     print(f"Found duplicated code between {filename_a} and {filename_b}:")
     for size, start_a, end_a, start_b, end_b in sorted(large_segments):
-        print(f"  {-size} tokens on lines "
+        print(f"    {-size} tokens on lines "
               f"{start_a}-{end_a} and {start_b}-{end_b}")
 
 
