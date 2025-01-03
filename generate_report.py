@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
-
+import argparse
 import collections
 import glob
 
 import find_duplicates
 import tokenizer
 import utils
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file_glob", help="Glob pattern of files to analyze")
+    parser.add_argument("--min_length", "-ml", type=int, default=100,
+                        help="Minimum number of duplicated tokens to report")
+    parser.add_argument("--big_files", "-bf", action="store_true",
+                        help="Don't skip extremely large files")
+    return parser.parse_args()
 
 
 def find_all_files(glob_pattern):
@@ -21,7 +31,8 @@ def find_all_files(glob_pattern):
     return results
 
 
-def compare_files(filename_a, filename_b, language, min_segment_size):
+def compare_files(filename_a, filename_b, language, min_segment_size,
+                  include_large_files):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -29,10 +40,9 @@ def compare_files(filename_a, filename_b, language, min_segment_size):
     data_a, data_b = (tokenizer.get_file_tokens(filename, language)
                       for filename in (filename_a, filename_b))
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
-    if pixel_count > utils.PIXELS_IN_BIG_FILE:
-        print("skipping analysis of too-big image "
-              f"for '{filename_a}' and '{filename_b}'")
-        return []
+    if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_large_files:
+        return ["skipping analysis of too-big image "
+                f"for '{filename_a}' and '{filename_b}'"]
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
     segments = find_duplicates.get_segments(matrix, (filename_a == filename_b))
     # We'll keep a tuple of (negative_size, start_line_a, end_line_a,
@@ -70,7 +80,8 @@ def compare_files(filename_a, filename_b, language, min_segment_size):
     return results
 
 
-def compare_all_files(filenames, language, min_segment_size):
+def compare_all_files(filenames, language, min_segment_size,
+                      include_large_files):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -81,6 +92,16 @@ def compare_all_files(filenames, language, min_segment_size):
     for i, filename_a in enumerate(filenames):
         for filename_b in filenames[i:]:
             pair_results = compare_files(
-                    filename_a, filename_b, language, min_segment_size)
+                    filename_a, filename_b, language, min_segment_size,
+                    include_large_files)
             results.extend(pair_results)
     return results
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    languages_to_file_lists = find_all_files(args.file_glob)
+    for language, file_list in languages_to_file_lists.items():
+        for line in compare_all_files(
+                file_list, language, args.min_length, args.big_files):
+            print(line)
