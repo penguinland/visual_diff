@@ -11,7 +11,7 @@ class TestGenerateReports(unittest.TestCase):
     def test_file_against_self(self):
         actual = generate_report.compare_files("examples/pointsprite.py",
                                                "examples/pointsprite.py",
-                                               "python")
+                                               "python", 100)
         expected = [
             "Found duplicated code between examples/pointsprite.py and examples/pointsprite.py:",
             "    706 tokens on lines 28-121 and lines 121-295",
@@ -24,7 +24,7 @@ class TestGenerateReports(unittest.TestCase):
 
     def test_file_pair(self):
         actual = generate_report.compare_all_files(
-            ["examples/gpsnmea.go", "examples/gpsrtk.go"], "go")
+            ["examples/gpsnmea.go", "examples/gpsrtk.go"], "go", 100)
         expected = [
             "Found duplicated code between examples/gpsnmea.go and examples/gpsrtk.go:",
             "    413 tokens on lines 61-123 and lines 77-144",

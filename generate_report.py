@@ -21,7 +21,7 @@ def find_all_files(glob_pattern):
     return results
 
 
-def compare_files(filename_a, filename_b, language):
+def compare_files(filename_a, filename_b, language, min_segment_size):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -41,7 +41,7 @@ def compare_files(filename_a, filename_b, language):
     # first.
     large_segments = set()
     for segment in segments:
-        if segment.size() < 100:
+        if segment.size() < min_segment_size:
             continue
         # When comparing a file to itself, don't consider the segment from X to
         # Y as distinct from the segment from Y to X.
@@ -70,7 +70,7 @@ def compare_files(filename_a, filename_b, language):
     return results
 
 
-def compare_all_files(filenames, language):
+def compare_all_files(filenames, language, min_segment_size):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -80,5 +80,7 @@ def compare_all_files(filenames, language):
     # B with A, but do remember to compare A with A.
     for i, filename_a in enumerate(filenames):
         for filename_b in filenames[i:]:
-            results.extend(compare_files(filename_a, filename_b, language))
+            pair_results = compare_files(
+                    filename_a, filename_b, language, min_segment_size)
+            results.extend(pair_results)
     return results
