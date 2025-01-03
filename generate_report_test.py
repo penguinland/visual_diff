@@ -41,6 +41,19 @@ class TestGenerateReports(unittest.TestCase):
             ]
         self.assertEqual(expected, actual)
 
+    def test_file_globbing(self):
+        actual = generate_report.find_all_files(
+            ["examples/*.py", "examples/*.?pp"])
+        expected = {
+            "python": ["examples/lsbattle_entity_wireframe.py",
+                       "examples/pointsprite.py"],
+            "cpp": ["examples/cpp_example.hpp",
+                    "examples/viam_mlmodelservice_triton_impl.cpp"],
+        }
+        # To make the tests deterministic, sort each value.
+        actual_sorted = {k: sorted(v) for k, v in actual.items()}
+        self.assertEqual(expected, actual_sorted)
+
 
 if __name__ == '__main__':
     unittest.main()

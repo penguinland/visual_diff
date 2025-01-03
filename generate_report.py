@@ -10,7 +10,8 @@ import utils
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_glob", help="Glob pattern of files to analyze")
+    parser.add_argument("file_glob", nargs="*",
+                        help="Glob pattern of files to analyze")
     parser.add_argument("--min_length", "-ml", type=int, default=100,
                         help="Minimum number of duplicated tokens to report")
     parser.add_argument("--big_files", "-bf", action="store_true",
@@ -18,21 +19,22 @@ def parse_args():
     return parser.parse_args()
 
 
-def find_all_files(glob_pattern):
+def find_all_files(glob_patterns):
     """
     We take in a string describing a glob pattern, and return a dict mapping
     language names to lists of filenames in the glob whose extension matches the
     language (e.g., `{"cpp": ["example.hpp", "example.cpp"]}`).
     """
     results = collections.defaultdict(list)
-    for filename in glob.iglob(glob_pattern):
-        language = utils.guess_language(filename)
-        results[language].append(filename)
+    for glob_pattern in glob_patterns:
+        for filename in glob.iglob(glob_pattern):
+            language = utils.guess_language(filename)
+            results[language].append(filename)
     return results
 
 
 def compare_files(filename_a, filename_b, language, min_segment_size,
-                  include_large_files):
+                  include_large_files=False):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -81,7 +83,7 @@ def compare_files(filename_a, filename_b, language, min_segment_size,
 
 
 def compare_all_files(filenames, language, min_segment_size,
-                      include_large_files):
+                      include_large_files=False):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
