@@ -25,10 +25,8 @@ class TestGetLengths(unittest.TestCase):
 
     def assertImagesMatch(self, expected_filename, actual_image):
         expected_image = PIL.Image.open(f"test_images/{expected_filename}")
-        actual_data = list(actual_image.getdata())
-        expected_data = list(expected_image.getdata())
-        for i, (a, e) in enumerate(zip(actual_data, expected_data)):
-            self.assertEqual(a, e, f"pixels at index {i} differ")
+        self.assertEqual(list(actual_image.getdata()),
+                         list(expected_image.getdata()))
 
     @parameterized.expand((("cpp_example.hpp",),
                           ("index.js",),
@@ -47,14 +45,6 @@ class TestGetLengths(unittest.TestCase):
     @parameterized.expand((("gpsnmea.go", "gpsrtk.go", "gps.png"),
                           ))
     def test_two_files(self, filename_a, filename_b, image_filename):
-        data_a = tokenizer.get_file_tokens(f"examples/{filename_a}")
-        data_b = tokenizer.get_file_tokens(f"examples/{filename_b}")
-        with open(f"{filename_a}.txt", "w") as f:
-            for tup in zip(data_a.tokens, data_a.boundaries):
-                f.write(f"{tup}\n")
-        with open(f"{filename_b}.txt", "w") as f:
-            for tup in zip(data_b.tokens, data_b.boundaries):
-                f.write(f"{tup}\n")
         actual_image = self.generate_image(filename_a, filename_b)
         self.assertImagesMatch(image_filename, actual_image)
 
