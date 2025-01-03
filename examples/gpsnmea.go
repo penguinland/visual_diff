@@ -21,6 +21,13 @@ func connectionTypeError(connType, serialConn, i2cConn string) error {
 		i2cConn)
 }
 
+// As of late 2024, something about the way tree-sitter parsed backticks was not consistent: one
+// computer running this would get a single token containing two backticks and everything between,
+// while another would get three tokens: a backtick token, then the string between them, and
+// another backtick token. In order to get the integration tests to pass with either tokenizer
+// implementation, we comment out all of these structs. The code won't compile, but at least you
+// can find the other duplications.
+/*
 // AttrConfig is used for converting NMEA Movement Sensor attibutes.
 type AttrConfig struct {
 	ConnectionType string `json:"connection_type"`
@@ -45,6 +52,7 @@ type I2CAttrConfig struct {
 	I2cAddr     int    `json:"i2c_addr"`
 	I2CBaudRate int    `json:"i2c_baud_rate,omitempty"`
 }
+*/
 
 // Validate ensures all parts of the config are valid.
 func (cfg *AttrConfig) Validate(path string) ([]string, error) {
