@@ -22,13 +22,17 @@ def find_all_files(glob_pattern):
 
 
 def compare_files(filename_a, filename_b, language):
+    """
+    Returns a list of strings that should be shown in a report about
+    duplication within these files.
+    """
     data_a, data_b = (tokenizer.get_file_tokens(filename, language)
                       for filename in (filename_a, filename_b))
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
     if pixel_count > utils.PIXELS_IN_BIG_FILE:
         print("skipping analysis of too-big image "
               f"for '{filename_a}' and '{filename_b}'")
-        return
+        return []
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
     segments = find_duplicates.get_segments(matrix, (filename_a == filename_b))
     # We'll keep a tuple of (negative_size, start_line_a, end_line_a,
@@ -51,27 +55,30 @@ def compare_files(filename_a, filename_b, language):
                             ))
 
     if not large_segments:
-        return  # No major duplication!
+        return []  # No major duplication!
     # Otherwise...
-    print(f"Found duplicated code between {filename_a} and {filename_b}:")
+    results = [f"Found duplicated code between {filename_a} and {filename_b}:"]
+
     def sorting_key(data):
         # Sort by the starting line in file A, then starting line in file B,
         # then by length (largest to smallest).
         return (data[1], data[3], -data[0])
     large_segments = sorted(large_segments, key=sorting_key)
     for size, start_a, end_a, start_b, end_b in large_segments:
-        print(f"    {size} tokens on lines "
-              f"{start_a}-{end_a} and lines {start_b}-{end_b}")
-
-
-compare_files("examples/pointsprite.py", "examples/pointsprite.py", "python")
+        results.append(f"    {size} tokens on lines "
+                       f"{start_a}-{end_a} and lines {start_b}-{end_b}")
+    return results
 
 
 def compare_all_files(filenames, language):
+    """
+    Returns a list of strings that should be shown in a report about
+    duplication within these files.
+    """
+    results = []
     # Compare all pairs of files. After comparing A with B, don't also compare
     # B with A, but do remember to compare A with A.
     for i, filename_a in enumerate(filenames):
         for filename_b in filenames[i:]:
-            compare_files(filename_a, filename_b, language)
-
-compare_all_files(["examples/gpsnmea.go", "examples/gpsrtk.go"], "go")
+            results.extend(compare_files(filename_a, filename_b, language))
+    return results
