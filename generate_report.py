@@ -43,7 +43,7 @@ def compare_files(filename_a, filename_b, language):
         # Y as distinct from the segment from Y to X.
         if filename_a == filename_b and segment.top[0] > segment.top[1]:
                 continue
-        large_segments.add((-segment.size(),
+        large_segments.add((segment.size(),
                             data_a.boundaries[segment.top[0]][0][0],
                             data_a.boundaries[segment.bottom[0]][1][0],
                             data_b.boundaries[segment.top[1]][0][0],
@@ -54,9 +54,14 @@ def compare_files(filename_a, filename_b, language):
         return  # No major duplication!
     # Otherwise...
     print(f"Found duplicated code between {filename_a} and {filename_b}:")
-    for size, start_a, end_a, start_b, end_b in sorted(large_segments):
-        print(f"    {-size} tokens on lines "
-              f"{start_a}-{end_a} and {start_b}-{end_b}")
+    def sorting_key(data):
+        # Sort by the starting line in file A, then starting line in file B,
+        # then by length (largest to smallest).
+        return (data[1], data[3], -data[0])
+    large_segments = sorted(large_segments, key=sorting_key)
+    for size, start_a, end_a, start_b, end_b in large_segments:
+        print(f"    {size} tokens on lines "
+              f"{start_a}-{end_a} and lines {start_b}-{end_b}")
 
 
 compare_files("examples/pointsprite.py", "examples/pointsprite.py", "python")
@@ -68,3 +73,5 @@ def compare_all_files(filenames, language):
     for i, filename_a in enumerate(filenames):
         for filename_b in filenames[i:]:
             compare_files(filename_a, filename_b, language)
+
+compare_all_files(["examples/gpsnmea.go", "examples/gpsrtk.go"], "go")
