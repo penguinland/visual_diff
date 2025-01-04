@@ -37,6 +37,7 @@ def guess_language(filename):
         "cpp":    "cpp",
         "hpp":    "cpp",
         "go":     "go",
+        "hs":     "haskell",
         "js":     "javascript",
         "py":     "python",
         "svelte": "svelte",
