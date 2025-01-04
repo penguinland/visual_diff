@@ -28,7 +28,11 @@ def find_all_files(glob_patterns):
     results = collections.defaultdict(list)
     for glob_pattern in glob_patterns:
         for filename in glob.iglob(glob_pattern):
-            language = utils.guess_language(filename)
+            try:
+                language = utils.guess_language(filename)
+            except ValueError:
+                print(f"Skipping file '{filename}' in unknown format")
+                continue
             results[language].append(filename)
     return results
 
