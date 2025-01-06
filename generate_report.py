@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument("--min_length", "-ml", type=int, default=100,
                         help="Minimum number of duplicated tokens to report")
     parser.add_argument("--big_files", "-bf", action="store_true",
-                        help="Don't skip extremely large files")
+                        help="Don't skip images over 50 megapixels")
     return parser.parse_args()
 
 
