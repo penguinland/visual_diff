@@ -18,9 +18,6 @@ except ImportError:
     can_use_gui = False
 
 
-PIXELS_IN_BIG_FILE = 50 * 1000 * 1000  # 50 megapixels
-
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("filename_a", help="File to analyze")
@@ -68,7 +65,7 @@ if __name__ == "__main__":
     if args.black_and_white:
         hues = None
     else:
-        if pixel_count > PIXELS_IN_BIG_FILE and not args.big_file:
+        if pixel_count > utils.PIXELS_IN_BIG_FILE and not args.big_file:
             print("WARNING: the image is over 50 megapixels. Coloring very "
                   "large images can use so many resources that your computer "
                   "will freeze. To perform this action anyway, use the "
@@ -87,7 +84,7 @@ if __name__ == "__main__":
                   "shell, `import gui`, and see what's going wrong.")
             sys.exit(1)
     else:
-        if pixel_count > PIXELS_IN_BIG_FILE and not args.big_file:
+        if pixel_count > utils.PIXELS_IN_BIG_FILE and not args.big_file:
             print("WARNING: the image is over 10 megapixels. Saving very large "
                   "images can use so many resources that your computer "
                   "will freeze. To perform this action anyway, use the "
