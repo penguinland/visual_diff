@@ -43,8 +43,11 @@ def compare_files(filename_a, filename_b, language, min_segment_size,
     Returns a list of strings that should be shown in a report about
     duplication within these files.
     """
-    data_a, data_b = (tokenizer.get_file_tokens(filename, language)
-                      for filename in (filename_a, filename_b))
+    try:
+        data_a, data_b = (tokenizer.get_file_tokens(filename, language)
+                          for filename in (filename_a, filename_b))
+    except SyntaxError:
+        return [f"Parse error when comparing {filename_a} to {filename_b}."]
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
     if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_large_files:
         return ["skipping analysis of too-big image "
