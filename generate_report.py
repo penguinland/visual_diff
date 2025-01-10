@@ -101,7 +101,13 @@ def compare_all_files(file_data, min_segment_size, include_large_files):
     return results
 
 
-def process_all_files_in_language(language, file_list):
+def process_all_files_in_language(
+        language, file_list, min_length, allow_big_files):
+    """
+    Given a language and a list of files containing code in that language,
+    tokenize each file and look for duplicated code between them all. Print out
+    anything you find.
+    """
     data = []
     for filename in file_list:
         try:
@@ -110,7 +116,7 @@ def process_all_files_in_language(language, file_list):
         except SyntaxError:
             print(f"Cannot parse {filename}")
 
-    for line in compare_all_files(data, args.min_length, args.big_files):
+    for line in compare_all_files(data, min_length, allow_big_files):
         print(line)
 
 
@@ -118,4 +124,5 @@ if __name__ == "__main__":
     args = parse_args()
     languages_to_file_lists = find_all_files(args.file_glob)
     for language, file_list in languages_to_file_lists.items():
-        process_all_files_in_language(language, file_list)
+        process_all_files_in_language(
+                language, file_list, args.min_length, args.big_files)
