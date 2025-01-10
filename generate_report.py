@@ -38,13 +38,13 @@ def find_all_files(glob_patterns):
 
 
 def compare_files(filename_a, data_a, filename_b, data_b,
-                  min_segment_size, include_large_files=False):
+                  min_segment_size, include_big_files=False):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
     """
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
-    if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_large_files:
+    if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_big_files:
         return ["skipping analysis of too-big image "
                 f"for '{filename_a}' and '{filename_b}'"]
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
@@ -84,7 +84,7 @@ def compare_files(filename_a, data_a, filename_b, data_b,
     return results
 
 
-def compare_all_files(file_data, min_segment_size, include_large_files):
+def compare_all_files(file_data, min_segment_size, include_big_files):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -96,13 +96,13 @@ def compare_all_files(file_data, min_segment_size, include_large_files):
         for filename_b, data_b in file_data[i:]:
             pair_results = compare_files(
                     filename_a, data_a, filename_b, data_b, min_segment_size,
-                    include_large_files)
+                    include_big_files)
             results.extend(pair_results)
     return results
 
 
 def process_all_files_in_language(
-        language, file_list, min_length, allow_big_files):
+        language, file_list, min_length, include_big_files):
     """
     Given a language and a list of files containing code in that language,
     tokenize each file and look for duplicated code between them all. Print out
@@ -116,7 +116,7 @@ def process_all_files_in_language(
         except SyntaxError:
             print(f"Cannot parse {filename}")
 
-    for line in compare_all_files(data, min_length, allow_big_files):
+    for line in compare_all_files(data, min_length, include_big_files):
         print(line)
 
 
