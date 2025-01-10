@@ -9,17 +9,19 @@ import utils
 # The lines is a list of strings containing the file contents.
 # The boundaries is a list of ((start_row, start_col), (end_row, end_col))
 #     tuples for each token.
-FileInfo = collections.namedtuple("FileInfo", ["tokens", "lines", "boundaries"])
+# The filename is a string.
+FileInfo = collections.namedtuple(
+        "FileInfo", ["tokens", "lines", "boundaries", "filename"])
 
 
 def get_file_tokens(filename, language=None):
     if language is None:
         language = utils.guess_language(filename)
     with open(filename) as f:
-        return get_tokens(f.read(), language)
+        return get_tokens(f.read(), language, filename)
 
 
-def get_tokens(file_contents, language):
+def get_tokens(file_contents, language, filename):
     """
     We return a FileInfo object containing details of the given
     file_contents.
@@ -37,7 +39,7 @@ def get_tokens(file_contents, language):
     token_array = numpy.array(
         [tok.type if tok.type in constant_types else tok.text for tok in toks])
     boundaries = _get_boundaries(toks)
-    return FileInfo(token_array, lines, boundaries)
+    return FileInfo(token_array, lines, boundaries, filename)
 
 
 def _find_boundary(i, tok, toks, most_recent_line):

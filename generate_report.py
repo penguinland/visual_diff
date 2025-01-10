@@ -37,18 +37,21 @@ def find_all_files(glob_patterns):
     return results
 
 
-def compare_files(filename_a, data_a, filename_b, data_b,
-                  min_segment_size, include_big_files=False):
+def compare_files(data_a, data_b, min_segment_size, include_big_files=False):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
     """
+    filename_a = data_a.filename
+    filename_b = data_b.filename
+
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
     if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_big_files:
         return ["skipping analysis of too-big image "
                 f"for '{filename_a}' and '{filename_b}'"]
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
-    segments = find_duplicates.get_segments(matrix, (filename_a == filename_b))
+    segments = find_duplicates.get_segments(
+            matrix, (filename_a == filename_b))
     # We'll keep a tuple of (negative_size, start_line_a, end_line_a,
     # start_line_b, end_line_b) for each large segment we find. We store the
     # negative of the size so that, when sorted, the largest segments come
@@ -92,11 +95,10 @@ def compare_all_files(file_data, min_segment_size, include_big_files):
     results = []
     # Compare all pairs of files. After comparing A with B, don't also compare
     # B with A, but do remember to compare A with A.
-    for i, (filename_a, data_a) in enumerate(file_data):
-        for filename_b, data_b in file_data[i:]:
+    for i, data_a in enumerate(file_data):
+        for data_b in file_data[i:]:
             pair_results = compare_files(
-                    filename_a, data_a, filename_b, data_b, min_segment_size,
-                    include_big_files)
+                    data_a, data_b, min_segment_size, include_big_files)
             results.extend(pair_results)
     return results
 
@@ -111,8 +113,7 @@ def process_all_files_in_language(
     data = []
     for filename in file_list:
         try:
-            data.append(
-                    (filename, tokenizer.get_file_tokens(filename, language)))
+            data.append(tokenizer.get_file_tokens(filename, language))
         except SyntaxError:
             print(f"Cannot parse {filename}")
 
