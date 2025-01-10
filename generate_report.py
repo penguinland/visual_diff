@@ -37,17 +37,12 @@ def find_all_files(glob_patterns):
     return results
 
 
-def compare_files(filename_a, filename_b, language, min_segment_size,
-                  include_large_files=False):
+def compare_files(filename_a, data_a, filename_b, data_b,
+                  min_segment_size, include_large_files=False):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
     """
-    try:
-        data_a, data_b = (tokenizer.get_file_tokens(filename, language)
-                          for filename in (filename_a, filename_b))
-    except SyntaxError:
-        return [f"Parse error when comparing {filename_a} to {filename_b}."]
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
     if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_large_files:
         return ["skipping analysis of too-big image "
@@ -89,8 +84,7 @@ def compare_files(filename_a, filename_b, language, min_segment_size,
     return results
 
 
-def compare_all_files(filenames, language, min_segment_size,
-                      include_large_files=False):
+def compare_all_files(file_data, min_segment_size, include_large_files):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -98,10 +92,10 @@ def compare_all_files(filenames, language, min_segment_size,
     results = []
     # Compare all pairs of files. After comparing A with B, don't also compare
     # B with A, but do remember to compare A with A.
-    for i, filename_a in enumerate(filenames):
-        for filename_b in filenames[i:]:
+    for i, (filename_a, data_a) in enumerate(file_data):
+        for filename_b, data_b in file_data[i:]:
             pair_results = compare_files(
-                    filename_a, filename_b, language, min_segment_size,
+                    filename_a, data_a, filename_b, data_b, min_segment_size,
                     include_large_files)
             results.extend(pair_results)
     return results
@@ -111,6 +105,14 @@ if __name__ == "__main__":
     args = parse_args()
     languages_to_file_lists = find_all_files(args.file_glob)
     for language, file_list in languages_to_file_lists.items():
+        data = []
+        for filename in file_list:
+            try:
+                data.append((filename,
+                             tokenizer.get_file_tokens(filename, language)))
+            except SyntaxError:
+                print(f"Cannot parse {filename}")
+
         for line in compare_all_files(
-                file_list, language, args.min_length, args.big_files):
+                data, args.min_length, args.big_files):
             print(line)

@@ -13,7 +13,6 @@ FileInfo = collections.namedtuple("FileInfo", ["tokens", "lines", "boundaries"])
 
 
 def get_file_tokens(filename, language=None):
-    print(f"tokenizing {filename} ...")
     if language is None:
         language = utils.guess_language(filename)
     with open(filename) as f:
