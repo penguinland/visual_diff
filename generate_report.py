@@ -12,7 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("file_glob", nargs="*",
                         help="Glob pattern of files to analyze")
-    parser.add_argument("--min_length", "-ml", type=int, default=100,
+    parser.add_argument("--min_length", "-ml", type=int, default=300,
                         help="Minimum number of duplicated tokens to report")
     parser.add_argument("--big_files", "-bf", action="store_true",
                         help="Don't skip images over 50 megapixels")
