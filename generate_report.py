@@ -101,18 +101,21 @@ def compare_all_files(file_data, min_segment_size, include_large_files):
     return results
 
 
+def process_all_files_in_language(language, file_list):
+    data = []
+    for filename in file_list:
+        try:
+            data.append(
+                    (filename, tokenizer.get_file_tokens(filename, language)))
+        except SyntaxError:
+            print(f"Cannot parse {filename}")
+
+    for line in compare_all_files(data, args.min_length, args.big_files):
+        print(line)
+
+
 if __name__ == "__main__":
     args = parse_args()
     languages_to_file_lists = find_all_files(args.file_glob)
     for language, file_list in languages_to_file_lists.items():
-        data = []
-        for filename in file_list:
-            try:
-                data.append((filename,
-                             tokenizer.get_file_tokens(filename, language)))
-            except SyntaxError:
-                print(f"Cannot parse {filename}")
-
-        for line in compare_all_files(
-                data, args.min_length, args.big_files):
-            print(line)
+        process_all_files_in_language(language, file_list)
