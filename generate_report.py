@@ -50,8 +50,7 @@ def compare_files(data_a, data_b, min_segment_size, include_big_files=False):
         return ["skipping analysis of too-big image "
                 f"for '{filename_a}' and '{filename_b}'"]
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
-    segments = find_duplicates.get_segments(
-            matrix, (filename_a == filename_b))
+    segments = find_duplicates.get_segments(matrix, (filename_a == filename_b))
     # We'll keep a tuple of (negative_size, start_line_a, end_line_a,
     # start_line_b, end_line_b) for each large segment we find. We store the
     # negative of the size so that, when sorted, the largest segments come
