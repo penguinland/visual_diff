@@ -12,7 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("file_glob", nargs="*",
                         help="Glob pattern of files to analyze")
-    parser.add_argument("--min_length", "-ml", type=int, default=100,
+    parser.add_argument("--min_length", "-ml", type=int, default=300,
                         help="Minimum number of duplicated tokens to report")
     parser.add_argument("--big_files", "-bf", action="store_true",
                         help="Don't skip images over 50 megapixels")
@@ -27,7 +27,7 @@ def find_all_files(glob_patterns):
     """
     results = collections.defaultdict(list)
     for glob_pattern in glob_patterns:
-        for filename in glob.iglob(glob_pattern):
+        for filename in glob.iglob(glob_pattern, recursive=True):
             try:
                 language = utils.guess_language(filename)
             except ValueError:
@@ -37,16 +37,16 @@ def find_all_files(glob_patterns):
     return results
 
 
-def compare_files(filename_a, filename_b, language, min_segment_size,
-                  include_large_files=False):
+def compare_files(data_a, data_b, min_segment_size, include_big_files=False):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
     """
-    data_a, data_b = (tokenizer.get_file_tokens(filename, language)
-                      for filename in (filename_a, filename_b))
+    filename_a = data_a.filename
+    filename_b = data_b.filename
+
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
-    if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_large_files:
+    if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_big_files:
         return ["skipping analysis of too-big image "
                 f"for '{filename_a}' and '{filename_b}'"]
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
@@ -86,8 +86,7 @@ def compare_files(filename_a, filename_b, language, min_segment_size,
     return results
 
 
-def compare_all_files(filenames, language, min_segment_size,
-                      include_large_files=False):
+def compare_all_files(file_data, min_segment_size, include_big_files):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -95,19 +94,35 @@ def compare_all_files(filenames, language, min_segment_size,
     results = []
     # Compare all pairs of files. After comparing A with B, don't also compare
     # B with A, but do remember to compare A with A.
-    for i, filename_a in enumerate(filenames):
-        for filename_b in filenames[i:]:
+    for i, data_a in enumerate(file_data):
+        for data_b in file_data[i:]:
             pair_results = compare_files(
-                    filename_a, filename_b, language, min_segment_size,
-                    include_large_files)
+                    data_a, data_b, min_segment_size, include_big_files)
             results.extend(pair_results)
     return results
+
+
+def process_all_files_in_language(
+        language, file_list, min_length, include_big_files):
+    """
+    Given a language and a list of files containing code in that language,
+    tokenize each file and look for duplicated code between them all. Print out
+    anything you find.
+    """
+    data = []
+    for filename in file_list:
+        try:
+            data.append(tokenizer.get_file_tokens(filename, language))
+        except SyntaxError:
+            print(f"Cannot parse {filename}")
+
+    for line in compare_all_files(data, min_length, include_big_files):
+        print(line)
 
 
 if __name__ == "__main__":
     args = parse_args()
     languages_to_file_lists = find_all_files(args.file_glob)
     for language, file_list in languages_to_file_lists.items():
-        for line in compare_all_files(
-                file_list, language, args.min_length, args.big_files):
-            print(line)
+        process_all_files_in_language(
+                language, file_list, args.min_length, args.big_files)
