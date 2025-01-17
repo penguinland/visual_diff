@@ -86,7 +86,7 @@ def compare_files(data_a, data_b, min_segment_size, include_big_files=False):
     return results
 
 
-def compare_all_files(file_data, min_segment_size, include_big_files):
+def compare_all_files(file_data, min_segment_size, include_big_files=False):
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
