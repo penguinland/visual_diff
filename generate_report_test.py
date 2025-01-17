@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-from parameterized import parameterized
-import PIL.Image
-import PIL.ImageChops
 import unittest
 
 import generate_report
