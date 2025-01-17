@@ -8,8 +8,8 @@ import tokenizer
 class TestGenerateReports(unittest.TestCase):
     def test_file_against_self(self):
         pointsprite_info = tokenizer.get_file_tokens("examples/pointsprite.py")
-        actual = generate_report.compare_files(
-                pointsprite_info, pointsprite_info, 100)
+        actual = list(generate_report.compare_files(
+                pointsprite_info, pointsprite_info, 100))
         expected = [
             "Found duplicated code between examples/pointsprite.py and examples/pointsprite.py:",
             "    706 tokens on lines 28-121 and lines 121-295",
@@ -23,8 +23,8 @@ class TestGenerateReports(unittest.TestCase):
     def test_file_pair(self):
         nmea_info = tokenizer.get_file_tokens("examples/gpsnmea.go")
         rtk_info = tokenizer.get_file_tokens("examples/gpsrtk.go")
-        actual = generate_report.compare_all_files(
-            [nmea_info, rtk_info], 100)
+        actual = list(generate_report.compare_all_files(
+                [nmea_info, rtk_info], 100))
         expected = [
             "Found duplicated code between examples/gpsnmea.go and examples/gpsrtk.go:",
             "    413 tokens on lines 69-131 and lines 85-152",
