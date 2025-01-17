@@ -2,13 +2,14 @@
 import unittest
 
 import generate_report
+import tokenizer
 
 
 class TestGenerateReports(unittest.TestCase):
     def test_file_against_self(self):
-        actual = generate_report.compare_files("examples/pointsprite.py",
-                                               "examples/pointsprite.py",
-                                               "python", 100)
+        pointsprite_info = tokenizer.get_file_tokens("examples/pointsprite.py")
+        actual = generate_report.compare_files(
+                pointsprite_info, pointsprite_info, 100)
         expected = [
             "Found duplicated code between examples/pointsprite.py and examples/pointsprite.py:",
             "    706 tokens on lines 28-121 and lines 121-295",
