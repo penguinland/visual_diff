@@ -62,9 +62,7 @@ class _SegmentUnionFind:
 
     def __str__(self):  # Used solely for debugging
         root = self.get_root()
-        return (f"(Segment size {root.size()} "
-                f"from ({root.top_r}, {root.top_c}) "
-                f"to ({root.bottom_r}, {root.bottom_c}))")
+        return f"(Segment size {root.size()} from {root.top} to {root.bottom})"
 
 
 def _initialize_segments(matrix, is_single_file):

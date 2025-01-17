@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-from parameterized import parameterized
-import PIL.Image
-import PIL.ImageChops
 import unittest
 
 import generate_report
+import tokenizer
 
 
 class TestGenerateReports(unittest.TestCase):
     def test_file_against_self(self):
-        actual = generate_report.compare_files("examples/pointsprite.py",
-                                               "examples/pointsprite.py",
-                                               "python", 100)
+        pointsprite_info = tokenizer.get_file_tokens("examples/pointsprite.py")
+        actual = generate_report.compare_files(
+                pointsprite_info, pointsprite_info, 100)
         expected = [
             "Found duplicated code between examples/pointsprite.py and examples/pointsprite.py:",
             "    706 tokens on lines 28-121 and lines 121-295",
@@ -23,21 +21,23 @@ class TestGenerateReports(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_file_pair(self):
+        nmea_info = tokenizer.get_file_tokens("examples/gpsnmea.go")
+        rtk_info = tokenizer.get_file_tokens("examples/gpsrtk.go")
         actual = generate_report.compare_all_files(
-            ["examples/gpsnmea.go", "examples/gpsrtk.go"], "go", 100)
+            [nmea_info, rtk_info], 100)
         expected = [
             "Found duplicated code between examples/gpsnmea.go and examples/gpsrtk.go:",
-            "    413 tokens on lines 61-123 and lines 77-144",
+            "    413 tokens on lines 69-131 and lines 85-152",
             "Found duplicated code between examples/gpsrtk.go and examples/gpsrtk.go:",
-            "    120 tokens on lines 270-308 and lines 304-344",
-            "    116 tokens on lines 344-355 and lines 479-490",
-            "    142 tokens on lines 387-415 and lines 438-464",
-            "    362 tokens on lines 551-610 and lines 559-618",
-            "    305 tokens on lines 551-602 and lines 567-618",
-            "    251 tokens on lines 551-594 and lines 575-618",
-            "    212 tokens on lines 551-586 and lines 583-618",
-            "    130 tokens on lines 551-570 and lines 599-618",
-            "    164 tokens on lines 554-578 and lines 594-618",
+            "    120 tokens on lines 278-316 and lines 312-352",
+            "    116 tokens on lines 352-363 and lines 487-498",
+            "    142 tokens on lines 395-423 and lines 446-472",
+            "    362 tokens on lines 559-618 and lines 567-626",
+            "    305 tokens on lines 559-610 and lines 575-626",
+            "    251 tokens on lines 559-602 and lines 583-626",
+            "    212 tokens on lines 559-594 and lines 591-626",
+            "    130 tokens on lines 559-578 and lines 607-626",
+            "    164 tokens on lines 562-586 and lines 602-626",
             ]
         self.assertEqual(expected, actual)
 
