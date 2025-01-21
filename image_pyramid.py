@@ -74,7 +74,9 @@ class ImagePyramid:
                 hues = numpy.minimum(
                     numpy.minimum(hue_quads[0], hue_quads[1]),
                     numpy.minimum(hue_quads[2], hue_quads[3]))
-                self._hue_pyramid.append(hues)
+                # On this next line, mypy isn't smart enough to figure out that
+                # we'll only get here if self._hue_pyramid is a list.
+                self._hue_pyramid.append(hues)  # type: ignore
 
         # self._zoom_level is the index into self._pyramid to get the current
         # image.

@@ -3,7 +3,7 @@ import numpy
 import PIL.Image
 import PIL.ImageTk
 import tkinter as tk
-from typing import Callable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 from image_pyramid import ImagePyramid
 
@@ -39,7 +39,10 @@ class ZoomMap(tk.Canvas):
                                       # Mac scrolling
                                       ("<MouseWheel>", self._zoom_mac),
                                       ):
-            self.bind(button_name, function)
+            # On this next line, mypy isn't smart enough to figure out that
+            # every function will be Callable: some are methods and some are
+            # functools.partial objects.
+            self.bind(button_name, function)  # type: ignore
 
     def _set_image(self) -> None:
         """
