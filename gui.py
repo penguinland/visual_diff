@@ -11,12 +11,12 @@ class _Context(tk.Text):
     have one of these for the token(s) represented by the column of the mouse
     cursor, and another for its row.
     """
-    TAB_WIDTH = 4  # Width of a tab, in characters
-    CONTEXT_COUNT = 3  # Lines to display before/after the current one
+    TAB_WIDTH: int = 4  # Width of a tab, in characters
+    CONTEXT_COUNT: int = 3  # Lines to display before/after the current one
     # We hope we don't encounter files with more than 99,999 lines, but if we
     # do, alignment will be off.
-    LINE_NUMBER_WIDTH = 5  # Number of characters to allocate for line numbers
-    PRELUDE_WIDTH = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
+    LINE_NUMBER_WIDTH: int = 5  # Maximum number of digits in the line number
+    PRELUDE_WIDTH: int = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
 
     def __init__(self, tk_parent, data, text_width, zoom_map):
         height = 2 * self.CONTEXT_COUNT + 1
