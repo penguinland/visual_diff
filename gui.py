@@ -2,6 +2,7 @@ from math import ceil
 import numpy
 import tkinter as tk
 import tkinter.font as tkfont
+from typing import Optional
 
 from tokenizer import FileInfo
 from zoom_map import ZoomMap
@@ -130,7 +131,7 @@ class _Gui(tk.Frame):
     def __init__(
         self,
         matrix: numpy.ndarray,
-        hues: numpy.ndarray,
+        hues: Optional[numpy.ndarray],
         data_a: FileInfo,
         data_b: FileInfo,
         map_width: int,
@@ -154,7 +155,7 @@ class _Gui(tk.Frame):
 
 def launch(
     matrix: numpy.ndarray,
-    hues: numpy.ndarray,
+    hues: Optional[numpy.ndarray],
     data_a: FileInfo,
     data_b: FileInfo,
     map_width: int,
@@ -165,7 +166,7 @@ def launch(
     """
     root = tk.Tk()
 
-    def _quit(event):
+    def _quit(event: tk.Event) -> None:
         root.destroy()
     for char in "wWqQ":
         root.bind("<Control-{}>".format(char), _quit)

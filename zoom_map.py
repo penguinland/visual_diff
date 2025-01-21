@@ -3,7 +3,7 @@ import numpy
 import PIL.Image
 import PIL.ImageTk
 import tkinter as tk
-from typing import Optional
+from typing import Callable, Optional
 
 from image_pyramid import ImagePyramid
 
@@ -12,7 +12,7 @@ class ZoomMap(tk.Canvas):
         self,
         tk_parent: tk.Widget,
         matrix: numpy.ndarray,
-        hues: numpy.ndarray,
+        hues: Optional[numpy.ndarray],
         sidelength: int,
     ) -> None:
         super().__init__(tk_parent, height=sidelength, width=sidelength,

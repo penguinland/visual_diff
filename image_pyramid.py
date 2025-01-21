@@ -8,7 +8,10 @@ class ImagePyramid:
     _ZOOMED_IN_LEVELS: int = 3  # Number of times you can zoom in beyond 100%
 
     def __init__(
-        self, matrix: numpy.ndarray, hues: numpy.ndarray, sidelength: int
+        self,
+        matrix: numpy.ndarray,
+        hues: Optional[numpy.ndarray],
+        sidelength: int,
     ) -> None:
         """
         The sidelength is how large a sub-image we will return in get_submatrix
