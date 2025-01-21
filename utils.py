@@ -1,5 +1,5 @@
 import numpy
-from typing import Any, Optional
+from typing import Optional
 
 
 PIXELS_IN_BIG_FILE = 50 * 1000 * 1000  # 50 megapixels
