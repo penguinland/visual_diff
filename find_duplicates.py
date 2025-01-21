@@ -129,7 +129,9 @@ def _get_pixel_to_segment(
         # need to sort the segments. Try merging the largest ones first, and
         # among ties, go for the ones closest to the top-left corner first. If
         # there are still ties, just pick some arbitrary order.
-        def key(segment):
+        def key(
+            segment: _SegmentUnionFind
+        ) -> tuple[int, int, int, int, int, int]:
             root = segment.get_root()
             return (-root.size(), sum(root.top), *root.top, *root.bottom)
         segments = sorted(segments, key=key)
@@ -200,7 +202,7 @@ def _find_mergeable_segment(
     current: _SegmentUnionFind,
     pixel_to_segment: dict[_Coordinates, _SegmentUnionFind],
     max_distance: int,
-    shape: _Coordinates,
+    shape: tuple[int, ...],
 ) -> Optional[_SegmentUnionFind]:
     """
     current is a _SegmentUnionFind, and pixel_to_segment is a dict mapping pixel
@@ -219,7 +221,7 @@ def _find_mergeable_segment(
 
     best_candidate = None
     best_candidate_size = -1
-    def update_candidate(candidate):
+    def update_candidate(candidate: _SegmentUnionFind) -> None:
         nonlocal best_candidate, best_candidate_size
         if candidate.size() > best_candidate_size:
             best_candidate = candidate
@@ -260,12 +262,11 @@ def get_hues(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
     scores = get_lengths(matrix, is_single_file)
     # Cut everything off at the max, then divide by the max to put all values
     # between 0 and 1.
-    scores = numpy.minimum(
-        _MAX_TOKEN_CHAIN, numpy.astype(scores, numpy.float32))
+    scores = numpy.minimum(_MAX_TOKEN_CHAIN, scores.astype(numpy.float32))
     scores /= _MAX_TOKEN_CHAIN
     # Get the hues to go from blue (lowest score) up to red (highest). Red has
     # hue 0, while blue is roughly 170.
     scores = 1 - scores
     scores *= 170
-    scores = numpy.astype(scores, numpy.uint8)
+    scores = scores.astype(numpy.uint8)
     return scores
