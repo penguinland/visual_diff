@@ -10,7 +10,7 @@ from image_pyramid import ImagePyramid
 class ZoomMap(tk.Canvas):
     def __init__(
         self,
-        tk_parent: tk.Canvas,
+        tk_parent: tk.Widget,
         matrix: numpy.ndarray,
         hues: numpy.ndarray,
         sidelength: int,

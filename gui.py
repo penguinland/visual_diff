@@ -1,7 +1,9 @@
 from math import ceil
+import numpy
 import tkinter as tk
 import tkinter.font as tkfont
 
+from tokenizer import FileInfo
 from zoom_map import ZoomMap
 
 
@@ -18,7 +20,13 @@ class _Context(tk.Text):
     LINE_NUMBER_WIDTH: int = 5  # Maximum number of digits in the line number
     PRELUDE_WIDTH: int = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
 
-    def __init__(self, tk_parent, data, text_width, zoom_map):
+    def __init__(
+        self,
+        tk_parent: tk.Widget,
+        data: FileInfo,
+        text_width: int,
+        zoom_map: ZoomMap,
+    ) -> None:
         height = 2 * self.CONTEXT_COUNT + 1
         # NOTE: Lines longer than text_width get truncated, and any tokens off
         # the end don't get shown/highlighted.
@@ -48,7 +56,7 @@ class _Context(tk.Text):
         self._boundaries = data.boundaries
         self._zoom_map = zoom_map
 
-    def _snip_line(self, i):
+    def _snip_line(self, i: int) -> str:
         """
         Returns the part of line i that will fit in the display.
         """
@@ -68,7 +76,7 @@ class _Context(tk.Text):
             print("PROBLEM: tabs at the end of the line!")
         return line_start
 
-    def display(self, pixel):
+    def display(self, pixel: int) -> None:
         # The zoom level is equivalent to the number of tokens described by the
         # current pixel in the map.
         zoom_level = self._zoom_map.zoom_level
@@ -119,10 +127,18 @@ class _Context(tk.Text):
 
 
 class _Gui(tk.Frame):
-    def __init__(self, matrix, hues, data_a, data_b, map_width, text_width,
-                 root):
+    def __init__(
+        self,
+        matrix: numpy.ndarray,
+        hues: numpy.ndarray,
+        data_a: FileInfo,
+        data_b: FileInfo,
+        map_width: int,
+        text_width: int,
+        root: tk.Widget,
+    ) -> None:
         super().__init__(root)
-        self.pack(fill=tk.BOTH, expand="true")
+        self.pack(fill=tk.BOTH, expand=True)
         self._map = ZoomMap(self, matrix, hues, map_width)
 
         self._contexts = [_Context(self, data, text_width, self._map)
