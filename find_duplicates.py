@@ -1,7 +1,9 @@
 import numpy
+from typing import Optional, Self
 
 
-_MAX_TOKEN_CHAIN = 100  # Sequences at least this long get the most extreme hue
+# Sequences at least this long get the most extreme hue
+_MAX_TOKEN_CHAIN: int = 100
 
 
 class _SegmentUnionFind:
@@ -16,7 +18,7 @@ class _SegmentUnionFind:
     # roughly two thirds.
     __slots__ = ("_size", "_root", "top", "bottom")
 
-    def __init__(self, r, c, size):
+    def __init__(self, r: int, c: int, size: int):
         """
         The arguments passed in are the coordinates of the top-left pixel, and
         the number of pixels on a straight diagonal line to the end of this
@@ -25,21 +27,21 @@ class _SegmentUnionFind:
         immediate diagonals.
         """
         self._size = size
-        self._root = None  # Might be another _SegmentUnionFind after merging
+        self._root: Optional[Self] = None
         self.top = (r, c)
         self.bottom = (r + size - 1, c + size - 1)
 
-    def get_root(self):
+    def get_root(self) -> Self:
         if self._root is None:
             return self
 
         self._root = self._root.get_root()
         return self._root
 
-    def size(self):
+    def size(self) -> int:
         return self.get_root()._size
 
-    def merge(self, other):
+    def merge(self, other: Self) -> None:
         if self.size() > other.size():
             large_root = self.get_root()
             small_root = other.get_root()
@@ -60,12 +62,15 @@ class _SegmentUnionFind:
             # bottom-right corner. Use it as the new bottom.
             large_root.bottom = small_root.bottom
 
-    def __str__(self):  # Used solely for debugging
+    def __str__(self) -> str:  # Used solely for debugging
         root = self.get_root()
         return f"(Segment size {root.size()} from {root.top} to {root.bottom})"
 
 
-def _initialize_segments(matrix, is_single_file):
+def _initialize_segments(matrix: numpy.ndarray,
+                         is_single_file: bool) -> tuple[list[_SegmentUnionFind],
+                                                        dict[tuple[int, int],
+                                                             _SegmentUnionFind]]:
     """
     Returns a tuple of (segments, pixel_to_segment). These are a list of
     _SegmentUnionFinds and a dict mapping pixel coordinates to the
