@@ -1,5 +1,5 @@
 import numpy
-from typing import Optional, Self
+from typing import Iterable, Optional, Self
 
 
 # Sequences at least this long get the most extreme hue
@@ -111,13 +111,14 @@ def _initialize_segments(matrix: numpy.ndarray,
     return segments, pixel_to_segment
 
 
-def _get_pixel_to_segment(matrix, is_single_file):
+def _get_pixel_to_segment(matrix: numpy.ndarray, is_single_file: bool) -> dict[tuple[int, int], _SegmentUnionFind]:
     """
     matrix is a 2D numpy array of uint8s. is_single_file is a boolean. We return
     a map from (row, col) pairs to _SegmentUnionFinds for each pixel set in the
     original matrix. If is_single_file is set, we do not include pixels on the
     main diagonal, because a file shouldn't count as a duplicate of itself.
     """
+    segments: Iterable[_SegmentUnionFind]
     segments, pixel_to_segment = _initialize_segments(matrix, is_single_file)
     while segments:
         # To prevent flaky tests, we need to be deterministic, which means we
