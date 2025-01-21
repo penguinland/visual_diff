@@ -135,7 +135,7 @@ class _Gui(tk.Frame):
         data_b: FileInfo,
         map_width: int,
         text_width: int,
-        root: tk.Widget,
+        root: tk.Tk,
     ) -> None:
         super().__init__(root)
         self.pack(fill=tk.BOTH, expand=True)
@@ -146,13 +146,20 @@ class _Gui(tk.Frame):
         for event in ("<Motion>", "<Enter>"):
             self._map.bind(event, self._on_motion)
 
-    def _on_motion(self, event):
+    def _on_motion(self, event: tk.Event) -> None:
         # We're using (row, col) format, so the first one changes with Y.
         self._contexts[0].display(self._map.canvasy(event.y))
         self._contexts[1].display(self._map.canvasx(event.x))
 
 
-def launch(matrix, hues, data_a, data_b, map_width, text_width):
+def launch(
+    matrix: numpy.ndarray,
+    hues: numpy.ndarray,
+    data_a: FileInfo,
+    data_b: FileInfo,
+    map_width: int,
+    text_width: int,
+) -> None:
     """
     Creates a new window for the GUI and runs the main program.
     """
