@@ -197,7 +197,7 @@ def _find_mergeable_segment(current: _SegmentUnionFind,
                             pixel_to_segment: dict[_Coordinates,
                                                    _SegmentUnionFind],
                             max_distance: int,
-                            shape: _Coordinates):
+                            shape: _Coordinates) -> Optional[_SegmentUnionFind]:
     """
     current is a _SegmentUnionFind, and pixel_to_segment is a dict mapping pixel
     coordinates to _SegmentUnionFind objects. We return the largest
@@ -252,7 +252,7 @@ def _find_mergeable_segment(current: _SegmentUnionFind,
     return best_candidate
 
 
-def get_hues(matrix, is_single_file):
+def get_hues(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
     scores = get_lengths(matrix, is_single_file)
     # Cut everything off at the max, then divide by the max to put all values
     # between 0 and 1.
