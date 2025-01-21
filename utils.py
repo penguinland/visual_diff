@@ -25,7 +25,9 @@ def to_hsv_matrix(matrix: numpy.ndarray,
 # The two arguments to make_matrix both have type
 # list[code_tokenize.tokens.ASTToken], but that module does not have type
 # annotations and adding them in would be annoying.
-def make_matrix(tokens_a: list[Any], tokens_b: list[Any]) -> numpy.ndarray:
+def make_matrix(
+    tokens_a: numpy.ndarray, tokens_b: numpy.ndarray
+) -> numpy.ndarray:
     matrix = numpy.zeros([len(tokens_a), len(tokens_b)], dtype=numpy.uint8)
     for i, value in enumerate(tokens_a):
         matrix[i, :] = (tokens_b == value)

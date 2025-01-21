@@ -18,7 +18,7 @@ except ImportError:
     can_use_gui = False
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("filename_a", help="File to analyze")
     parser.add_argument("filename_b", nargs="?", help="Second file to analyze")
@@ -37,7 +37,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_text_width(args):
+def get_text_width(args: argparse.Namespace) -> int:
     if args.text_width is not None:
         return args.text_width
     if args.language == "python" or args.filename_a.split(".")[-1] == "py":
