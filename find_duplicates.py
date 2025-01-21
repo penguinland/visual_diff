@@ -70,10 +70,9 @@ class _SegmentUnionFind:
         return f"(Segment size {root.size()} from {root.top} to {root.bottom})"
 
 
-def _initialize_segments(matrix: numpy.ndarray,
-                         is_single_file: bool) -> tuple[list[_SegmentUnionFind],
-                                                        dict[_Coordinates,
-                                                             _SegmentUnionFind]]:
+def _initialize_segments(
+    matrix: numpy.ndarray, is_single_file: bool
+) -> tuple[list[_SegmentUnionFind], dict[_Coordinates, _SegmentUnionFind]]:
     """
     Returns a tuple of (segments, pixel_to_segment). These are a list of
     _SegmentUnionFinds and a dict mapping pixel coordinates to the
@@ -114,7 +113,9 @@ def _initialize_segments(matrix: numpy.ndarray,
     return segments, pixel_to_segment
 
 
-def _get_pixel_to_segment(matrix: numpy.ndarray, is_single_file: bool) -> dict[_Coordinates, _SegmentUnionFind]:
+def _get_pixel_to_segment(
+    matrix: numpy.ndarray, is_single_file: bool
+) -> dict[_Coordinates, _SegmentUnionFind]:
     """
     matrix is a 2D numpy array of uint8s. is_single_file is a boolean. We return
     a map from (row, col) pairs to _SegmentUnionFinds for each pixel set in the
@@ -179,7 +180,9 @@ def get_lengths(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
     return image
 
 
-def get_segments(matrix: numpy.ndarray, is_single_file: bool) -> set[_SegmentUnionFind]:
+def get_segments(
+    matrix: numpy.ndarray, is_single_file: bool
+) -> set[_SegmentUnionFind]:
     """
     matrix is a 2D numpy array of uint8s. We return set of _SegmentUnionFinds
     describing all the segments we found in the matrix.
@@ -193,11 +196,12 @@ def get_segments(matrix: numpy.ndarray, is_single_file: bool) -> set[_SegmentUni
     return segments
 
 
-def _find_mergeable_segment(current: _SegmentUnionFind,
-                            pixel_to_segment: dict[_Coordinates,
-                                                   _SegmentUnionFind],
-                            max_distance: int,
-                            shape: _Coordinates) -> Optional[_SegmentUnionFind]:
+def _find_mergeable_segment(
+    current: _SegmentUnionFind,
+    pixel_to_segment: dict[_Coordinates, _SegmentUnionFind],
+    max_distance: int,
+    shape: _Coordinates,
+) -> Optional[_SegmentUnionFind]:
     """
     current is a _SegmentUnionFind, and pixel_to_segment is a dict mapping pixel
     coordinates to _SegmentUnionFind objects. We return the largest
