@@ -45,7 +45,7 @@ def get_text_width(args: argparse.Namespace) -> int:
     return 100
 
 
-if __name__ == "__main__":
+def main() -> None:
     args = parse_args()
     language = args.language
     if language is None:
@@ -95,3 +95,7 @@ if __name__ == "__main__":
         image = utils.to_hsv_matrix(matrix, hues)
         pil_image = PIL.Image.fromarray(image, mode="HSV")
         pil_image.convert(mode="RGB").save(args.output_location)
+
+
+if __name__ == "__main__":
+    main()
