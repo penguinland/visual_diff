@@ -3,7 +3,7 @@ import numpy
 import PIL.Image
 import PIL.ImageTk
 import tkinter as tk
-from typing import Any, Callable, Iterable, Optional
+from typing import Optional
 
 from image_pyramid import ImagePyramid
 
