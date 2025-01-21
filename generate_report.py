@@ -80,7 +80,9 @@ def compare_files(
     # Otherwise...
     results = [f"Found duplicated code between {filename_a} and {filename_b}:"]
 
-    def sorting_key(data):
+    def sorting_key(
+        data: tuple[int, int, int, int, int]
+    ) -> tuple[int, int, int]:
         # Sort by the starting line in file A, then starting line in file B,
         # then by length (largest to smallest).
         return (data[1], data[3], -data[0])
