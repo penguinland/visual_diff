@@ -1,12 +1,20 @@
 from functools import partial
+import numpy
 import PIL.Image
 import PIL.ImageTk
 import tkinter as tk
+from typing import Optional
 
 from image_pyramid import ImagePyramid
 
 class ZoomMap(tk.Canvas):
-    def __init__(self, tk_parent, matrix, hues, sidelength):
+    def __init__(
+        self,
+        tk_parent: tk.Canvas,
+        matrix: numpy.ndarray,
+        hues: numpy.ndarray,
+        sidelength: int,
+    ) -> None:
         super().__init__(tk_parent, height=sidelength, width=sidelength,
                          bg="green", xscrollincrement=1, yscrollincrement=1)
         # We keep a handle to the actual image being displayed, because TK
@@ -14,8 +22,9 @@ class ZoomMap(tk.Canvas):
         # still supposed to be on the screen. We also keep track of the TK
         # image object, so we can delete it later when we create a new, updated
         # one to take its place.
-        self._cached_image = None
-        self._tk_image = None
+        self._cached_image: Optional[PIL.ImageTk.PhotoImage] = None
+        # TK canvas images are referred to by their ID numbers.
+        self._tk_image: Optional[int] = None  # 
 
         self._pyramid = ImagePyramid(matrix, hues, sidelength)
 
@@ -32,7 +41,7 @@ class ZoomMap(tk.Canvas):
                                       ):
             self.bind(button_name, function)
 
-    def _set_image(self):
+    def _set_image(self) -> None:
         """
         Delete the old image, if it exists, then display the new one.
 
@@ -68,10 +77,10 @@ class ZoomMap(tk.Canvas):
         self._tk_image = self.create_image(min_x, min_y, anchor=tk.NW,
                                            image=self._cached_image)
 
-    def _zoom_mac(self, event):
-        return self._zoom(-event.delta, event)
+    def _zoom_mac(self, event: tk.Event) -> None:
+        self._zoom(-event.delta, event)
 
-    def _zoom(self, amount, event):
+    def _zoom(self, amount: int, event: tk.Event) -> None:
         if not self._pyramid.zoom(amount):
             return
 
@@ -84,24 +93,24 @@ class ZoomMap(tk.Canvas):
 
         self._set_image()
 
-    def _on_click(self, event):
+    def _on_click(self, event: tk.Event) -> None:
         self._click_coords = [event.x, event.y]
 
-    def _on_drag(self, event):
+    def _on_drag(self, event: tk.Event) -> None:
         dx = self._click_coords[0] - event.x
         dy = self._click_coords[1] - event.y
         self.xview_scroll(dx, "units")
         self.yview_scroll(dy, "units")
         self._on_click(event)
 
-    def _on_unclick(self, event):
+    def _on_unclick(self, event: tk.Event) -> None:
         self._set_image()
 
     @staticmethod
-    def _to_image(matrix):
+    def _to_image(matrix: numpy.ndarray) -> PIL.ImageTk.PhotoImage:
         image = PIL.Image.fromarray(matrix, mode="HSV")
         return PIL.ImageTk.PhotoImage(image)
 
     @property
-    def zoom_level(self):  # Used in gui.py
+    def zoom_level(self) -> int:  # Used in gui.py
         return 2 ** self._pyramid.get_zoom_level()
