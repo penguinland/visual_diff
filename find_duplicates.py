@@ -192,7 +192,7 @@ def _find_mergeable_segment(
     current: _SegmentUnionFind,
     pixel_to_segment: dict[_Coordinates, _SegmentUnionFind],
     max_distance: int,
-    shape: tuple[int, ...],
+    shape: tuple[int, int],
 ) -> Optional[_SegmentUnionFind]:
     """
     We return the largest _SegmentUnionFind below-right of current that we can
