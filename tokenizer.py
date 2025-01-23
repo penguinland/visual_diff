@@ -1,6 +1,8 @@
 import code_tokenize
 import numpy
-from typing import Any, NamedTuple, Optional
+from typing import NamedTuple, Optional
+
+from code_tokenizer.tokens import Token
 
 import utils
 
@@ -9,7 +11,7 @@ Boundary = tuple[tuple[int, int], tuple[int, int]]  # syntactic sugar
 
 
 class FileInfo(NamedTuple):
-    tokens: numpy.ndarray  # Really a list[code_tokenize.tokens.ASTToken]
+    tokens: numpy.ndarray  # Really a list[code_tokenize.tokens.Token]
     lines: list[str]
     boundaries: list[Boundary]
     filename: str
@@ -41,8 +43,8 @@ def get_tokens(file_contents: str, language: str, filename: str) -> FileInfo:
 
 def _find_boundary(
     i: int,
-    tok: Any,
-    toks: list[Any],
+    tok: Token,
+    toks: list[Token],
     most_recent_line: int
 ) -> Boundary:
     """
@@ -79,7 +81,7 @@ def _find_boundary(
                 raise
 
 
-def _get_boundaries(toks: list[Any]) -> list[Boundary]:
+def _get_boundaries(toks: list[Token]) -> list[Boundary]:
     most_recent_line = 0  # Used when parsing dedents in Python
     boundaries = []
     for i, tok in enumerate(toks):
