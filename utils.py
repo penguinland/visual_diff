@@ -40,6 +40,7 @@ def guess_language(filename):
         "hs":     "haskell",
         "js":     "javascript",
         "py":     "python",
+        "rs":     "rust",
         "svelte": "svelte",
         "ts":     "typescript",
         }
