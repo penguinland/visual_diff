@@ -2,7 +2,7 @@ import code_tokenize
 import numpy
 from typing import NamedTuple, Optional
 
-from code_tokenizer.tokens import Token
+from code_tokenize.tokens import ASTToken
 
 import utils
 
@@ -43,8 +43,8 @@ def get_tokens(file_contents: str, language: str, filename: str) -> FileInfo:
 
 def _find_boundary(
     i: int,
-    tok: Token,
-    toks: list[Token],
+    tok: ASTToken,
+    toks: list[ASTToken],
     most_recent_line: int
 ) -> Boundary:
     """
@@ -81,7 +81,7 @@ def _find_boundary(
                 raise
 
 
-def _get_boundaries(toks: list[Token]) -> list[Boundary]:
+def _get_boundaries(toks: list[ASTToken]) -> list[Boundary]:
     most_recent_line = 0  # Used when parsing dedents in Python
     boundaries = []
     for i, tok in enumerate(toks):
