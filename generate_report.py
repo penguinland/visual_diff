@@ -21,9 +21,9 @@ def parse_args() -> argparse.Namespace:
 
 def find_all_files(glob_patterns: str) -> dict[str, list[str]]:
     """
-    We take in a string describing a glob pattern, and return a dict mapping
-    language names to lists of filenames in the glob whose extension matches the
-    language (e.g., `{"cpp": ["example.hpp", "example.cpp"]}`).
+    We return a dict mapping language names to lists of filenames in the glob
+    whose extension matches the language (e.g., `{"cpp": ["example.hpp",
+    "example.cpp"]}`).
     """
     results = collections.defaultdict(list)
     for glob_pattern in glob_patterns:

@@ -74,11 +74,8 @@ def _initialize_segments(
     matrix: numpy.ndarray, is_single_file: bool
 ) -> tuple[list[_SegmentUnionFind], dict[_Coordinates, _SegmentUnionFind]]:
     """
-    Returns a tuple of (segments, pixel_to_segment). These are a list of
-    _SegmentUnionFinds and a dict mapping pixel coordinates to the
-    _SegmentUnionFinds they make up (same ones as in the list). Each
-    _SegmentUnionFind has size at least 2: these have already merged as many
-    immediate-diagonal neighbors as possible.
+    Each _SegmentUnionFind we return has size at least 2: these have already
+    merged as many immediate-diagonal neighbors as possible.
     """
     nr, nc = matrix.shape
 
@@ -117,10 +114,8 @@ def _get_pixel_to_segment(
     matrix: numpy.ndarray, is_single_file: bool
 ) -> dict[_Coordinates, _SegmentUnionFind]:
     """
-    matrix is a 2D numpy array of uint8s. is_single_file is a boolean. We return
-    a map from (row, col) pairs to _SegmentUnionFinds for each pixel set in the
-    original matrix. If is_single_file is set, we do not include pixels on the
-    main diagonal, because a file shouldn't count as a duplicate of itself.
+    If is_single_file is set, we do not include pixels on the main diagonal,
+    because a file shouldn't count as a duplicate of itself.
     """
     segments: Iterable[_SegmentUnionFind]
     segments, pixel_to_segment = _initialize_segments(matrix, is_single_file)
@@ -165,12 +160,9 @@ def _get_pixel_to_segment(
 
 def get_lengths(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
     """
-    matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
-    which are a measure of how long a chain of nonzero values from the original
-    matrix is.
-
-    If is_single_file is set, the main diagonal will be all 1's, because a file
-    shouldn't count as a duplicate of itself.
+    We return an image whose pixels indicate how long a chain of nonzero values
+    from the original matrix is. If is_single_file is set, the main diagonal
+    will be all 1's, because a file shouldn't count as a duplicate of itself.
     """
     pixel_to_segment = _get_pixel_to_segment(matrix, is_single_file)
     # For every pixel not involved in a segment, its score is 0 if it was not
@@ -186,11 +178,9 @@ def get_segments(
     matrix: numpy.ndarray, is_single_file: bool
 ) -> set[_SegmentUnionFind]:
     """
-    matrix is a 2D numpy array of uint8s. We return set of _SegmentUnionFinds
-    describing all the segments we found in the matrix.
-
-    If is_single_file is set, the main diagonal cannot be joined into a segment,
-    because a file shouldn't count as a duplicate of itself.
+    We return set of _SegmentUnionFinds describing all the segments we found in
+    the matrix. If is_single_file is set, the main diagonal cannot be joined
+    into a segment, because a file shouldn't count as a duplicate of itself.
     """
     pixel_to_segment = _get_pixel_to_segment(matrix, is_single_file)
     # Collect all the segments and remove duplicates.
@@ -205,11 +195,10 @@ def _find_mergeable_segment(
     shape: tuple[int, ...],
 ) -> Optional[_SegmentUnionFind]:
     """
-    current is a _SegmentUnionFind, and pixel_to_segment is a dict mapping pixel
-    coordinates to _SegmentUnionFind objects. We return the largest
-    _SegmentUnionFind below-right of current that we can merge with, or None if
-    none are available. We only look at most max_distance away from the location
-    diagonal from current's bottom-right corner (using the Manhattan distance).
+    We return the largest _SegmentUnionFind below-right of current that we can
+    merge with, or None if none are available. We only look at most max_distance
+    away from the location diagonal from current's bottom-right corner (using
+    the Manhattan distance).
 
     Two segments are mergeable if the Manhattan distance between the
     bottom-right end of one and the top-left end of the other is at most 2 more

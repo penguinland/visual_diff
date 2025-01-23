@@ -23,10 +23,6 @@ def get_file_tokens(filename: str, language: Optional[str]=None) -> FileInfo:
 
 
 def get_tokens(file_contents: str, language: str, filename: str) -> FileInfo:
-    """
-    We return a FileInfo object containing details of the given
-    file_contents.
-    """
     try:
         toks = code_tokenize.tokenize(file_contents, lang=language)
     except ValueError:
@@ -43,11 +39,16 @@ def get_tokens(file_contents: str, language: str, filename: str) -> FileInfo:
     return FileInfo(token_array, lines, boundaries, filename)
 
 
-def _find_boundary(i: int, tok: Any, toks: list[Any], most_recent_line: int) -> Boundary:
+def _find_boundary(
+    i: int,
+    tok: Any,
+    toks: list[Any],
+    most_recent_line: int
+) -> Boundary:
     """
     toks is a list of all tokens in a file. tok is the token at index i in this
-    list. We return a ((start_r, start_c), (end_r, end_c)) tuple of the row and
-    column at which this token starts and ends.
+    list. We return the Boundary in the file at which this token starts and
+    ends.
     """
     try:
         node = tok.ast_node
