@@ -2,6 +2,7 @@
 import argparse
 import collections
 import glob
+from typing import Iterator
 
 import find_duplicates
 import tokenizer
@@ -42,7 +43,7 @@ def compare_files(
     data_b: tokenizer.FileInfo,
     min_segment_size: int,
     include_big_files: bool=False,
-) -> list[str]:
+) -> Iterator[str]:
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -52,8 +53,9 @@ def compare_files(
 
     pixel_count = len(data_a.tokens) * len(data_b.tokens)
     if pixel_count > utils.PIXELS_IN_BIG_FILE and not include_big_files:
-        return ["skipping analysis of too-big image "
-                f"for '{filename_a}' and '{filename_b}'"]
+        yield ("skipping analysis of too-big image "
+                f"for '{filename_a}' and '{filename_b}'")
+        return
     matrix = utils.make_matrix(data_a.tokens, data_b.tokens)
     segments = find_duplicates.get_segments(matrix, (filename_a == filename_b))
     # We'll keep a tuple of (negative_size, start_line_a, end_line_a,
@@ -76,9 +78,9 @@ def compare_files(
                             ))
 
     if not large_segments:
-        return []  # No major duplication!
+        return  # No major duplication!
     # Otherwise...
-    results = [f"Found duplicated code between {filename_a} and {filename_b}:"]
+    yield f"Found duplicated code between {filename_a} and {filename_b}:"
 
     def sorting_key(
         data: tuple[int, int, int, int, int]
@@ -88,29 +90,25 @@ def compare_files(
         return (data[1], data[3], -data[0])
     sorted_large_segments = sorted(large_segments, key=sorting_key)
     for size, start_a, end_a, start_b, end_b in sorted_large_segments:
-        results.append(f"    {size} tokens on lines "
-                       f"{start_a}-{end_a} and lines {start_b}-{end_b}")
-    return results
+        yield (f"    {size} tokens on lines "
+               f"{start_a}-{end_a} and lines {start_b}-{end_b}")
 
 
 def compare_all_files(
     file_data: list[tokenizer.FileInfo],
     min_segment_size: int,
     include_big_files: bool=False,
-) -> list[str]:
+) -> Iterator[str]:
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
     """
-    results = []
     # Compare all pairs of files. After comparing A with B, don't also compare
     # B with A, but do remember to compare A with A.
     for i, data_a in enumerate(file_data):
         for data_b in file_data[i:]:
-            pair_results = compare_files(
+            yield from compare_files(
                     data_a, data_b, min_segment_size, include_big_files)
-            results.extend(pair_results)
-    return results
 
 
 def process_all_files_in_language(

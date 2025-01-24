@@ -30,9 +30,9 @@ def get_tokens(file_contents: str, language: str, filename: str) -> FileInfo:
     try:
         toks = code_tokenize.tokenize(file_contents, lang=language)
     except ValueError:
-        # Empty files (such as `__init__.py` break the code_tokenize
+        # Empty files (such as `__init__.py`) break the code_tokenize
         # implementation, so return early.
-        return FileInfo(numpy.array([]), [], [], "")
+        return FileInfo(numpy.array([]), [], [], filename)
 
     toks = [t for t in toks if t.type not in ("newline", "comment")]
     lines = list(file_contents.split("\n"))
