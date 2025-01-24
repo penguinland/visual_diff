@@ -2,6 +2,7 @@
 import argparse
 import collections
 import glob
+from typing import Iterator
 
 import find_duplicates
 import tokenizer
@@ -42,7 +43,7 @@ def compare_files(
     data_b: tokenizer.FileInfo,
     min_segment_size: int,
     include_big_files: bool=False,
-) -> list[str]:
+) -> Iterator[str]:
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -97,7 +98,7 @@ def compare_all_files(
     file_data: list[tokenizer.FileInfo],
     min_segment_size: int,
     include_big_files: bool=False,
-) -> list[str]:
+) -> Iterator[str]:
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
