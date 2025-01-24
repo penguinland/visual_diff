@@ -1,4 +1,5 @@
 import numpy
+import numpy.typing
 from typing import Iterable, Optional, Self
 
 
@@ -71,7 +72,7 @@ class _SegmentUnionFind:
 
 
 def _initialize_segments(
-    matrix: numpy.ndarray, is_single_file: bool
+    matrix: numpy.typing.NDArray[numpy.uint8], is_single_file: bool
 ) -> tuple[list[_SegmentUnionFind], dict[_Coordinates, _SegmentUnionFind]]:
     """
     Each _SegmentUnionFind we return has size at least 2: these have already
@@ -111,7 +112,7 @@ def _initialize_segments(
 
 
 def _get_pixel_to_segment(
-    matrix: numpy.ndarray, is_single_file: bool
+    matrix: numpy.typing.NDArray[numpy.uint8], is_single_file: bool
 ) -> dict[_Coordinates, _SegmentUnionFind]:
     """
     If is_single_file is set, we do not include pixels on the main diagonal,
@@ -158,7 +159,9 @@ def _get_pixel_to_segment(
     return pixel_to_segment
 
 
-def get_lengths(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
+def get_lengths(
+    matrix: numpy.typing.NDArray[numpy.uint8], is_single_file: bool
+) -> numpy.typing.NDArray[numpy.uint32]:
     """
     We return an image whose pixels indicate how long a chain of nonzero values
     from the original matrix is. If is_single_file is set, the main diagonal
@@ -175,7 +178,7 @@ def get_lengths(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
 
 
 def get_segments(
-    matrix: numpy.ndarray, is_single_file: bool
+    matrix: numpy.typing.NDArray[numpy.uint8], is_single_file: bool
 ) -> set[_SegmentUnionFind]:
     """
     We return set of _SegmentUnionFinds describing all the segments we found in
@@ -247,7 +250,11 @@ def _find_mergeable_segment(
     return best_candidate
 
 
-def get_hues(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
+def get_hues(
+    matrix: numpy.typing.NDArray[numpy.uint8], is_single_file: bool
+) -> numpy.typing.NDArray[numpy.uint8]:
+    # Scores are going to start out as uint32's, but get turned into floats.
+    scores: numpy.typing.NDArray
     scores = get_lengths(matrix, is_single_file)
     # Cut everything off at the max, then divide by the max to put all values
     # between 0 and 1.

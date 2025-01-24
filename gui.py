@@ -1,5 +1,6 @@
 from math import ceil
 import numpy
+import numpy.typing
 import tkinter as tk
 import tkinter.font as tkfont
 from typing import Optional
@@ -130,8 +131,8 @@ class _Context(tk.Text):
 class _Gui(tk.Frame):
     def __init__(
         self,
-        matrix: numpy.ndarray,
-        hues: Optional[numpy.ndarray],
+        matrix: numpy.typing.NDArray[numpy.uint8],
+        hues: Optional[numpy.typing.NDArray[numpy.uint8]],
         data_a: FileInfo,
         data_b: FileInfo,
         map_width: int,
@@ -154,8 +155,8 @@ class _Gui(tk.Frame):
 
 
 def launch(
-    matrix: numpy.ndarray,
-    hues: Optional[numpy.ndarray],
+    matrix: numpy.typing.NDArray[numpy.uint8],
+    hues: Optional[numpy.typing.NDArray[numpy.uint8]],
     data_a: FileInfo,
     data_b: FileInfo,
     map_width: int,

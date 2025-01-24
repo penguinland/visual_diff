@@ -1,5 +1,6 @@
 from functools import partial
 import numpy
+import numpy.typing
 import PIL.Image
 import PIL.ImageTk
 import tkinter as tk
@@ -11,8 +12,8 @@ class ZoomMap(tk.Canvas):
     def __init__(
         self,
         tk_parent: tk.Widget,
-        matrix: numpy.ndarray,
-        hues: Optional[numpy.ndarray],
+        matrix: numpy.typing.NDArray[numpy.uint8],
+        hues: Optional[numpy.typing.NDArray[numpy.uint8]],
         sidelength: int,
     ) -> None:
         super().__init__(tk_parent, height=sidelength, width=sidelength,
@@ -110,7 +111,9 @@ class ZoomMap(tk.Canvas):
         self._set_image()
 
     @staticmethod
-    def _to_image(matrix: numpy.ndarray) -> PIL.ImageTk.PhotoImage:
+    def _to_image(
+        matrix: numpy.typing.NDArray[numpy.uint8]
+    ) -> PIL.ImageTk.PhotoImage:
         image = PIL.Image.fromarray(matrix, mode="HSV")
         return PIL.ImageTk.PhotoImage(image)
 
