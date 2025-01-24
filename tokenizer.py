@@ -1,37 +1,38 @@
 import code_tokenize
-import collections
 import numpy
+from typing import NamedTuple, Optional
+
+from code_tokenize.tokens import ASTToken
 
 import utils
 
 
-# The tokens is a list of tokens contained in a file.
-# The lines is a list of strings containing the file contents.
-# The boundaries is a list of ((start_row, start_col), (end_row, end_col))
-#     tuples for each token.
-# The filename is a string.
-FileInfo = collections.namedtuple(
-        "FileInfo", ["tokens", "lines", "boundaries", "filename"])
+# Syntactic sugar: a Boundary contains the start and end of a token, where
+# each position is described by its line number and the column within the line.
+Boundary = tuple[tuple[int, int], tuple[int, int]]
 
 
-def get_file_tokens(filename, language=None):
+class FileInfo(NamedTuple):
+    tokens: numpy.ndarray  # Really a list[code_tokenize.tokens.Token]
+    lines: list[str]
+    boundaries: list[Boundary]
+    filename: str
+
+
+def get_file_tokens(filename: str, language: Optional[str]=None) -> FileInfo:
     if language is None:
         language = utils.guess_language(filename)
     with open(filename) as f:
         return get_tokens(f.read(), language, filename)
 
 
-def get_tokens(file_contents, language, filename):
-    """
-    We return a FileInfo object containing details of the given
-    file_contents.
-    """
+def get_tokens(file_contents: str, language: str, filename: str) -> FileInfo:
     try:
         toks = code_tokenize.tokenize(file_contents, lang=language)
     except ValueError:
         # Empty files (such as `__init__.py` break the code_tokenize
         # implementation, so return early.
-        return FileInfo([], [], [])
+        return FileInfo(numpy.array([]), [], [], "")
 
     toks = [t for t in toks if t.type not in ("newline", "comment")]
     lines = list(file_contents.split("\n"))
@@ -42,11 +43,16 @@ def get_tokens(file_contents, language, filename):
     return FileInfo(token_array, lines, boundaries, filename)
 
 
-def _find_boundary(i, tok, toks, most_recent_line):
+def _find_boundary(
+    i: int,
+    tok: ASTToken,
+    toks: list[ASTToken],
+    most_recent_line: int
+) -> Boundary:
     """
     toks is a list of all tokens in a file. tok is the token at index i in this
-    list. We return a ((start_r, start_c), (end_r, end_c)) tuple of the row and
-    column at which this token starts and ends.
+    list. We return the Boundary in the file at which this token starts and
+    ends.
     """
     try:
         node = tok.ast_node
@@ -77,7 +83,7 @@ def _find_boundary(i, tok, toks, most_recent_line):
                 raise
 
 
-def _get_boundaries(toks):
+def _get_boundaries(toks: list[ASTToken]) -> list[Boundary]:
     most_recent_line = 0  # Used when parsing dedents in Python
     boundaries = []
     for i, tok in enumerate(toks):

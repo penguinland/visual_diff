@@ -1,7 +1,10 @@
 from math import ceil
+import numpy
 import tkinter as tk
 import tkinter.font as tkfont
+from typing import Optional
 
+from tokenizer import FileInfo
 from zoom_map import ZoomMap
 
 
@@ -11,14 +14,20 @@ class _Context(tk.Text):
     have one of these for the token(s) represented by the column of the mouse
     cursor, and another for its row.
     """
-    TAB_WIDTH = 4  # Width of a tab, in characters
-    CONTEXT_COUNT = 3  # Lines to display before/after the current one
+    TAB_WIDTH: int = 4  # Width of a tab, in characters
+    CONTEXT_COUNT: int = 3  # Lines to display before/after the current one
     # We hope we don't encounter files with more than 99,999 lines, but if we
     # do, alignment will be off.
-    LINE_NUMBER_WIDTH = 5  # Number of characters to allocate for line numbers
-    PRELUDE_WIDTH = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
+    LINE_NUMBER_WIDTH: int = 5  # Maximum number of digits in the line number
+    PRELUDE_WIDTH: int = LINE_NUMBER_WIDTH + 2  # Line number, colon, space
 
-    def __init__(self, tk_parent, data, text_width, zoom_map):
+    def __init__(
+        self,
+        tk_parent: tk.Widget,
+        data: FileInfo,
+        text_width: int,
+        zoom_map: ZoomMap,
+    ) -> None:
         height = 2 * self.CONTEXT_COUNT + 1
         # NOTE: Lines longer than text_width get truncated, and any tokens off
         # the end don't get shown/highlighted.
@@ -48,7 +57,7 @@ class _Context(tk.Text):
         self._boundaries = data.boundaries
         self._zoom_map = zoom_map
 
-    def _snip_line(self, i):
+    def _snip_line(self, i: int) -> str:
         """
         Returns the part of line i that will fit in the display.
         """
@@ -68,7 +77,7 @@ class _Context(tk.Text):
             print("PROBLEM: tabs at the end of the line!")
         return line_start
 
-    def display(self, pixel):
+    def display(self, pixel: int) -> None:
         # The zoom level is equivalent to the number of tokens described by the
         # current pixel in the map.
         zoom_level = self._zoom_map.zoom_level
@@ -119,10 +128,18 @@ class _Context(tk.Text):
 
 
 class _Gui(tk.Frame):
-    def __init__(self, matrix, hues, data_a, data_b, map_width, text_width,
-                 root):
+    def __init__(
+        self,
+        matrix: numpy.ndarray,
+        hues: Optional[numpy.ndarray],
+        data_a: FileInfo,
+        data_b: FileInfo,
+        map_width: int,
+        text_width: int,
+        root: tk.Tk,
+    ) -> None:
         super().__init__(root)
-        self.pack(fill=tk.BOTH, expand="true")
+        self.pack(fill=tk.BOTH, expand=True)
         self._map = ZoomMap(self, matrix, hues, map_width)
 
         self._contexts = [_Context(self, data, text_width, self._map)
@@ -130,19 +147,26 @@ class _Gui(tk.Frame):
         for event in ("<Motion>", "<Enter>"):
             self._map.bind(event, self._on_motion)
 
-    def _on_motion(self, event):
+    def _on_motion(self, event: tk.Event) -> None:
         # We're using (row, col) format, so the first one changes with Y.
         self._contexts[0].display(self._map.canvasy(event.y))
         self._contexts[1].display(self._map.canvasx(event.x))
 
 
-def launch(matrix, hues, data_a, data_b, map_width, text_width):
+def launch(
+    matrix: numpy.ndarray,
+    hues: Optional[numpy.ndarray],
+    data_a: FileInfo,
+    data_b: FileInfo,
+    map_width: int,
+    text_width: int,
+) -> None:
     """
     Creates a new window for the GUI and runs the main program.
     """
     root = tk.Tk()
 
-    def _quit(event):
+    def _quit(event: tk.Event) -> None:
         root.destroy()
     for char in "wWqQ":
         root.bind("<Control-{}>".format(char), _quit)

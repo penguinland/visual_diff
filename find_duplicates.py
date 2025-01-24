@@ -1,7 +1,12 @@
 import numpy
+from typing import Iterable, Optional, Self
 
 
-_MAX_TOKEN_CHAIN = 100  # Sequences at least this long get the most extreme hue
+# Sequences at least this long get the most extreme hue
+_MAX_TOKEN_CHAIN: int = 100
+
+
+_Coordinates = tuple[int, int]  # Syntactic sugar
 
 
 class _SegmentUnionFind:
@@ -16,7 +21,7 @@ class _SegmentUnionFind:
     # roughly two thirds.
     __slots__ = ("_size", "_root", "top", "bottom")
 
-    def __init__(self, r, c, size):
+    def __init__(self, r: int, c: int, size: int):
         """
         The arguments passed in are the coordinates of the top-left pixel, and
         the number of pixels on a straight diagonal line to the end of this
@@ -25,21 +30,21 @@ class _SegmentUnionFind:
         immediate diagonals.
         """
         self._size = size
-        self._root = None  # Might be another _SegmentUnionFind after merging
+        self._root: Optional[Self] = None
         self.top = (r, c)
         self.bottom = (r + size - 1, c + size - 1)
 
-    def get_root(self):
+    def get_root(self) -> Self:
         if self._root is None:
             return self
 
         self._root = self._root.get_root()
         return self._root
 
-    def size(self):
+    def size(self) -> int:
         return self.get_root()._size
 
-    def merge(self, other):
+    def merge(self, other: Self) -> None:
         if self.size() > other.size():
             large_root = self.get_root()
             small_root = other.get_root()
@@ -60,18 +65,17 @@ class _SegmentUnionFind:
             # bottom-right corner. Use it as the new bottom.
             large_root.bottom = small_root.bottom
 
-    def __str__(self):  # Used solely for debugging
+    def __str__(self) -> str:  # Used solely for debugging
         root = self.get_root()
         return f"(Segment size {root.size()} from {root.top} to {root.bottom})"
 
 
-def _initialize_segments(matrix, is_single_file):
+def _initialize_segments(
+    matrix: numpy.ndarray, is_single_file: bool
+) -> tuple[list[_SegmentUnionFind], dict[_Coordinates, _SegmentUnionFind]]:
     """
-    Returns a tuple of (segments, pixel_to_segment). These are a list of
-    _SegmentUnionFinds and a dict mapping pixel coordinates to the
-    _SegmentUnionFinds they make up (same ones as in the list). Each
-    _SegmentUnionFind has size at least 2: these have already merged as many
-    immediate-diagonal neighbors as possible.
+    Each _SegmentUnionFind we return has size at least 2: these have already
+    merged as many immediate-diagonal neighbors as possible.
     """
     nr, nc = matrix.shape
 
@@ -106,20 +110,23 @@ def _initialize_segments(matrix, is_single_file):
     return segments, pixel_to_segment
 
 
-def _get_pixel_to_segment(matrix, is_single_file):
+def _get_pixel_to_segment(
+    matrix: numpy.ndarray, is_single_file: bool
+) -> dict[_Coordinates, _SegmentUnionFind]:
     """
-    matrix is a 2D numpy array of uint8s. is_single_file is a boolean. We return
-    a map from (row, col) pairs to _SegmentUnionFinds for each pixel set in the
-    original matrix. If is_single_file is set, we do not include pixels on the
-    main diagonal, because a file shouldn't count as a duplicate of itself.
+    If is_single_file is set, we do not include pixels on the main diagonal,
+    because a file shouldn't count as a duplicate of itself.
     """
+    segments: Iterable[_SegmentUnionFind]
     segments, pixel_to_segment = _initialize_segments(matrix, is_single_file)
     while segments:
         # To prevent flaky tests, we need to be deterministic, which means we
         # need to sort the segments. Try merging the largest ones first, and
         # among ties, go for the ones closest to the top-left corner first. If
         # there are still ties, just pick some arbitrary order.
-        def key(segment):
+        def key(
+            segment: _SegmentUnionFind
+        ) -> tuple[int, int, int, int, int, int]:
             root = segment.get_root()
             return (-root.size(), sum(root.top), *root.top, *root.bottom)
         segments = sorted(segments, key=key)
@@ -151,14 +158,11 @@ def _get_pixel_to_segment(matrix, is_single_file):
     return pixel_to_segment
 
 
-def get_lengths(matrix, is_single_file):
+def get_lengths(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
     """
-    matrix is a 2D numpy array of uint8s. We return a 2D numpy array of uint32s,
-    which are a measure of how long a chain of nonzero values from the original
-    matrix is.
-
-    If is_single_file is set, the main diagonal will be all 1's, because a file
-    shouldn't count as a duplicate of itself.
+    We return an image whose pixels indicate how long a chain of nonzero values
+    from the original matrix is. If is_single_file is set, the main diagonal
+    will be all 1's, because a file shouldn't count as a duplicate of itself.
     """
     pixel_to_segment = _get_pixel_to_segment(matrix, is_single_file)
     # For every pixel not involved in a segment, its score is 0 if it was not
@@ -170,13 +174,13 @@ def get_lengths(matrix, is_single_file):
     return image
 
 
-def get_segments(matrix, is_single_file):
+def get_segments(
+    matrix: numpy.ndarray, is_single_file: bool
+) -> set[_SegmentUnionFind]:
     """
-    matrix is a 2D numpy array of uint8s. We return set of _SegmentUnionFinds
-    describing all the segments we found in the matrix.
-
-    If is_single_file is set, the main diagonal cannot be joined into a segment,
-    because a file shouldn't count as a duplicate of itself.
+    We return set of _SegmentUnionFinds describing all the segments we found in
+    the matrix. If is_single_file is set, the main diagonal cannot be joined
+    into a segment, because a file shouldn't count as a duplicate of itself.
     """
     pixel_to_segment = _get_pixel_to_segment(matrix, is_single_file)
     # Collect all the segments and remove duplicates.
@@ -184,13 +188,17 @@ def get_segments(matrix, is_single_file):
     return segments
 
 
-def _find_mergeable_segment(current, pixel_to_segment, max_distance, shape):
+def _find_mergeable_segment(
+    current: _SegmentUnionFind,
+    pixel_to_segment: dict[_Coordinates, _SegmentUnionFind],
+    max_distance: int,
+    shape: tuple[int, int],
+) -> Optional[_SegmentUnionFind]:
     """
-    current is a _SegmentUnionFind, and pixel_to_segment is a dict mapping pixel
-    coordinates to _SegmentUnionFind objects. We return the largest
-    _SegmentUnionFind below-right of current that we can merge with, or None if
-    none are available. We only look at most max_distance away from the location
-    diagonal from current's bottom-right corner (using the Manhattan distance).
+    We return the largest _SegmentUnionFind below-right of current that we can
+    merge with, or None if none are available. We only look at most max_distance
+    away from the location diagonal from current's bottom-right corner (using
+    the Manhattan distance).
 
     Two segments are mergeable if the Manhattan distance between the
     bottom-right end of one and the top-left end of the other is at most 2 more
@@ -202,7 +210,7 @@ def _find_mergeable_segment(current, pixel_to_segment, max_distance, shape):
 
     best_candidate = None
     best_candidate_size = -1
-    def update_candidate(candidate):
+    def update_candidate(candidate: _SegmentUnionFind) -> None:
         nonlocal best_candidate, best_candidate_size
         if candidate.size() > best_candidate_size:
             best_candidate = candidate
@@ -239,16 +247,15 @@ def _find_mergeable_segment(current, pixel_to_segment, max_distance, shape):
     return best_candidate
 
 
-def get_hues(matrix, is_single_file):
+def get_hues(matrix: numpy.ndarray, is_single_file: bool) -> numpy.ndarray:
     scores = get_lengths(matrix, is_single_file)
     # Cut everything off at the max, then divide by the max to put all values
     # between 0 and 1.
-    scores = numpy.minimum(
-        _MAX_TOKEN_CHAIN, numpy.astype(scores, numpy.float32))
+    scores = numpy.minimum(_MAX_TOKEN_CHAIN, scores.astype(numpy.float32))
     scores /= _MAX_TOKEN_CHAIN
     # Get the hues to go from blue (lowest score) up to red (highest). Red has
     # hue 0, while blue is roughly 170.
     scores = 1 - scores
     scores *= 170
-    scores = numpy.astype(scores, numpy.uint8)
+    scores = scores.astype(numpy.uint8)
     return scores

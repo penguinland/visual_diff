@@ -18,7 +18,7 @@ except ImportError:
     can_use_gui = False
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("filename_a", help="File to analyze")
     parser.add_argument("filename_b", nargs="?", help="Second file to analyze")
@@ -37,7 +37,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_text_width(args):
+def get_text_width(args: argparse.Namespace) -> int:
     if args.text_width is not None:
         return args.text_width
     if args.language == "python" or args.filename_a.split(".")[-1] == "py":
@@ -45,7 +45,7 @@ def get_text_width(args):
     return 100
 
 
-if __name__ == "__main__":
+def main() -> None:
     args = parse_args()
     language = args.language
     if language is None:
@@ -95,3 +95,7 @@ if __name__ == "__main__":
         image = utils.to_hsv_matrix(matrix, hues)
         pil_image = PIL.Image.fromarray(image, mode="HSV")
         pil_image.convert(mode="RGB").save(args.output_location)
+
+
+if __name__ == "__main__":
+    main()

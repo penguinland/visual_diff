@@ -1,12 +1,18 @@
 import numpy
+from typing import Optional
 
 import utils
 
 
 class ImagePyramid:
-    _ZOOMED_IN_LEVELS = 3  # Number of times you can zoom in beyond 100%
+    _ZOOMED_IN_LEVELS: int = 3  # Number of times you can zoom in beyond 100%
 
-    def __init__(self, matrix, hues, sidelength):
+    def __init__(
+        self,
+        matrix: numpy.ndarray,
+        hues: Optional[numpy.ndarray],
+        sidelength: int,
+    ) -> None:
         """
         The sidelength is how large a sub-image we will return in get_submatrix
         """
@@ -14,6 +20,7 @@ class ImagePyramid:
         self._pyramid.append(matrix)
         self._sidelength = sidelength
 
+        self._hue_pyramid: Optional[list[numpy.ndarray]]
         if hues is None:
             self._hue_pyramid = None
         else:
@@ -67,18 +74,21 @@ class ImagePyramid:
                 hues = numpy.minimum(
                     numpy.minimum(hue_quads[0], hue_quads[1]),
                     numpy.minimum(hue_quads[2], hue_quads[3]))
-                self._hue_pyramid.append(hues)
+                # On this next line, mypy isn't smart enough to figure out that
+                # we'll only get here if self._hue_pyramid is a list.
+                self._hue_pyramid.append(hues)  # type: ignore
 
         # self._zoom_level is the index into self._pyramid to get the current
         # image.
         self._zoom_level = 0  # Start at 100%
         self._max_zoom_level = len(self._pyramid) - 1
 
-    def get_submatrix(self, top_left_x, top_left_y):
+    def get_submatrix(
+        self, top_left_x: int, top_left_y: int
+    ) -> tuple[numpy.ndarray, int, int]:
         """
-        Given the top left corner of a window, we return a
-        sidelength-by-sidelength-by-3 tensor containing an HSV image of the
-        relevant region, and the indices of the top-left corner.
+        We return a sidelength-by-sidelength-by-3 ndarray containing an HSV
+        image of the relevant region, and the indices of the top-left corner.
 
         The image returned is at the current zoom level, 3 times taller and
         wider than the displayed window, so that the center of the window is
@@ -138,7 +148,7 @@ class ImagePyramid:
 
         return image, min_x << scale, min_y << scale
 
-    def zoom(self, amount):
+    def zoom(self, amount: int) -> bool:
         """
         Returns whether we successfully changed zoom levels.
         """
@@ -150,5 +160,5 @@ class ImagePyramid:
         self._zoom_level = max(self._zoom_level, -self._ZOOMED_IN_LEVELS)
         return (self._zoom_level != orig_zoom_level)
 
-    def get_zoom_level(self):
+    def get_zoom_level(self) -> int:
         return self._zoom_level

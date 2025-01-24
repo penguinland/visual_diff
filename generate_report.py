@@ -8,7 +8,7 @@ import tokenizer
 import utils
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("file_glob", nargs="*",
                         help="Glob pattern of files to analyze")
@@ -19,11 +19,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def find_all_files(glob_patterns):
+def find_all_files(glob_patterns: str) -> dict[str, list[str]]:
     """
-    We take in a string describing a glob pattern, and return a dict mapping
-    language names to lists of filenames in the glob whose extension matches the
-    language (e.g., `{"cpp": ["example.hpp", "example.cpp"]}`).
+    We return a dict mapping language names to lists of filenames in the glob
+    whose extension matches the language (e.g., `{"cpp": ["example.hpp",
+    "example.cpp"]}`).
     """
     results = collections.defaultdict(list)
     for glob_pattern in glob_patterns:
@@ -37,7 +37,12 @@ def find_all_files(glob_patterns):
     return results
 
 
-def compare_files(data_a, data_b, min_segment_size, include_big_files=False):
+def compare_files(
+    data_a: tokenizer.FileInfo,
+    data_b: tokenizer.FileInfo,
+    min_segment_size: int,
+    include_big_files: bool=False,
+) -> list[str]:
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -75,18 +80,24 @@ def compare_files(data_a, data_b, min_segment_size, include_big_files=False):
     # Otherwise...
     results = [f"Found duplicated code between {filename_a} and {filename_b}:"]
 
-    def sorting_key(data):
+    def sorting_key(
+        data: tuple[int, int, int, int, int]
+    ) -> tuple[int, int, int]:
         # Sort by the starting line in file A, then starting line in file B,
         # then by length (largest to smallest).
         return (data[1], data[3], -data[0])
-    large_segments = sorted(large_segments, key=sorting_key)
-    for size, start_a, end_a, start_b, end_b in large_segments:
+    sorted_large_segments = sorted(large_segments, key=sorting_key)
+    for size, start_a, end_a, start_b, end_b in sorted_large_segments:
         results.append(f"    {size} tokens on lines "
                        f"{start_a}-{end_a} and lines {start_b}-{end_b}")
     return results
 
 
-def compare_all_files(file_data, min_segment_size, include_big_files=False):
+def compare_all_files(
+    file_data: list[tokenizer.FileInfo],
+    min_segment_size: int,
+    include_big_files: bool=False,
+) -> list[str]:
     """
     Returns a list of strings that should be shown in a report about
     duplication within these files.
@@ -103,7 +114,11 @@ def compare_all_files(file_data, min_segment_size, include_big_files=False):
 
 
 def process_all_files_in_language(
-        language, file_list, min_length, include_big_files):
+    language: str,
+    file_list: list[str],
+    min_length: int,
+    include_big_files: bool,
+) -> None:
     """
     Given a language and a list of files containing code in that language,
     tokenize each file and look for duplicated code between them all. Print out
