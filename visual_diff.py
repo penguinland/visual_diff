@@ -21,7 +21,8 @@ except ImportError:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("filename_a", help="File to analyze")
-    parser.add_argument("filename_b", nargs="?", help="Second file to analyze")
+    parser.add_argument("filename_b", nargs="?",
+                        help="(Optional) Second file to analyze")
     parser.add_argument("--output_location", "-o",
                         help="Save an image to this location and exit")
     parser.add_argument("--big_file", "-b", action="store_true",
@@ -32,7 +33,8 @@ def parse_args() -> argparse.Namespace:
                         help="map width/height, in pixels")
     parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
-    parser.add_argument("--black_and_white", "-bw", action="store_true",
+    parser.add_argument("--black_and_white", "--black-and-white", "-bw",
+                        action="store_true",
                         help="Don't color based on the amount of duplication")
     return parser.parse_args()
 
