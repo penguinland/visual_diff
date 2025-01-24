@@ -1,4 +1,5 @@
 import numpy
+import numpy.typing
 from typing import Optional
 
 import utils
@@ -9,8 +10,8 @@ class ImagePyramid:
 
     def __init__(
         self,
-        matrix: numpy.ndarray,
-        hues: Optional[numpy.ndarray],
+        matrix: numpy.typing.NDArray[numpy.uint8],
+        hues: Optional[numpy.typing.NDArray[numpy.uint8]],
         sidelength: int,
     ) -> None:
         """
@@ -20,7 +21,7 @@ class ImagePyramid:
         self._pyramid.append(matrix)
         self._sidelength = sidelength
 
-        self._hue_pyramid: Optional[list[numpy.ndarray]]
+        self._hue_pyramid: Optional[list[numpy.typing.NDArray[numpy.uint8]]]
         if hues is None:
             self._hue_pyramid = None
         else:
@@ -85,7 +86,7 @@ class ImagePyramid:
 
     def get_submatrix(
         self, top_left_x: int, top_left_y: int
-    ) -> tuple[numpy.ndarray, int, int]:
+    ) -> tuple[numpy.typing.NDArray[numpy.uint8], int, int]:
         """
         We return a sidelength-by-sidelength-by-3 ndarray containing an HSV
         image of the relevant region, and the indices of the top-left corner.

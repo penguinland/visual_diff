@@ -1,5 +1,6 @@
 import code_tokenize
 import numpy
+import numpy.typing
 from typing import NamedTuple, Optional
 
 from code_tokenize.tokens import ASTToken
@@ -9,11 +10,29 @@ import utils
 
 # Syntactic sugar: a Boundary contains the start and end of a token, where
 # each position is described by its line number and the column within the line.
+# The first line of the file is line 1, but the first column of the line is
+# column 0. The end is the first location *after* the end of the token (which
+# might be 1 character past the end of the current line, if this is the last
+# token on the line).
+# Example: This file:
+#     print("hi")
+#     print("bye")
+# Likely has these boundaries:
+#     ((1,  0), (1,  5))  print
+#     ((1,  5), (1,  6))  (
+#     ((1,  6), (1, 10))  "hi"
+#     ((1, 10), (1, 11))  )
+#     ((2,  0), (2,  5))  print
+#     ((2,  5), (2,  6))  (
+#     ((2,  6), (2, 11))  "bye"
+#     ((2, 11), (2, 12))  )
+
+    
 Boundary = tuple[tuple[int, int], tuple[int, int]]
 
 
 class FileInfo(NamedTuple):
-    tokens: numpy.ndarray  # Really a list[code_tokenize.tokens.Token]
+    tokens: numpy.typing.NDArray[str]
     lines: list[str]
     boundaries: list[Boundary]
     filename: str
