@@ -32,7 +32,8 @@ def parse_args() -> argparse.Namespace:
                         help="map width/height, in pixels")
     parser.add_argument("--text_width", "-tw", type=int,
                         help="Expected maximum line width, in characters")
-    parser.add_argument("--black_and_white", "-bw", action="store_true",
+    parser.add_argument("--black_and_white", "--black-and-white", "-bw",
+                        action="store_true",
                         help="Don't color based on the amount of duplication")
     return parser.parse_args()
 
