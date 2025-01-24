@@ -21,7 +21,8 @@ except ImportError:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("filename_a", help="File to analyze")
-    parser.add_argument("filename_b", nargs="?", help="Second file to analyze")
+    parser.add_argument("filename_b", nargs="?",
+                        help="(Optional) Second file to analyze")
     parser.add_argument("--output_location", "-o",
                         help="Save an image to this location and exit")
     parser.add_argument("--big_file", "-b", action="store_true",
