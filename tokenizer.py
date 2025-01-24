@@ -7,7 +7,9 @@ from code_tokenize.tokens import ASTToken
 import utils
 
 
-Boundary = tuple[tuple[int, int], tuple[int, int]]  # syntactic sugar
+# Syntactic sugar: a Boundary contains the start and end of a token, where
+# each position is described by its line number and the column within the line.
+Boundary = tuple[tuple[int, int], tuple[int, int]]
 
 
 class FileInfo(NamedTuple):

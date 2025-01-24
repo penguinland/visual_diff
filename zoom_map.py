@@ -24,7 +24,7 @@ class ZoomMap(tk.Canvas):
         # one to take its place.
         self._cached_image: Optional[PIL.ImageTk.PhotoImage] = None
         # TK canvas images are referred to by their ID numbers.
-        self._tk_image: Optional[int] = None  # 
+        self._tk_image: Optional[int] = None
 
         self._pyramid = ImagePyramid(matrix, hues, sidelength)
 
