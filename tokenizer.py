@@ -26,13 +26,11 @@ import utils
 #     ((2,  5), (2,  6))  (
 #     ((2,  6), (2, 11))  "bye"
 #     ((2, 11), (2, 12))  )
-
-    
 Boundary = tuple[tuple[int, int], tuple[int, int]]
 
 
 class FileInfo(NamedTuple):
-    tokens: numpy.typing.NDArray[str]
+    tokens: numpy.typing.NDArray[numpy.str_]
     lines: list[str]
     boundaries: list[Boundary]
     filename: str
