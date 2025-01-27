@@ -39,6 +39,7 @@ class ZoomMap(tk.Canvas):
                                       ("<Button-5>", partial(self._zoom,  1)),
                                       # Mac scrolling
                                       ("<MouseWheel>", self._zoom_mac),
+                                      ("<TouchpadScroll>", self._zoom_touchpad),
                                       ):
             # On this next line, mypy isn't smart enough to figure out that
             # every function will be Callable: some are methods and some are
@@ -83,6 +84,25 @@ class ZoomMap(tk.Canvas):
 
     def _zoom_mac(self, event: tk.Event) -> None:
         self._zoom(-event.delta, event)
+
+    _zoom_touchpad_amount: int = 0
+    def _zoom_touchpad(self, event: tk.Event) -> None:
+        # The event's delta is two 2-byte signed words packed together.
+        delta_x = (event.delta >> 16) & 0xFFFF
+        delta_y = (event.delta >>  0) & 0xFFFF
+        if delta_x >= 2 ** 15:
+            delta_x -= 2 ** 16
+        if delta_y >= 2 ** 15:
+            delta_y -= 2 ** 16
+
+        # We get lots of events about tiny movements. Sum them up and only
+        # change zoom levels if there have been a bunch all in the same
+        # direction.
+        self._zoom_touchpad_amount += delta_x + delta_y
+        if abs(self._zoom_touchpad_amount) > 10:
+            sign = 1 if self._zoom_touchpad_amount > 0 else -1
+            self._zoom_touchpad_amount = 0
+            self._zoom(sign, event)
 
     def _zoom(self, amount: int, event: tk.Event) -> None:
         if not self._pyramid.zoom(amount):
