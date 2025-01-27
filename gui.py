@@ -1,3 +1,4 @@
+import darkdetect
 from math import ceil
 import numpy
 import numpy.typing
@@ -114,7 +115,8 @@ class _Context(tk.Text):
                                     ac + self.PRELUDE_WIDTH),
                      "{}.{}".format(self.CONTEXT_COUNT + 1 + br - ar,
                                     bc + self.PRELUDE_WIDTH))
-        self.tag_config("token", background="yellow")
+        highlight_color = "dimgrey" if darkdetect.isDark() else "yellow"
+        self.tag_config("token", background=highlight_color)
 
         # ...but don't highlight the line numbers on multi-line tokens.
         for i in range(self.CONTEXT_COUNT):
