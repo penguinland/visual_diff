@@ -3,6 +3,7 @@ import numpy
 import numpy.typing
 import PIL.Image
 import PIL.ImageTk
+import platform
 import tkinter as tk
 from typing import Optional
 
@@ -39,12 +40,16 @@ class ZoomMap(tk.Canvas):
                                       ("<Button-5>", partial(self._zoom,  1)),
                                       # Mac scrolling
                                       ("<MouseWheel>", self._zoom_mac),
-                                      ("<TouchpadScroll>", self._zoom_touchpad),
                                       ):
             # On this next line, mypy isn't smart enough to figure out that
             # every function will be Callable: some are methods and some are
             # functools.partial objects.
             self.bind(button_name, function)  # type: ignore
+        if platform.system() == "Darwin":
+            # Macs use Tcl/Tk version 9.0.0 or later to get touchpad support,
+            # whereas (as of January 2025) Ubuntu uses Tcl/Tk version 8.6.14,
+            # which lacks this event type.
+            self.bind("<TouchpadScroll>", self._zoom_touchpad)
 
     def _set_image(self) -> None:
         """
