@@ -83,7 +83,8 @@ class ZoomMap(tk.Canvas):
                                            image=self._cached_image)
 
     def _zoom_mac(self, event: tk.Event) -> None:
-        self._zoom(-event.delta, event)
+        sign = 1 if event.delta > 0 else -1
+        self._zoom(-sign, event)
 
     _zoom_touchpad_amount: int = 0
     def _zoom_touchpad(self, event: tk.Event) -> None:
@@ -102,11 +103,11 @@ class ZoomMap(tk.Canvas):
         if abs(self._zoom_touchpad_amount) > 10:
             sign = 1 if self._zoom_touchpad_amount > 0 else -1
             self._zoom_touchpad_amount = 0
-            self._zoom(sign, event)
+            self._zoom(-sign, event)
 
     def _zoom(self, amount: int, event: tk.Event) -> None:
         if not self._pyramid.zoom(amount):
-            return
+            return  # We're at an extreme level, and didn't actually zoom.
 
         # Otherwise, we changed zoom levels, so adjust everything accordingly.
         # We need to move the map so the pixels that started under the mouse are
