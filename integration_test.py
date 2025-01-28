@@ -25,8 +25,10 @@ class TestGetLengths(unittest.TestCase):
 
     def assertImagesMatch(self, expected_filename, actual_image):
         expected_image = PIL.Image.open(f"test_images/{expected_filename}")
-        self.assertEqual(list(actual_image.getdata()),
-                         list(expected_image.getdata()))
+        # This used to be a `self.assertEqual`, but when it fails, formatting
+        # the error message takes forever.
+        self.assertTrue(list(actual_image.getdata()) ==
+                        list(expected_image.getdata()))
 
     @parameterized.expand((("cpp_example.hpp",),
                           ("index.js",),
