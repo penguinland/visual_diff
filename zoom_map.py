@@ -105,7 +105,7 @@ class ZoomMap(tk.Canvas):
         # change zoom levels if there have been a bunch all in the same
         # direction.
         self._zoom_touchpad_amount += delta_x + delta_y
-        if abs(self._zoom_touchpad_amount) > 25:
+        if abs(self._zoom_touchpad_amount) > 20:
             sign = 1 if self._zoom_touchpad_amount > 0 else -1
             self._zoom_touchpad_amount = 0
             self._zoom(-sign, event)
