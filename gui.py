@@ -58,7 +58,7 @@ class _Context(tk.Text):
         self._lines = data.lines
         self._boundaries = data.boundaries
         self._zoom_map = zoom_map
-        self._highlight_color = "dimgrey" if darkdetect.isDark() else "yellow"
+        self._highlight_color = "grey" if darkdetect.isDark() else "yellow"
 
     def _snip_line(self, i: int) -> str:
         """
