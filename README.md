@@ -26,7 +26,7 @@ mouse is on, and the bottom snippit is for the column. In large images, as you
 zoom out, multiple tokens will be combined into single pixels in the image, and
 multiple tokens will be highlighted in these snippets.
 
-## Prerequisites
+## Installation
 You'll need [Tcl/Tk bindings](https://docs.python.org/3/library/tkinter.html)
 for Python. This might require installing something outside of your virtual
 environment: you'll know it's set up right if you can run `python3 -m tkinter`
@@ -35,7 +35,8 @@ and get a little interactive window to pop up.
 - On Mac: `brew install python-tk`
 - On Ubuntu: `sudo apt-get install python3-pil.imagetk`
 
-After that, just `pip3 install -r requirements.txt`, and you should be good!
+After that, just clone the repo, run `pip3 install -r requirements.txt`, and
+you should be good!
 
 If you get errors about not doing this in a virtual environment, try
 `python3 -m venv venv`, then `source venv/bin/activate`, and _then_
@@ -46,7 +47,7 @@ either file an issue telling us to update the documentation with what you did,
 or update it yourself and send us a pull request!).
 
 ## Options
-The short version: run `visual_diff.py --help` for info.
+The short version: run `./visual_diff.py --help` for info.
 
 The program can recognize a handful of languages from the file extension (e.g.,
 `.py` or `.go`). If you want to use a language that is not automatically
