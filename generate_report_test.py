@@ -12,11 +12,11 @@ class TestGenerateReports(unittest.TestCase):
                 pointsprite_info, pointsprite_info, 100))
         expected = [
             "Found duplicated code between examples/pointsprite.py and examples/pointsprite.py:",
-            "    706 tokens on lines 28-121 and lines 121-295",
-            "    126 tokens on lines 90-105 and lines 104-121",
-            "    126 tokens on lines 90-105 and lines 280-295",
-            "    126 tokens on lines 104-121 and lines 266-281",
-            "    126 tokens on lines 266-281 and lines 280-295",
+            "    672 tokens on lines 28-119 and lines 121-295",
+            "    116 tokens on lines 92-104 and lines 105-119",
+            "    116 tokens on lines 92-104 and lines 281-295",
+            "    116 tokens on lines 105-119 and lines 268-280",
+            "    116 tokens on lines 268-280 and lines 281-295",
             ]
         self.assertEqual(expected, actual)
 
@@ -27,11 +27,12 @@ class TestGenerateReports(unittest.TestCase):
                 [nmea_info, rtk_info], 100))
         expected = [
             "Found duplicated code between examples/gpsnmea.go and examples/gpsrtk.go:",
-            "    413 tokens on lines 69-131 and lines 85-152",
+            "    451 tokens on lines 69-131 and lines 85-152",
             "Found duplicated code between examples/gpsrtk.go and examples/gpsrtk.go:",
-            "    120 tokens on lines 278-316 and lines 312-352",
-            "    116 tokens on lines 352-363 and lines 487-498",
-            "    142 tokens on lines 395-423 and lines 446-472",
+            "    100 tokens on lines 96-124 and lines 106-127",
+            "    128 tokens on lines 278-316 and lines 312-352",
+            "    118 tokens on lines 352-363 and lines 487-498",
+            "    157 tokens on lines 389-423 and lines 444-472",
             "    362 tokens on lines 559-618 and lines 567-626",
             "    305 tokens on lines 559-610 and lines 575-626",
             "    251 tokens on lines 559-602 and lines 583-626",
