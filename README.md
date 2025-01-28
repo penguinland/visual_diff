@@ -32,10 +32,8 @@ for Python. This might require installing something outside of your virtual
 environment: you'll know it's set up right if you can run `python3 -m tkinter`
 and get a little interactive window to pop up.
 
-- On Mac, try `brew install python-tk` to install that.
-- On Ubuntu, you might try `sudo apt-get install python3-pil.imagetk` to get
-Tcl/Tk set up correctly. I don't remember exactly what I did that finally
-worked, but that was one of the things I tried.
+- On Mac: `brew install python-tk`
+- On Ubuntu: `sudo apt-get install python3-pil.imagetk`
 
 After that, just `pip3 install -r requirements.txt`, and you should be good!
 

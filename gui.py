@@ -1,3 +1,4 @@
+import darkdetect
 from math import ceil
 import numpy
 import numpy.typing
@@ -57,6 +58,7 @@ class _Context(tk.Text):
         self._lines = data.lines
         self._boundaries = data.boundaries
         self._zoom_map = zoom_map
+        self._highlight_color = "grey" if darkdetect.isDark() else "yellow"
 
     def _snip_line(self, i: int) -> str:
         """
@@ -114,7 +116,7 @@ class _Context(tk.Text):
                                     ac + self.PRELUDE_WIDTH),
                      "{}.{}".format(self.CONTEXT_COUNT + 1 + br - ar,
                                     bc + self.PRELUDE_WIDTH))
-        self.tag_config("token", background="yellow")
+        self.tag_config("token", background=self._highlight_color)
 
         # ...but don't highlight the line numbers on multi-line tokens.
         for i in range(self.CONTEXT_COUNT):
