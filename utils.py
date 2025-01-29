@@ -46,6 +46,7 @@ def guess_language(filename: str) -> str:
         "hpp":    "cpp",
         "go":     "go",
         "hs":     "haskell",
+        "java":   "java",
         "js":     "javascript",
         "py":     "python",
         "rs":     "rust",
